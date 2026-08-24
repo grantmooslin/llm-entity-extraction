@@ -59,6 +59,15 @@ cost_models:
     input_per_million: 0.4
     output_per_million: 1.6
 
+# GPU hourly pricing (USD) for Modal/local inference throughput comparison.
+# Used by llm_dojo_scoring.throughput for GPU vs API cost equivalence.
+gpu_hourly_usd:
+  H100: 2.50
+  A100: 1.50
+  A10G: 0.75
+  T4: 0.35
+  L4: 0.50
+
 doc_classes:
   - key: contract
     label: "Contract / Agreement"

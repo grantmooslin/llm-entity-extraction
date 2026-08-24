@@ -11,6 +11,8 @@ source of truth, so this module bridges the two:
   prices as dicts (``{input_per_million, output_per_million}``); the package
   accepts ``[input, output]`` lists only, so the dict form is converted here
   (the package otherwise SILENTLY ignores dict-form prices).
+- ``gpu_hourly_usd:`` block → the package ``gpu_hourly_usd`` table for throughput
+  cost comparison.
 - Environment: the package's embedding rescue reads ``OPENROUTER_API_KEY`` /
   ``OPENROUTER_BASE_URL`` directly from ``os.environ``, while this repo keeps
   keys in ``config/environments/.env`` — ``load_env()`` runs first so the
@@ -118,6 +120,11 @@ def apply_taxonomy_settings() -> None:
     costs = _cost_models_from_yaml(taxonomy.get("cost_models") or {})
     if costs:
         overrides["cost_models"] = costs
+
+    # GPU hourly pricing for throughput comparison
+    gpu_costs = taxonomy.get("gpu_hourly_usd") or {}
+    if gpu_costs:
+        overrides["gpu_hourly_usd"] = {str(k): float(v) for k, v in gpu_costs.items()}
 
     if overrides:
         configure(**overrides)
