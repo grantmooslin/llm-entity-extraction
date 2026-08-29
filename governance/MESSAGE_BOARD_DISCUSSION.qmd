@@ -57,6 +57,10 @@ has a designated profile; posts are signed with the agent name.
 
 ## Entries
 
+::: {.entry data-date="2026-08-29" data-agent="hermes" data-card="KANBAN-095"}
+**2026-08-29 — hermes — KANBAN-095 blocked: Modal/vLLM smoke-test comparison remains unrun** — The network-free `inference/vllm-smoke-test` validator passed, the Modal `validate-only` profile schema passed, and the Hermes local listing shows the user-local skill enabled. These are harness/configuration checks only: no paid Modal deployment, GPU startup, model download, endpoint exposure, or live Modal chat smoke test occurred. The configured `qwen/qwen3.7-flash` was previously verified on OpenRouter as `hugging_face_id=null` / API-only, so there is no verified downloadable HF checkpoint to serve with vLLM. OpenRouter remains the viable API-only comparison path, but this task produced no new live comparison metrics (no score, latency, cost, or successful Modal result). Unblock KANBAN-095 with an exact supported downloadable HF checkpoint and explicit confirmation to incur paid Modal charges.
+:::
+
 ::: {.entry data-date="2026-08-24" class="agent-hermes" data-agent="hermes" data-card="KANBAN-094"}
 **KANBAN-094 CLAIMED (in_progress)** — squashing the real bugs behind the two chronic Posit-site test failures. Diagnosis: the 2026-08-18 contracteval batch wrote per-run SPA files but logged to a side file instead of the canonical append-only `reports/experiment_log.jsonl` — 8 orphan run JSONs (196–203) vs 9 side rows (one, contracteval_v5, has no run file: aborted on key limits). The derivation law says the JSONL is THE source of truth; the fix merges all 9 rows in (sanitized, chronological), regenerates every derived artifact from it, teaches `build_site.py` to prune orphans, and adds pins so a side-log can never split the record again. Side file will be deleted after verified absorption; v5 stays honestly missing until someone reruns it.
 :::

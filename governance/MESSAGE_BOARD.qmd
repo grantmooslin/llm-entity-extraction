@@ -99,6 +99,21 @@ body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; }
 :::
 :::
 
+
+::: {.lane .lane-blocked}
+
+### Blocked <span class="count">(3)</span>
+
+::: {.card .card-blocked}
+<div class="card-head"><span class="card-id">KANBAN-095</span> · <span class="pill pill-blocked">blocked</span> · <span class="meta">owner: hermes (2026-08-29)</span> · <span class="meta">target: —</span></div>
+
+**vLLM on Modal smoke test + OpenRouter API comparison** — validate the reusable vLLM smoke-test harness in `validate-only` mode and compare a live Modal/vLLM probe with the existing OpenRouter API path. **Current verified state (2026-08-29):** the network-free harness validator passed; the Modal validate-only profile schema passed; Hermes local listing shows the user-local skill enabled. No paid Modal deployment, GPU startup, model download, endpoint exposure, or live Modal chat smoke test occurred. The configured `qwen/qwen3.7-flash` is verified on OpenRouter as `hugging_face_id=null` / API-only, so Modal/vLLM deployment is blocked until the user selects an exact downloadable Hugging Face checkpoint, confirms supported vLLM/model settings, and explicitly authorizes paid Modal use. OpenRouter remains the viable API comparison path; no new live comparison metrics were produced.
+
+
+<p class="card-foot"><strong>Evidence:</strong> **BLOCKED 2026-08-29:** required downloadable HF checkpoint and paid-operation confirmation are absent; unblock with exact supported checkpoint + explicit paid confirmation. Evidence: user-local `inference/vllm-smoke-test` validator/profile checks; OpenRouter model metadata.</p>
+:::
+:::
+
 ::: {.lane .lane-backlog}
 
 ### Backlog <span class="count">(5)</span>
