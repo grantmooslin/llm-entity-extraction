@@ -14,7 +14,7 @@ from typing import Union
 
 import requests
 
-from src.openrouter_utils import OPENROUTER_API_URL
+from src.openrouter_utils import resolve_openrouter_api_url
 
 
 VALID_CLASSES = [
@@ -132,7 +132,7 @@ def classify_image(api_key: str, image_path: Path, model: str = "qwen/qwen3.7-fl
         "Content-Type": "application/json",
     }
 
-    response = requests.post(OPENROUTER_API_URL, headers=headers, json=payload, timeout=120)
+    response = requests.post(resolve_openrouter_api_url(), headers=headers, json=payload, timeout=120)
 
     try:
         response.raise_for_status()

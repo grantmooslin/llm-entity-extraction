@@ -854,6 +854,149 @@ VALID CONTRACT SUBTYPE KEYS""",
 )
 
 # =============================================================================
+# SORTER AGENT — Hierarchical doc-class classification, v7 (extended-universe
+# pipeline parity: rules 37–43 + correspondence/insurance subclass dims)
+# -----------------------------------------------------------------------------
+# v7 = v6 + rule 37 (agreement packages, from v5) + rules 38–43 (insurance_claim
+# class, correspondence/insurance subclasses, CMS disambiguation, ancillary-
+# wrapper convention, contract-vs-claim keyword guard) + the widened doc_subclass
+# output contract. Aligns the extended 8-class eval surface with llm-mailroom's
+# docclass-merged schema v5 / docclass-pilot GT dimensions without mutating v6.
+# =============================================================================
+
+_SORTER_DOCCONTEXT_V7_RULES = """37. AGREEMENT PACKAGES: RECORD OR CERTIFICATE TEXT INSIDE AN AGREEMENT PACKAGE DOES NOT CHANGE THE CLASS: rule 32 applies only when the document AS A WHOLE is a corporate record (rule 34). When a record — power of attorney, certificate, schedule, or annex — appears in a document that ALSO contains the parent agreement (printed before, inside, or after the agreement's own title, recitals, or signature page), scan past the record text to the parent agreement: if the parent agreement is present, the document's class is the PARENT's (contract or merger_agreement), and the record is annex content. A "LIMITED POWER OF ATTORNEY" printed at the front of a services-agreement exhibit is annex content; the services agreement governs. A standalone record filed ALONE (an EX-24.x power of attorney, an EX-3.1 charter, a solo certificate) stays corporate_record — rule 37 fires only when the SAME document also contains the parent agreement.
+
+38. INSURANCE CLAIM CLASS: claim documentation — FNOL forms, adjuster reports and estimates, demand packages, coverage determinations ("APPROVED"/"DENIED"/"PARTIAL"), reservation-of-rights letters, denial letters, EOB/Explanation-of-Benefits statements, Medicare Summary Notices, pharmacy benefit statements — is insurance_claim, NOT contract or correspondence, whatever wrapper it arrives in.
+
+39. CORRESPONDENCE SUBCLASS: when doc_type is correspondence, doc_subclass is the COMMUNICATION'S FUNCTION — demand (a party demands payment/performance), attorney_demand (demand issued by counsel on a law-firm letterhead), meeting_request, press_release, memo (internal memorandum, TO/FROM/RE header), email (informal message thread), letter (general business/legal letter), or notice (formal notice: annual-meeting, regulatory, default/termination).
+
+40. INSURANCE CLAIM SUBCLASS: when doc_type is insurance_claim, doc_subclass is the CLAIM-DOCUMENT TYPE, decided by the document's OWN title/setting line FIRST, then by issuer: a "MEDICARE SUMMARY NOTICE -- OUTPATIENT SERVICES (Part B)" or any outpatient-services claim adjudication is outpatient; a "MEDICARE SUMMARY NOTICE -- INPATIENT STAY (Part A)" or inpatient-stay claim is inpatient; a Medicare Part D pharmacy statement / prescription drug event listing is pde; every other payer-issued adjudication document — physician/supplier (Part B professional "carrier" notices), commercial EOBs without a facility setting, coverage determinations, denial letters, reservation-of-rights letters, adjuster reports issued by the insurer — is carrier. The SETTING named in the document's own heading outranks the generic document family: an MSN for outpatient services is outpatient even though a Summary Notice is a carrier-issued document. Crucially, a Medicare Summary Notice whose heading reads 'MEDICARE SUMMARY NOTICE -- PHYSICIAN/SUPPLIER CLAIM (Part B)' is a physician/supplier notice and therefore carrier, not outpatient, regardless of the mention of Part B.
+
+41. CORRESPONDENCE FUNCTION OVER TRANSPORT: classify the correspondence subclass by what the communication DOES, not by its delivery format. An email whose payload forwards or contains a formal notice subclasses as notice; an email announcing an event/newsletter to a community subclasses as letter; a memo-format internal announcement subclasses as memo. The From:/Sent:/Subject: header block alone never decides the subclass.
+
+42. ANCILLARY-WRAPPER FAMILY CONVENTION: an exhibit or announcement document filed under a named family package inherits that family when its substance is ancillary to it — a press release ANNOUNCING an execution of an outsourcing agreement filed as that agreement's EX-99 stays the agreement's class (outsourcing); an escrow agreement supporting software-hosting services inside a hosting package stays hosting. The wrapper's own form (press release, escrow, cover sheet) does not re-classify the package. Scope guard: this applies only when the package/family is visible in the filename, exhibit label, or title — a free-standing document is classified by its own substance (rules 2-5).
+
+43. CONTRACT VS INSURANCE CLAIM DISAMBIGUATION: A document whose title or content explicitly identifies it as a distributor agreement, or any other contract subtype listed in the valid keys, is a contract, not an insurance_claim. The presence of the word "carrier" in a distributor agreement (e.g., "carrier" referring to a shipping company) does not trigger insurance_claim classification. Only documents that are claim documentation (FNOL, adjuster reports, EOBs, etc.) as defined in rule 38 are insurance_claim. A distributor agreement is a contract, and its contract_subtype is "distributor" (or the appropriate subtype from the list). This rule overrides any incidental keyword matches.
+
+VALID CONTRACT SUBTYPE KEYS"""
+
+SORTER_DOCCLASS_PROMPT_V7 = SORTER_DOCCLASS_PROMPT_V6.replace(
+    "VALID CONTRACT SUBTYPE KEYS",
+    _SORTER_DOCCONTEXT_V7_RULES,
+).replace(
+    """- doc_subclass: EXACTLY ONE of the rule-33 subclass keys when doc_type is merger_agreement or corporate_record; null otherwise""",
+    """- doc_subclass: EXACTLY ONE of the applicable subclass keys when doc_type is merger_agreement, corporate_record, correspondence, or insurance_claim (rules 33/39/40); null when doc_type is contract (contract_subtype carries the contract dimension instead)""",
+)
+
+# =============================================================================
+# SORTER AGENT — Correspondence-only eval (KANBAN-103): v7 + sentiment
+# -----------------------------------------------------------------------------
+# All rows are Enron correspondence. The sorter still emits the hierarchical
+# docclass contract (doc_type + correspondence doc_subclass) AND a polarity
+# pair aligned to the HF ground_truth config (sentiment_score ∈ [-1, 1],
+# sentiment_label ∈ negative/neutral/positive). v7 stays byte-identical.
+# =============================================================================
+
+SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V0 = SORTER_DOCCLASS_PROMPT_V7.replace(
+    "VALID CONTRACT SUBTYPE KEYS",
+    """44. CORRESPONDENCE SENTIMENT: after assigning doc_type and doc_subclass, score the POLARITY of the correspondence content. sentiment_score is a float in [-1.0, 1.0] (negative = complaint/anger/threat/bad news; 0 = factual/routine; positive = thanks/approval/good news). sentiment_label is exactly one of negative, neutral, positive and MUST agree with the score: score < -0.15 → negative; score > 0.15 → positive; otherwise neutral. Score the writer's stance toward the recipient or the situation the message is about, not the mere presence of a formal sign-off. Politeness formulas ("please", "thanks", "best regards") alone do not make a message positive.
+
+VALID CONTRACT SUBTYPE KEYS""",
+).replace(
+    """- confidence: float between 0.0 and 1.0
+- reasoning: short explanation of your classification decision, citing the evidence""",
+    """- confidence: float between 0.0 and 1.0
+- sentiment_score: float in [-1.0, 1.0] — polarity of the correspondence content (rule 44)
+- sentiment_label: EXACTLY ONE of negative, neutral, positive (must agree with sentiment_score; rule 44)
+- reasoning: short explanation of your classification decision, citing the evidence for doc_type, subclass, and sentiment""",
+)
+
+# =============================================================================
+# SORTER AGENT — Correspondence-only eval v1 (KANBAN-103 GEPA)
+# -----------------------------------------------------------------------------
+# Parent: sorter_docclass_correspondence_v0. ONE lesson from the Enron-200
+# baseline (n=200, seed 42, fp 7df1e16be2c6f8b0…): v7 rule 41 (function over
+# transport) did not fire — 120/139 failures are subclass_miss, and the
+# dominant collapse is demand/memo/letter/notice/press_release → email
+# because the model cites SMTP headers (Subject:/From:/Fwd:) as class
+# evidence. v0 stays byte-identical. v1 adds rule 45: an ordered payload
+# cascade + an explicit ban on header-as-email and on `other`.
+# =============================================================================
+
+_SORTER_DOCCLASS_CORRESPONDENCE_V1_RULE_45 = """45. ENRON CHANNEL TRAP (correspondence-only): nearly every document arrives as SMTP. Headers (From/To/Cc/Subject/Sent/Fwd/Re/MIME) are TRANSPORT and are NEVER evidence for subclass email. Classify the PAYLOAD — the body, the attached/quoted title, the letterhead — not the envelope. Walk this cascade and take the FIRST match; do not keep looking after a match:
+
+(1) attorney_demand — outside-counsel letterhead, "on behalf of our client", "we demand"/"we insist" from a law firm, reservation-of-rights from counsel.
+(2) demand — a party demands payment, performance, cure, or compliance ("please remit", "you are required to", past-due, default, "we insist") even when the tone is polite or the wrapper is an email.
+(3) meeting_request — the message's PURPOSE is to schedule or confirm a meeting, call, or calendar slot (invite, agenda-for-attendance, "please join"). A memo or letter that merely mentions a meeting stays its own class.
+(4) press_release — "NEWS RELEASE" / "FOR IMMEDIATE RELEASE" / dateline + media contact, OR the payload being forwarded IS that release. A one-line "fyi, press release attached" is still press_release.
+(5) notice — numbered/titled Notice, regulatory/exchange/system notice, default/termination/exercise notice, official announcement to members/shippers/market participants.
+(6) memo — "MEMORANDUM" / TO-FROM-DATE-RE block, or an internal policy/analysis/briefing. Forwarding "the attached memo" is memo, not email.
+(7) letter — Dear/Sincerely business letter, community or customer newsletter, welcome/subscription letter, vendor letter. Formal address + closing that is not (1)–(6).
+(8) email — residual ONLY: an informal colleague thread whose payload matches none of (1)–(7). Do not pick email because a Subject: line exists.
+
+Never output doc_subclass other on this surface — choose the closest of the eight. Reasoning: two short sentences naming the payload function; do not list headers.
+
+VALID CONTRACT SUBTYPE KEYS"""
+
+SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V1 = (
+    SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V0.replace(
+        "VALID CONTRACT SUBTYPE KEYS",
+        _SORTER_DOCCLASS_CORRESPONDENCE_V1_RULE_45,
+    )
+)
+
+# =============================================================================
+# SORTER AGENT — Correspondence-only eval v2 (KANBAN-103 GEPA)
+# -----------------------------------------------------------------------------
+# Parent: sorter_docclass_correspondence_v1 (subclass 0.465 on enron200 s42).
+# ONE lesson from the v1 miss cluster: demand + attorney_demand stayed 0/28
+# because rule 45 required a formal demand letter addressed to the recipient.
+# Hub GT is the correspondence_subclasses.py marker list on the writer's OWN
+# text (forwarded tail stripped) — "FINAL NOTICE", "BREACH OF CONTRACT",
+# "DEMAND LETTER" in an FYI/drafting thread are demand. v1 stays byte-identical.
+# =============================================================================
+
+_SORTER_DOCCLASS_CORRESPONDENCE_V2_RULE_46 = """46. HUB DEMAND MARKERS (correspondence-only; overrides rule 45 steps 1–2): the Enron ground-truth demand class is a LEGAL-PHRASE hit in the writer's OWN text (subject + body above any forwarded-original separator — "-----Original Message-----", "-----Forwarded by", "---------------------- Forwarded by"). It is NOT "this document is itself a formal demand letter addressed to you." Internal FYI, drafting notes, and news forwards ARE demand when they contain one of these phrases: DEMAND LETTER, LETTER OF DEMAND, DEMAND FOR PAYMENT, DEMAND FOR ARBITRATION, DEMAND FOR DAMAGES, DEMAND FOR SPECIFIC PERFORMANCE, DEMAND FOR RELIEF, CEASE AND DESIST, LITIGATION HOLD, LEGAL HOLD, NOTICE OF DEFAULT, NOTICE OF BREACH, NOTICE TO CURE, FINAL NOTICE, FINAL DEMAND, IMMEDIATE PAYMENT, REMIT PAYMENT, ULTIMATUM, BREACH OF CONTRACT, BREACH OF THE AGREEMENT. Energy-market "demand charges" / "demand reduction" / TCF capacity is NOT demand. attorney_demand = a demand-marker hit AND a law-firm sender (domains such as kayescholer.com, milbank.com, bakerbotts.com, velaw.com, latham.com, skadden.com, or Esq./Counsel in the from-line). Re-order the rule-45 cascade to: meeting_request, press_release, attorney_demand/demand (this rule), notice, memo, letter, email. FINAL NOTICE and NOTICE OF DEFAULT/BREACH are demand, not notice.
+
+VALID CONTRACT SUBTYPE KEYS"""
+
+SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V2 = (
+    SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V1.replace(
+        "VALID CONTRACT SUBTYPE KEYS",
+        _SORTER_DOCCLASS_CORRESPONDENCE_V2_RULE_46,
+    )
+)
+
+# =============================================================================
+# SORTER AGENT — Correspondence-only eval v3 (KANBAN-103 GEPA)
+# -----------------------------------------------------------------------------
+# Parent: sorter_docclass_correspondence_v2 (FROZEN; subclass 0.485 on
+# enron200 s42; demand 3/25, attorney_demand 1/3). ONE lesson from the
+# audited demand/attorney_demand bodies: Hub correspondence_subclasses.py
+# fires on ANY demand-marker phrase in the writer's own text, so most
+# Hub-demand rows are NOT demands (IT FINAL NOTICE, spam FINAL NOTICE,
+# "please draft a demand letter", FYI news "breach of contract", Demand
+# Letter Log, cover notes attaching a demand, "they may send a demand
+# letter", pasted contract clauses). False positives are already demoted
+# in data/gt/enron_correspondence_label_overrides.jsonl. v2 rule 46 taught
+# that broken Hub convention. v3 OVERRIDES rule 46: demand is the speech
+# act. v2 bytes stay intact. Do not bump max_tokens (v2's 21 `other` rows
+# were 2048-token parse burns — keep reasoning short in this same block).
+# Reserved (unrun): qwen3.7-flash_sorter_docclass_correspondence_v3_enron200_s42
+# =============================================================================
+
+CORRESPONDENCE_SUBCLASS_V3 = """47. DEMAND IS THE SPEECH ACT (correspondence-only; OVERRIDES rule 46): a Hub phrase hit is not enough. demand means THIS message itself performs the demand — the writer is telling the recipient to pay, cure, cease, perform, or arbitrate. A mention, draft-request ("please draft a demand letter"), hypothetical ("we could send a demand letter", "they may send a demand letter"), news clip, FYI/cover note attaching a demand, Demand Letter Log, pasted contract clause, IT-outage "FINAL NOTICE", or spam "FINAL NOTICE" is NOT demand — keep walking the rule-45 cascade (meeting_request / press_release / notice / memo / letter / email). attorney_demand = the message IS that speech act AND a lawyer or law firm is the AUTHOR/SENDER of the demand (kayescholer.com, milbank.com, bakerbotts.com, velaw.com, latham.com, skadden.com, or Esq./Counsel on the from-line), not a firm merely mentioned. A law firm circulating or revising its own draft demand instrument is attorney_demand; counsel discussing whether someone could send one is not. Keep reasoning to two short sentences so the JSON object still emits.
+
+VALID CONTRACT SUBTYPE KEYS"""
+
+SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V3 = (
+    SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V2.replace(
+        "VALID CONTRACT SUBTYPE KEYS",
+        CORRESPONDENCE_SUBCLASS_V3,
+    )
+)
+
+# =============================================================================
 # SORTER AGENT — Vision Classification (RVL-CDIP-style image pipeline)
 # -----------------------------------------------------------------------------
 # Modeled on the RVL-CDIP classifier repo's v17 prompt structure: an ordered
@@ -1047,6 +1190,66 @@ Runner-up: contract, ruled out because the substantive form is an equity instrum
 <subclass>rights_instrument</subclass>
 <confidence>92</confidence>
 <reasoning>Specimen Class A Common Stock certificate (EX-4.1) defining securityholder rights.</reasoning>"""
+
+# =============================================================================
+# SORTER AGENT — Hierarchical doc-class classification, VISION MODE v1
+# (v7 rules on the vision skeleton — insurance_claim + subclass dims)
+# -----------------------------------------------------------------------------
+# v1 = vision_v0 + rules 36–43 from the text docclass v7 arm + insurance_claim
+# in the label set and scratchpad checks. contract rows still carry no CUAD
+# contract_subtype on this surface.
+# =============================================================================
+
+SORTER_DOCCLASS_VISION_PROMPT_V1 = SORTER_DOCCLASS_VISION_PROMPT_V0.replace(
+    """You are shown the page images of ONE incoming legal document and must assign it exactly one of 7 classes, plus a second-level doc_subclass where the class has one.""",
+    """You are shown the page images of ONE incoming legal document and must assign it exactly one of 8 classes, plus a second-level doc_subclass where the class has one.""",
+).replace(
+    """Labels (use these exact strings):
+contract, corporate_record, due_diligence, correspondence, compliance_filing, court_opinion, merger_agreement""",
+    """Labels (use these exact strings):
+contract, corporate_record, due_diligence, correspondence, compliance_filing, court_opinion, insurance_claim, merger_agreement""",
+).replace(
+    """35. REGISTRATION RIGHTS AGREEMENTS FILED AS SEC EXHIBITS (corpus convention): a "REGISTRATION RIGHTS AGREEMENT" filed as an exhibit to a registration statement (EX-4.x) — an instrument granting securityholders the right to have their shares registered — is corporate_record with doc_subclass rights_instrument, NOT contract: the S-1 exhibit catalog files EX-4.x instruments under the record types ("Registration Rights Agreement" with registration, piggyback, and shelf obligations -> corporate_record / rights_instrument, not contract and not a contract subtype). The rule applies in the SEC exhibit context only; a standalone registration rights agreement outside any filing package stays contract.
+
+## Scratchpad procedure""",
+    """35. REGISTRATION RIGHTS AGREEMENTS FILED AS SEC EXHIBITS (corpus convention): a "REGISTRATION RIGHTS AGREEMENT" filed as an exhibit to a registration statement (EX-4.x) — an instrument granting securityholders the right to have their shares registered — is corporate_record with doc_subclass rights_instrument, NOT contract: the S-1 exhibit catalog files EX-4.x instruments under the record types ("Registration Rights Agreement" with registration, piggyback, and shelf obligations -> corporate_record / rights_instrument, not contract and not a contract subtype). The rule applies in the SEC exhibit context only; a standalone registration rights agreement outside any filing package stays contract.
+
+36. M&A PACKAGE MACHINERY GOVERNS ANCILLARY INSTRUMENTS: rule 31's M&A-family title list is ILLUSTRATIVE, not exhaustive — acquisition machinery (Parent/Merger Sub, Effective Time, Exchange Ratio) governs even when CVRs, registration-rights, or support covenants appear inside the deal.
+
+37. AGREEMENT PACKAGES: record/certificate text inside an agreement package does not change the class when the parent agreement is also present (rule 34 extension).
+
+38. INSURANCE CLAIM CLASS: FNOL forms, adjuster reports, EOBs, Medicare Summary Notices, coverage determinations, and denial letters are insurance_claim, not contract or correspondence.
+
+39. CORRESPONDENCE SUBCLASS: when doc_type is correspondence, doc_subclass is the communication's function — demand, attorney_demand, meeting_request, press_release, memo, email, letter, or notice.
+
+40. INSURANCE CLAIM SUBCLASS: when doc_type is insurance_claim, doc_subclass is carrier, pde, outpatient, or inpatient — the setting named in the document's own heading outranks the generic document family.
+
+41. CORRESPONDENCE FUNCTION OVER TRANSPORT: classify by what the communication DOES, not its delivery format.
+
+42. ANCILLARY-WRAPPER FAMILY CONVENTION: an ancillary exhibit inherits the parent package's class when the package/family is visible in the filename or exhibit label.
+
+43. CONTRACT VS INSURANCE CLAIM DISAMBIGUATION: a distributor agreement stays contract even when the word "carrier" appears in a shipping sense.
+
+## Scratchpad procedure""",
+).replace(
+    """Walk checks 1-7 below IN ORDER.""",
+    """Walk checks 1-8 below IN ORDER.""",
+).replace(
+    """7. correspondence: communications between parties or with regulators — letterhead with "Dear ...", "Sincerely", "Very truly yours", email headers ("FROM:", "TO:", "RE:", "SUBJECT:"), interoffice "MEMORANDUM — TO/FROM/DATE/RE", notices, demand letters, cover letters.
+
+If you wrote "none" for every check""",
+    """7. correspondence: communications between parties or with regulators — letterhead with "Dear ...", "Sincerely", "Very truly yours", email headers ("FROM:", "TO:", "RE:", "SUBJECT:"), interoffice "MEMORANDUM — TO/FROM/DATE/RE", notices, demand letters, cover letters.
+
+8. insurance_claim: claim documentation — FNOL forms, adjuster reports/estimates, demand packages, coverage determinations, reservation-of-rights/denial letters, EOB statements, Medicare Summary Notices, pharmacy benefit statements — NOT contract or correspondence whatever wrapper they arrive in (rule 38).
+
+If you wrote "none" for every check""",
+).replace(
+    """The label must be lowercase, exactly one of the 7 strings above, no punctuation inside the tags, no explanation after them.""",
+    """The label must be lowercase, exactly one of the 8 strings above, no punctuation inside the tags, no explanation after them.""",
+).replace(
+    """Then output the doc_subclass on its own line — EXACTLY ONE of the rule-33 subclass keys when the label is merger_agreement or corporate_record, and the word null when the label is any other class:""",
+    """Then output the doc_subclass on its own line — EXACTLY ONE of the applicable subclass keys when the label is merger_agreement, corporate_record, correspondence, or insurance_claim (rules 33/39/40), and the word null when the label is contract or any other class without a subclass dimension:""",
+)
 
 
 # =============================================================================
@@ -3258,6 +3461,19 @@ An empty list is a valid, honest answer when nothing is missing."""
 
 
 
+# contracts_specialist_v40 — parties_no_address_injection (prompt-engineer proposal,
+# validated anchor; A/B pending on edge_contracts_specialist / stealth_ox-alpha).
+CONTRACTS_SPECIALIST_PROMPT_V40 = CONTRACTS_SPECIALIST_PROMPT_V39.replace(
+    'parties: array of all named parties (full name + alias)',
+    'parties: array of all named parties (full name + alias) — extract the party\'s name as it appears in the opening recital or signature block, but omit any address, phone number, or email. Include standard descriptors like \'an individual\' or \'a corporation\' if they are part of the party\'s designation. The alias (in parentheses) should be included if present. Example: "SQUARE TWO GOLF INC., a New Jersey corporation (\\"Company\\")" is correct; "SQUARE TWO GOLF INC., a New Jersey corporation (\\"Company\\"), with offices at 123 Main St" is incorrect because it includes the address.',
+)
+
+CONTRACTS_SPECIALIST_PROMPT_V41 = (
+    CONTRACTS_SPECIALIST_PROMPT_V40
+    + "\n" + "PARTY ALIAS SPLITTING (parties field): emit each party as ONE list item containing the legal name plus any short descriptor; surrounding double quotes are stripped from the boundaries only - never split a party into multiple items at a quotation mark or an opening parenthesis, and never include addresses, phone numbers or emails in party names. Worked example - source text \"SQUARE TWO GOLF, INC. ('Company') and KATHY WHITWORTH, an individual\" yields [\"SQUARE TWO GOLF, INC.\", \"KATHY WHITWORTH, an individual\"]: two items, no stray quote or parenthesis fragments."
+)
+
+
 PROMPT_VERSIONS = {
     # Sorter
     "sorter_v0": SORTER_PROMPT_V0,
@@ -3284,7 +3500,13 @@ PROMPT_VERSIONS = {
     "sorter_docclass_v4": SORTER_DOCCLASS_PROMPT_V4,
     "sorter_docclass_v5": SORTER_DOCCLASS_PROMPT_V5,
     "sorter_docclass_v6": SORTER_DOCCLASS_PROMPT_V6,
+    "sorter_docclass_v7": SORTER_DOCCLASS_PROMPT_V7,
+    "sorter_docclass_correspondence_v0": SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V0,
+    "sorter_docclass_correspondence_v1": SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V1,
+    "sorter_docclass_correspondence_v2": SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V2,
+    "sorter_docclass_correspondence_v3": SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V3,
     "sorter_docclass_vision_v0": SORTER_DOCCLASS_VISION_PROMPT_V0,
+    "sorter_docclass_vision_v1": SORTER_DOCCLASS_VISION_PROMPT_V1,
 
     # Sorter — vision (RVL-CDIP-style image classification)
     "sorter_vision_v0": SORTER_VISION_PROMPT_V0,
@@ -3372,6 +3594,10 @@ PROMPT_VERSIONS = {
     "contracts_specialist_v36": CONTRACTS_SPECIALIST_PROMPT_V36,
     "contracts_specialist_v37": CONTRACTS_SPECIALIST_PROMPT_V37,
     "contracts_specialist_v38": CONTRACTS_SPECIALIST_PROMPT_V38,
+
+
+    "contracts_specialist_v40": CONTRACTS_SPECIALIST_PROMPT_V40,
+    "contracts_specialist_v41": CONTRACTS_SPECIALIST_PROMPT_V41,
     "contracts_specialist_v39": CONTRACTS_SPECIALIST_PROMPT_V39,
     "contracts_audit_v0": CONTRACTS_AUDIT_PROMPT_V0,
     "contracts_specialist_v28": CONTRACTS_SPECIALIST_PROMPT_V28,
@@ -3449,3 +3675,50 @@ from src.prompts_docclass import DOCCLASS_PROMPT_VERSIONS  # noqa: E402
 
 PROMPT_VERSIONS.update(DOCCLASS_PROMPT_VERSIONS)
 assert len(PROMPT_VERSIONS) == len(set(PROMPT_VERSIONS)), "prompt version key collision"
+
+
+# =============================================================================
+# INSURANCE CLAIMS SPECIALIST — base prompt (v0)
+# -----------------------------------------------------------------------------
+# Vendored from the llm-mailroom agent roster (mirrored in The-Mailroom
+# mailroom_ui/prompt_registry.py, key "insurance_claims_specialist") so the
+# durability benches can run the specialist upstream. Provenance: llm-mailroom
+# src/agents/. Registration follows the standard contract.
+# =============================================================================
+INSURANCE_CLAIMS_SPECIALIST_PROMPT_V0 = "You are a meticulous insurance-claims specialist at a law firm.\nYou read insurance claim documentation \u2014 FNOL forms, adjuster reports and estimates,\ndemand packages, coverage determinations, reservation-of-rights letters, denial\nletters, and EOB statements \u2014 and distill their claim facts.\n\nYou handle: first-party and third-party claims across auto, property, liability,\nhealth, life, and workers' compensation lines; both open claims and final\ndeterminations.\n\nExtraction rules:\n1. Claim and policy numbers: transcribe them exactly as printed (claim no., policy\n   no., FNOL reference); these are identifiers, never paraphrase them.\n2. Parties: name the insurer and the insured party as stated on the documents.\n3. Claim type: classify the line of business (auto, property, liability, health,\n   life, workers_comp) from the documents themselves; use \"other\" only when none fits.\n4. Dates and amounts: capture date of loss, filing date, and claimed amount exactly\n   as stated; do not compute or convert amounts.\n5. Adjuster: name the adjuster only if the documents identify one.\n6. Damages description: summarize the loss/damages as described by the documents.\n7. Coverage determination: quote the outcome as stated \u2014 approved, denied, partial,\n   pending \u2014 never infer a determination that is not written.\n8. Denial reasons: list stated denial/limitation grounds distinctly; if the claim was\n   approved, leave this empty.\n9. Do not editorialize and do not infer unstated facts \u2014 report what the documents state.\n10. Return one complete JSON object with every schema field. Use null or an empty list\n    for facts not stated; never infer a claim number, policy number, date, amount, or\n    determination.\n11. The `confidence` score must be derived from the evidence in THIS document, not assumed:\n    start from the share of schema fields actually found (fields left null lower it), and lower\n    it further for uncertain values or truncated input. Never default to a fixed high value\n    (e.g. 0.90 or 0.95) \u2014 use the full 0.0-1.0 range and pick the number the evidence supports."
+
+PROMPT_VERSIONS["insurance_claims_specialist_v0"] = INSURANCE_CLAIMS_SPECIALIST_PROMPT_V0
+
+# -----------------------------------------------------------------------------
+# insurance_claims_specialist_v1 — EVIDENCE-ONLY VISIBILITY (KANBAN-097 mutation 1)
+# -----------------------------------------------------------------------------
+# Data-backed single lesson (edge bench baseline, qwen3.7-flash, n=20
+# adversarial transforms, seed 42): no_fabrication 0/20 — 30 true fabrications,
+# ALL absent even from the untransformed source: template-identifier fills
+# ("CLM-SAMPLE-001", "Sample Adjuster Name") when identifiers were truncated or
+# redacted away, composed damages narratives assembled from scattered tokens,
+# and claim_type guesses on near-empty (200-char) views. The v0 rules say
+# "never infer" but do not define the visibility boundary; under partial views
+# the prior fills the gap. v1 makes the boundary operational: a field may be
+# populated ONLY when its exact value is visible in the provided text.
+# Derivation: .replace() off the REAL base constant (anchor asserted
+# single-occurrence by tests/test_kanban097_agent_benches.py).
+_INS_V0_ANCHOR = "10. Return one complete JSON object with every schema field."
+assert INSURANCE_CLAIMS_SPECIALIST_PROMPT_V0.count(_INS_V0_ANCHOR) == 1, \
+    "anchor drift: insurance specialist v0 rule 10"
+INSURANCE_CLAIMS_SPECIALIST_PROMPT_V1 = INSURANCE_CLAIMS_SPECIALIST_PROMPT_V0.replace(
+    _INS_V0_ANCHOR,
+    "9a. EVIDENCE-ONLY VISIBILITY (mandatory, overrides every other rule):\n"
+    "    populate a field ONLY when its exact value is visible verbatim in the\n"
+    "    text you were given. Before writing any value, locate it in the text;\n"
+    "    if you cannot point to it, write null (or an empty list). This applies\n"
+    "    with special force to: identifiers (claim/policy numbers), names,\n"
+    "    dates, amounts, and the coverage determination. NEVER reconstruct a\n"
+    "    value from typical formats, sample templates, priors, or conventions;\n"
+    "    NEVER compose a description by stitching fragments from different\n"
+    "    sections \u2014 quote or closely paraphrase ONE visible passage. When the\n"
+    "    excerpt is partial (truncated, redacted, or garbled), the correct\n"
+    "    answer for invisible fields is null, not a plausible fill.\n"
+    + _INS_V0_ANCHOR,
+)
+PROMPT_VERSIONS["insurance_claims_specialist_v1"] = INSURANCE_CLAIMS_SPECIALIST_PROMPT_V1

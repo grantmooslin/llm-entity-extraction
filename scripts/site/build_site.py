@@ -272,6 +272,15 @@ def headline_score(record: dict) -> dict:
         if isinstance(value, (int, float)):
             detail = f"strict {_fmt(value)} · equiv {_fmt(scores.get('accuracy_equiv') or 0)}"
             return {"label": "family accuracy", "value": value, "detail": detail}
+    if task == "correspondence_classification":
+        exact = scores.get("correspondence_exact")
+        subclass = scores.get("subclass_accuracy")
+        sentiment = scores.get("sentiment_label_accuracy")
+        if isinstance(exact, (int, float)):
+            detail = f"subclass {_fmt(subclass)} · sentiment {_fmt(sentiment)}"
+            return {"label": "correspondence exact", "value": exact, "detail": detail}
+        if isinstance(subclass, (int, float)):
+            return {"label": "subclass", "value": subclass}
     return {}
 
 
@@ -339,6 +348,18 @@ def breakdown(record: dict) -> dict:
             "confidence_mean": scores.get("confidence_mean"),
             "calibration_error": scores.get("calibration_error"),
             "n_documents": scores.get("n_documents"),
+        }
+    if task == "correspondence_classification":
+        failures = (scores.get("sorter") or {}).get("failure_insights") or {}
+        return {
+            "doc_type_accuracy": scores.get("doc_type_accuracy"),
+            "subclass_accuracy": scores.get("subclass_accuracy"),
+            "sentiment_label_accuracy": scores.get("sentiment_label_accuracy"),
+            "sentiment_score_mae": scores.get("sentiment_score_mae"),
+            "correspondence_exact": scores.get("correspondence_exact"),
+            "confidence": scores.get("confidence"),
+            "n_failed": failures.get("n_failed"),
+            "mode_counts": failures.get("mode_counts") or {},
         }
     return {}
 
@@ -431,6 +452,9 @@ def _results_values(record: dict) -> list | None:
     if task == "subtype_classification":
         return [1.0 if r.get("sorter", {}).get("subtype_ok") else 0.0
                 for r in results if "subtype_ok" in (r.get("sorter") or {})]
+    if task == "correspondence_classification":
+        return [1.0 if r.get("sorter", {}).get("correspondence_exact") else 0.0
+                for r in results if "correspondence_exact" in (r.get("sorter") or {})]
     return None
 
 
@@ -798,6 +822,13 @@ def main_with_args(argv: list[str]) -> int:
             print(f"Site data is stale: {len(current)} runs in site, "
                   f"{len(records)} in {args.jsonl}.")
             return 1
+        # KANBAN-094: index length alone misses orphaned run files (a tree
+        # built from a longer/merged view); compare file count too.
+        n_files = len(list((args.out / "runs").glob("*.json")))
+        if n_files != len(records):
+            print(f"Site data is stale: {n_files} run files on disk, "
+                  f"{len(records)} in {args.jsonl}.")
+            return 1
         print(f"Site data is current ({len(current)} runs).")
         return 0
 
@@ -829,6 +860,17 @@ def main_with_args(argv: list[str]) -> int:
         if costs:
             summary["cost"] = costs["per_run"].get(index, {"covered": False})
         summaries.append(summary)
+    # KANBAN-094: the derived tree must be exactly {001..N}. An append-only
+    # log only grows, but a RECONCILED log can shrink below a previously
+    # built tree — prune any run file the current source of truth doesn't
+    # claim, or stale SPA pages linger and break the deep-link invariant.
+    expected_names = {f"{i:03d}.json" for i in range(1, len(records) + 1)}
+    pruned = sorted(p.name for p in runs_dir.glob("*.json")
+                    if p.name not in expected_names)
+    for name in pruned:
+        (runs_dir / name).unlink()
+    if pruned:
+        print(f"Pruned {len(pruned)} stale run file(s): {', '.join(pruned)}")
     (args.out / "index.json").write_text(
         json.dumps(summaries, indent=1), encoding="utf-8")
     meta = build_meta(records, args.jsonl, args.out)

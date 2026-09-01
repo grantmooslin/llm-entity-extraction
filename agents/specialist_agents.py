@@ -208,6 +208,26 @@ COURT_OPINIONS_SCHEMA = build_structured_schema({
     "authored_by": _nullable_string(),
 })
 
+INSURANCE_CLAIMS_SCHEMA = build_structured_schema({
+    "claim_number": _nullable_string("Claim reference exactly as printed"),
+    "policy_number": _nullable_string("Policy identifier exactly as printed"),
+    "insurer": _nullable_string("Insurance company as named"),
+    "insured_party": _nullable_string("Insured person/entity as named"),
+    "claim_type": _nullable_string("auto | property | liability | health | life | workers_comp | other"),
+    "date_of_loss": _nullable_string("As stated; never computed"),
+    "date_filed": _nullable_string("As stated; never computed"),
+    "claimed_amount": _nullable_string("Currency + amount exactly as stated; never converted"),
+    "adjuster": _nullable_string("Only when the documents identify one"),
+    "damages_description": _nullable_string("The loss/damages as described by the documents"),
+    "coverage_determination": _nullable_string("approved | denied | partial | pending — only what is WRITTEN"),
+    "denial_reasons": _string_array("Stated denial/limitation grounds; empty when approved"),
+    "supporting_documents": _string_array("Documents the package references"),
+    "confidence": {
+        "type": "number", "minimum": 0.0, "maximum": 1.0,
+        "description": "Evidence-grounded extraction confidence",
+    },
+})
+
 SPECIALIST_SCHEMAS = {
     "contract": CONTRACTS_SCHEMA,
     "corporate_record": CORPORATE_RECORDS_SCHEMA,
@@ -215,6 +235,7 @@ SPECIALIST_SCHEMAS = {
     "correspondence": CORRESPONDENCE_SCHEMA,
     "compliance_filing": COMPLIANCE_FILING_SCHEMA,
     "court_opinion": COURT_OPINIONS_SCHEMA,
+    "insurance_claim": INSURANCE_CLAIMS_SCHEMA,
 }
 
 
@@ -681,3 +702,19 @@ def get_specialist(doc_type: str, model: str | None = None, api_key: str | None 
     if doc_type not in SPECIALIST_REGISTRY:
         raise ValueError(f"No specialist registered for doc_type: {doc_type}")
     return SPECIALIST_REGISTRY[doc_type](model=model, api_key=api_key)
+
+
+class InsuranceClaimsSpecialist(_SpecialistBase):
+    agent_name = "insurance_claims_specialist"
+    schema = INSURANCE_CLAIMS_SCHEMA
+
+    def __init__(self, model: str | None = None, api_key: str | None = None,
+                 prompt_version: str = "insurance_claims_specialist_v0",
+                 callbacks: list | None = None):
+        super().__init__(model=model, api_key=api_key, callbacks=callbacks)
+        self.prompt_version = prompt_version
+        self._last_chunked = False
+        self._last_n_chunks = 0
+
+    def system_prompt(self) -> str:
+        return get_prompt(self.prompt_version)

@@ -7,3 +7,4 @@
 -r reporting.txt
 -r embeddings.txt
 -r notebooks.txt
+-r deploy.txt

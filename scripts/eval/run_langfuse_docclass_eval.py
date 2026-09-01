@@ -68,8 +68,12 @@ from agents.sorter_agent import (  # noqa: E402
     DOC_SUBCLASS_UNKNOWN,
     DOCCLASS_CLASS_KEYS,
     DOCCLASS_CLASSES,
+    DOCCLASS_PILOT_CLASSES,
+    DOCCLASS_PILOT_CLASS_KEYS,
+    DOCCLASS_PILOT_SCHEMA,
     DOCCLASS_SCHEMA,
     SorterAgent,
+    SUBCLASS_DIMENSIONS,
     equivalent_doc_subclasses,
     normalize_doc_subclass,
     normalize_subtype,
@@ -91,7 +95,8 @@ from src.prompts import list_prompts  # noqa: E402
 
 _CONFIG = load_braintrust_config()
 DEFAULT_DATASETS = "mailroom-maud-contracts,mailroom-cuad-contracts-full,mailroom-s1-corporate-records"
-DEFAULT_PROMPT = "sorter_docclass_v0"
+DEFAULT_LOCAL_DUMP = "data/datasets/docclass_merged.jsonl"
+DEFAULT_PROMPT = "sorter_docclass_v7"
 
 
 class EvalResultShim:
@@ -120,7 +125,7 @@ def load_docclass_dataset(dataset_names: list[str], project: str, project_id: st
     subclass dimension — e.g. correspondence).
     """
     rows: list[dict] = []
-    valid = set(DOCCLASS_CLASS_KEYS)
+    valid = set(DOCCLASS_CLASS_KEYS) | set(DOCCLASS_PILOT_CLASS_KEYS)
     for name in dataset_names:
         dataset = load_braintrust_dataset(project, name, valid=valid, project_id=project_id)
         for d in dataset:
@@ -152,6 +157,8 @@ def load_docclass_dataset(dataset_names: list[str], project: str, project_id: st
                     "expected": expected,
                     "metadata": metadata,
                     "expected_subclass": row.get("expected_subclass") or metadata.get("expected_subclass"),
+                    "gt_fields": dict(row.get("gt_fields") or {}),
+                    "split": row.get("split"),
                     "source_dataset": str(path),
                 })
         print(f"  {path}: local dump loaded")
@@ -181,6 +188,40 @@ def random_sample(dataset: list[dict], n: int, seed: int) -> list[dict]:
     import random
 
     return random.Random(seed).sample(dataset, min(n, len(dataset)))
+
+
+def filter_by_filename_manifest(dataset: list[dict], manifest_path: Path) -> list[dict]:
+    """Keep rows whose filename appears in a prior sample manifest (order preserved)."""
+    wanted: list[str] = []
+    with manifest_path.open(encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            row = json.loads(line)
+            fn = row.get("filename")
+            if fn:
+                wanted.append(str(fn))
+    by_name = {d["filename"]: d for d in dataset}
+    missing = [fn for fn in wanted if fn not in by_name]
+    if missing:
+        raise SystemExit(
+            f"filename manifest references {len(missing)} rows absent from the "
+            f"loaded corpus (first: {missing[0]!r})"
+        )
+    return [by_name[fn] for fn in wanted]
+
+
+def write_sample_manifest(dataset: list[dict], manifest_path: Path) -> None:
+    """Persist the exact stratified/sample draw for cross-arm same-surface A/B."""
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    with manifest_path.open("w", encoding="utf-8") as fh:
+        for row in dataset:
+            fh.write(json.dumps({
+                "filename": row["filename"],
+                "expected": row["expected"],
+                "expected_subclass": row.get("expected_subclass"),
+            }, ensure_ascii=False) + "\n")
 
 
 def attach_pages_by_filename(dataset: list[dict], pdf_dir: Path) -> tuple[list[dict], int]:
@@ -254,8 +295,10 @@ def main_with_args(argv: list[str]) -> int:
     parser.add_argument("--dataset-project", default=_CONFIG.dataset_project, help="Project holding the datasets")
     parser.add_argument("--datasets", default=DEFAULT_DATASETS,
                         help="Comma-separated Braintrust datasets to evaluate")
-    parser.add_argument("--local-dumps", default=None,
-                        help="Comma-separated local JSONL dumps (replaces Braintrust loading)")
+    parser.add_argument("--local-dumps", default=DEFAULT_LOCAL_DUMP,
+                        help="Comma-separated local JSONL dumps (default: "
+                             f"{DEFAULT_LOCAL_DUMP} — schema v5 merged corpus, 1,210 rows; "
+                             "replaces Braintrust loading when set)")
     parser.add_argument("--input-mode", choices=["text", "vision", "vision-primary"],
                         default="text",
                         help="text: classify doc_text (default); vision: classify page "
@@ -275,7 +318,16 @@ def main_with_args(argv: list[str]) -> int:
     parser.add_argument("--stratified", type=int, default=0,
                         help="STRATIFIED sample of N rows: evenly distributed across doc_type classes")
     parser.add_argument("--seed", type=int, default=42, help="Seed for --sample/--stratified")
+    parser.add_argument("--filename-manifest", type=Path, default=None,
+                        help="JSONL of {filename,...} rows — reuse an exact prior "
+                             "sample instead of re-drawing (--stratified/--sample)")
+    parser.add_argument("--export-sample-manifest", type=Path, default=None,
+                        help="After sampling, write the exact row list to this JSONL "
+                             "(for cross-arm same-surface A/B)")
     parser.add_argument("--model", default=_CONFIG.model, help=f"Model (default: {_CONFIG.model})")
+    parser.add_argument("--class-set", choices=["extended", "pilot"], default="extended",
+                        help="Primary class universe: extended (6 shared + merger + insurance) "
+                             "or pilot (the 5 classes the merged GT contains)")
     parser.add_argument("--prompt-version", default=DEFAULT_PROMPT,
                         help=f"Sorter prompt version (default: {DEFAULT_PROMPT})")
     parser.add_argument("--temperature", type=float, default=0.1, help="Sampling temperature")
@@ -315,7 +367,7 @@ def main_with_args(argv: list[str]) -> int:
     # --prompt-version always wins.
     if args.input_mode in ("vision", "vision-primary") \
             and args.prompt_version == DEFAULT_PROMPT:
-        args.prompt_version = "sorter_docclass_vision_v0"
+        args.prompt_version = "sorter_docclass_vision_v1"
         print(f"  --input-mode {args.input_mode}: defaulting prompt to "
               f"{args.prompt_version}")
 
@@ -341,7 +393,11 @@ def main_with_args(argv: list[str]) -> int:
         dataset, matched = attach_pages_by_filename(dataset, args.pdf_dir)
         print(f"  vision pages attached: {matched}/{len(dataset)} rows "
               f"({len(dataset) - matched} will use text fallback in vision-primary)")
-    if args.stratified:
+    if args.filename_manifest:
+        dataset = filter_by_filename_manifest(dataset, args.filename_manifest)
+        print(f"Loaded {len(dataset)} rows from filename manifest "
+              f"{args.filename_manifest}")
+    elif args.stratified:
         dataset = stratified_sample(dataset, args.stratified, args.seed)
         print(f"Stratified {len(dataset)} rows evenly across doc_type "
               f"(requested {args.stratified}, seed {args.seed})")
@@ -349,6 +405,10 @@ def main_with_args(argv: list[str]) -> int:
         dataset = random_sample(dataset, args.sample, args.seed)
     elif args.limit:
         dataset = dataset[: args.limit]
+    if args.export_sample_manifest:
+        write_sample_manifest(dataset, args.export_sample_manifest)
+        print(f"Wrote sample manifest ({len(dataset)} rows) -> "
+              f"{args.export_sample_manifest}")
     if not dataset:
         parser.error("No rows found in the datasets.")
 
@@ -369,13 +429,17 @@ def main_with_args(argv: list[str]) -> int:
     md_log_path = default_md_path()
 
     if args.dry_run:
-        how = (f"stratified {args.stratified} (even across doc_type, seed {args.seed})"
+        how = (f"filename manifest {args.filename_manifest} ({len(dataset)} rows)"
+               if args.filename_manifest else
+               f"stratified {args.stratified} (even across doc_type, seed {args.seed})"
                if args.stratified else
                f"sample {args.sample} (seed {args.seed})" if args.sample else
                f"limit {args.limit}" if args.limit else "all")
+        _classes = (DOCCLASS_PILOT_CLASS_KEYS if args.class_set == "pilot"
+                    else DOCCLASS_CLASS_KEYS)
         print(f"Dry run: {len(dataset)} rows ({how}) -> experiment '{experiment_name}'")
-        print(f"  sorter={args.prompt_version} model={args.model} "
-              f"classes={DOCCLASS_CLASS_KEYS}")
+        print(f"  sorter={args.prompt_version} model={args.model} class_set={args.class_set} "
+              f"classes={_classes}")
         print(f"  input_mode={args.input_mode} vision_pages={args.vision_pages} "
               f"tracing=langfuse-primary (phoenix fallback) "
               f"session={experiment_name} trace_name={args.lf_trace_name}")
@@ -452,7 +516,10 @@ def main_with_args(argv: list[str]) -> int:
         with tracer.trace_document(filename, expected_doc_type, trace_meta) as handle:
             sorter = SorterAgent(model=args.model, api_key=openrouter_key,
                                  prompt_version=args.prompt_version,
-                                 doc_classes=DOCCLASS_CLASSES, schema=DOCCLASS_SCHEMA,
+                                 doc_classes=(DOCCLASS_PILOT_CLASSES if args.class_set == "pilot"
+                                              else DOCCLASS_CLASSES),
+                                 schema=(DOCCLASS_PILOT_SCHEMA if args.class_set == "pilot"
+                                         else DOCCLASS_SCHEMA),
                                  callbacks=[handle.handler] if handle.handler else None)
             sorter._max_input_chars = args.max_input_chars
             sorter._max_tokens = args.max_tokens
@@ -522,20 +589,37 @@ def main_with_args(argv: list[str]) -> int:
 
             doc_type = str(result.get("doc_type", "correspondence")).strip().lower()
             doc_type_ok = doc_type == expected_doc_type
-            predicted_subclass = normalize_doc_subclass(
-                result.get("doc_subclass") if doc_type in ("merger_agreement", "corporate_record") else None,
-                doc_type,
-            ) if expected_subclass else None
+            # Canonicalize BOTH sides before comparing: the model emits enum
+            # keys while GT dialects vary by corpus (CUAD folder labels like
+            # 'License_Agreements', snake_case keys, folder conventions such
+            # as 'Joint Venture _ Filing'). contract rows score through the
+            # contract_subtype dimension (normalize_subtype); every registered
+            # doc_subclass dimension through normalize_doc_subclass.
+            if doc_type == "contract":
+                predicted_subclass = normalize_subtype(result.get("contract_subtype"))
+                expected_subclass_canon = normalize_subtype(expected_subclass)
+            elif doc_type in SUBCLASS_DIMENSIONS:
+                predicted_subclass = normalize_doc_subclass(
+                    result.get("doc_subclass"), doc_type)
+                expected_subclass_canon = normalize_doc_subclass(expected_subclass, doc_type)
+            else:
+                predicted_subclass = None
+                expected_subclass_canon = None
             # subclass_ok is None when the row carries no subclass GT (the
             # class has no second level) — those rows neither count for nor
-            # against subclass_accuracy.
-            subclass_ok = (predicted_subclass == expected_subclass) if expected_subclass else None
+            # against subclass_accuracy. GT 'other' stays a scoreable value.
+            if expected_subclass and expected_subclass_canon is not None:
+                subclass_ok = predicted_subclass == expected_subclass_canon
+            else:
+                subclass_ok = None
             # Equivalence-aware subclass: a defensible family read counts as a
             # hit (e.g. mixed_cash_stock <-> mixed_cash_stock_election), the
             # docclass mirror of subtype_accuracy_equiv.
             subclass_ok_equiv = (
-                doc_type_ok and equivalent_doc_subclasses(
-                    predicted_subclass, expected_subclass, doc_type)
+                doc_type_ok and expected_subclass_canon is not None and equivalent_doc_subclasses(
+                    predicted_subclass, expected_subclass_canon, doc_type)
+            ) if expected_subclass and doc_type != "contract" else (
+                doc_type_ok and predicted_subclass == expected_subclass_canon
             ) if expected_subclass else None
             exact = doc_type_ok and (subclass_ok if expected_subclass else True)
             try:
@@ -582,6 +666,7 @@ def main_with_args(argv: list[str]) -> int:
                                                "doc_subclass": predicted_subclass},
                                  "error": "",
                                  "expected_doc_type": expected_doc_type,
+                                 "expected_subclass_canon": expected_subclass_canon,
                                  "expected_subclass": expected_subclass,
                                  "scores": {"composite": composite}})
 
@@ -741,6 +826,11 @@ def log_experiment_to_repo(result, dataset, args, experiment_name,
             },
         },
     }
+
+    from src.score_emitter import build_emitter, emit_docclass_run_scores  # noqa: E402
+
+    emitter = build_emitter()
+    emit_docclass_run_scores(emitter, experiment_name, scores)
 
     record = {
         "type": "experiment",

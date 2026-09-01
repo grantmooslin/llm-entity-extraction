@@ -34,6 +34,63 @@ def _v1_api_base(api_base: str) -> str:
     return f"{api_base}/v1" if not api_base.endswith("/v1") else api_base
 
 
+def completion_prompt_content(prompt_obj: dict | None) -> str | None:
+    """Return the text body of a Braintrust completion prompt, or None."""
+    if not prompt_obj:
+        return None
+    prompt_data = prompt_obj.get("prompt_data") or {}
+    block = prompt_data.get("prompt") or {}
+    if block.get("type") == "completion":
+        return block.get("content")
+    return None
+
+
+def get_prompt_by_slug(
+    api_key: str,
+    project_id: str,
+    slug: str,
+    api_base: str = "https://api.braintrust.dev/v1",
+) -> dict | None:
+    """Return the latest prompt object for ``slug`` in a project, or None."""
+    resp = requests.get(
+        f"{_v1_api_base(api_base)}/prompt",
+        headers={"Authorization": f"Bearer {api_key}"},
+        params={"project_id": project_id, "slug": slug},
+        timeout=60,
+    )
+    resp.raise_for_status()
+    objects = resp.json().get("objects") or []
+    return objects[0] if objects else None
+
+
+def upsert_completion_prompt(
+    api_key: str,
+    project_id: str,
+    slug: str,
+    content: str,
+    *,
+    name: str | None = None,
+    description: str = "",
+    api_base: str = "https://api.braintrust.dev/v1",
+) -> dict:
+    """Create or replace a completion-type prompt in the Braintrust registry."""
+    body = {
+        "project_id": project_id,
+        "name": name or slug,
+        "slug": slug,
+        "description": description or f"Versioned prompt {slug}",
+        "prompt_data": {"prompt": {"type": "completion", "content": content}},
+    }
+    resp = requests.put(
+        f"{_v1_api_base(api_base)}/prompt",
+        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+        json=body,
+        timeout=120,
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
 def list_experiments(api_key: str, project_id: str, api_base: str = "https://api.braintrust.dev/v1") -> list[dict]:
     """Return metadata for every experiment in a project."""
     resp = requests.get(

@@ -613,7 +613,7 @@ def experiment_markdown(record: dict) -> str:
     # Per-subclass accuracy (the second-level dimension, with support counts),
     # equivalence recovery, and the input-mode split (text/vision/fallback) —
     # the docclass mirror of the subtype surface's per-class + equiv reporting.
-    if task == "docclass_classification":
+    if task in ("docclass_classification", "correspondence_classification"):
         per_sub = scores.get("per_subclass_accuracy")
         support = scores.get("per_subclass_support")
         if isinstance(per_sub, dict) and per_sub:
@@ -636,6 +636,26 @@ def experiment_markdown(record: dict) -> str:
         if isinstance(mode_counts, dict) and mode_counts:
             lines.append(f"- input-mode split: {', '.join(f'{k} {v}' for k, v in mode_counts.items())}")
             lines.append("")
+        if task == "correspondence_classification":
+            per_sent = scores.get("per_sentiment_accuracy")
+            sent_support = scores.get("per_sentiment_support")
+            if isinstance(per_sent, dict) and per_sent:
+                lines.append("### Per-sentiment-label accuracy")
+                lines.append("")
+                lines.extend(_md_table(
+                    ["sentiment_label", "accuracy", "support"],
+                    [[k, _fmt(per_sent[k]),
+                      sent_support.get(k) if isinstance(sent_support, dict) else None]
+                     for k in sorted(per_sent)],
+                ))
+                lines.append("")
+            if scores.get("sentiment_score_mae") is not None:
+                lines.append(
+                    f"- sentiment_score_mae: {_fmt(scores.get('sentiment_score_mae'))} "
+                    f"(band {_fmt(scores.get('sentiment_score_band'))}; "
+                    f"sentiment_score_ok {_fmt(scores.get('sentiment_score_ok'))})"
+                )
+                lines.append("")
 
     # ----------------------------------------------------------------- results
     results = record.get("results") or []
@@ -643,7 +663,34 @@ def experiment_markdown(record: dict) -> str:
         lines.append("### Per-document results")
         lines.append("")
         first = results[0]
-        if task == "docclass_classification":
+        if task == "correspondence_classification":
+            header = ["#", "Document", "Status", "doc_type", "subclass",
+                      "expected subclass", "doc_type ok", "subclass ok",
+                      "sent. label", "expected sent.", "sent. ok",
+                      "sent. score", "sent. MAE", "confidence",
+                      "failure mode", "error"]
+            rows = []
+            for i, row in enumerate(results):
+                sorter = row.get("sorter") or {}
+                rows.append([
+                    f"d{i + 1}",
+                    _fmt(row.get("filename"), max_len=90),
+                    row.get("status", "—"),
+                    _fmt(sorter.get("doc_type")),
+                    _fmt(sorter.get("doc_subclass")),
+                    _fmt(sorter.get("expected_subclass")),
+                    _fmt(sorter.get("doc_type_ok")),
+                    _fmt(sorter.get("subclass_ok")),
+                    _fmt(sorter.get("sentiment_label")),
+                    _fmt(sorter.get("expected_sentiment_label")),
+                    _fmt(sorter.get("sentiment_label_ok")),
+                    _fmt(sorter.get("sentiment_score")),
+                    _fmt(sorter.get("sentiment_score_mae")),
+                    _fmt(sorter.get("confidence")),
+                    _fmt(sorter.get("failure_mode")),
+                    _fmt(row.get("error")),
+                ])
+        elif task == "docclass_classification":
             # Hierarchical doc-class shape: the second-level doc_subclass
             # dimension is scored + rendered per document (KANBAN-033).
             header = ["#", "Document", "Status", "doc_type", "subclass",

@@ -21,6 +21,7 @@ Every script is `#!/usr/bin/env python3`, runs from the repo root, exposes
 | `stream_s1_exhibits.py` | EDGAR S-1 corporate-record exhibits (EX-3.x/4.x/21.x/24.x/25.x) via SEC full-text search + filing indexes; content-detected record-type subclass; exhibit code stays as metadata; SEC fair-access throttle + retry; `--local-dump` |
 | `stream_legalbench_tasks_to_bt.py` | LegalBench multi-class task suites -> Braintrust (one `mailroom-lb-<task>` dataset per task, e.g. `--tasks hearsay`; deterministic row ids => reruns upsert) |
 | `build_contracteval_testset.py` | build the ContractEval CUAD test split (KANBAN-052) into `data/contracteval/`: 4,182 (contract, question) pairs / 102 contracts / 41 categories from the Atticus `test.json` (the HF `cuad-qa` source); positives = 1,244 (the paper's hardcoded false-rate denominator); `--dry-run`, resumable download cache |
+| `load_enron_correspondence.py` | join HF `Lucius-Morningstar/enron-correspondence-dedup` agent-blind `default` + `ground_truth` on `filename` (correspondence-only); `--dry-run` prints subclass/sentiment counts; `--write` dumps joined JSONL |
 
 ## `scripts/eda/`
 
@@ -63,11 +64,14 @@ experiment-log append. Names are `{model-slug}_{prompt-version}[_suffix]`.
 | `run_langfuse_chained_eval.py` | **primary-sink mirror** of the chained eval (per-agent spans + task scores) |
 | `run_langfuse_extraction_eval.py` | **primary-sink mirror** of the extraction eval (`--chunked` supported) |
 | `run_langfuse_classification_eval.py` | **Langfuse mirror** of the classification eval (`--prompt-mode task` for LegalBench tasks) |
-| `run_langfuse_docclass_eval.py` | **hierarchical doc-class eval** (KANBAN-033): extended 7-class primary dimension (incl. merger_agreement) + doc_subclass second level (consideration type / record type); mixed surface of MAUD + CUAD + S-1 corporate records; Phoenix/Langfuse sink |
+| `run_langfuse_docclass_eval.py` | **hierarchical doc-class eval** (KANBAN-033/101): extended **8-class** primary dimension + doc_subclass second level; default `sorter_docclass_v7` on `data/datasets/docclass_merged.jsonl` (1,210 rows); Phoenix/Langfuse sink |
+| `run_correspondence_eval.py` | **correspondence-only Enron eval** (KANBAN-103): `doc_type` + communication-function `doc_subclass` + `sentiment_label`/`sentiment_score` on `Lucius-Morningstar/enron-correspondence-dedup`; default `--stratified 200 --seed 42`; `--include-all-attorney-demand` + `--extra-dumps` restore every attorney_demand example (Hub n=3 + full-corpus `sanders-r/ecogas/26.` dropped by dedup); `--gt-overrides` applies filename-keyed Hub GT patches (`data/gt/enron_correspondence_label_overrides.jsonl`); Braintrust traces ON; prompts `sorter_docclass_correspondence_v0`/`v1`/`v2`; `--publish-prompt` upserts the version into the Braintrust project library |
 | `run_langfuse_contracteval_eval.py` | **directly-mirrored ContractEval benchmark** (KANBAN-052, arXiv 2508.03080): one (contract, question) call per row over the CUAD test split, faithful full-context (`--max-input-chars 0`), ContractEval's exact rubric (F1/F2/Jaccard/false-nr + per-category) scored upstream (`llm-dojo-scoring` v0.4.0 `contracteval` kind); `task: contracteval` experiment-log record |
 | `sync_langfuse_datasets.py` | mirror Braintrust datasets into Langfuse datasets (deterministic item ids => upsert); `--maud`/`--s1` mirror the streamer local dumps |
 | `sync_langfuse_prompts.py` | mirror versioned prompts into Langfuse (idempotent; `--env-file` adds projects) |
 | `sync_langfuse_datasets.py` | mirror Braintrust datasets into Langfuse datasets (deterministic item ids => upsert) |
+| `sync_braintrust_prompts.py` | mirror versioned prompts (incl. docclass) into Braintrust prompt registry (`--env-file braintrust-sandbox.env`) |
+| `sync_braintrust_datasets.py` | upload eval/testing datasets to Braintrust (`--all` = hearsay + CUAD text + docclass HF + Enron) |
 
 ## `scripts/reporting/`
 

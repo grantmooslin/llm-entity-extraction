@@ -55,6 +55,22 @@ doc_type_accuracy, subclass_accuracy (rows without subclass GT unscored),
 exact_match, confidence; per-class accuracy + subclass confusion +
 failure insights (doc_type_miss / subclass_miss) in the repo log.
 
+## Correspondence-only Enron (`scripts/eval/run_correspondence_eval.py`)
+
+Correspondence-only sibling of the docclass eval (KANBAN-103): every row is
+`expected=correspondence` from Hugging Face
+`Lucius-Morningstar/enron-correspondence-dedup`. The sorter emits
+`doc_type` + communication-function `doc_subclass` + `sentiment_label` /
+`sentiment_score`, scored against the Hub `ground_truth` assortment.
+Emails are short (default `--max-input-chars 20000`). Braintrust experiment
+traces are ON by default (`--no-braintrust-logging` to opt out).
+
+```bash
+python scripts/eval/run_correspondence_eval.py --dry-run --stratified 200 --seed 42
+python scripts/eval/run_correspondence_eval.py --stratified 200 --seed 42 \
+  --experiment-name qwen3.7-flash_sorter_docclass_correspondence_v0_enron200_s42
+```
+
 ## Subtype (`scripts/eval/run_langfuse_subtype_eval.py` — primary; `run_subtype_eval.py` — local/resume)
 
 Sorter-only subtype routing: one call per document decides the primary class

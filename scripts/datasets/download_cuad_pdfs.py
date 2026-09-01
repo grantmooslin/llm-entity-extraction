@@ -34,6 +34,7 @@ import argparse
 import json
 import os
 import sys
+import urllib.parse
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -150,7 +151,10 @@ def main_with_args(argv: list[str]) -> int:
     for i, (pdf_path, dest) in enumerate(to_download, start=1):
         try:
             print(f"[{i}/{len(to_download)}] {pdf_path}")
-            total_bytes += download_file(HF_RAW_URL + pdf_path, dest)
+            # quote() the repo path: '#' in CUAD filenames ('Amendment #3 …')
+            # would otherwise truncate the URL as a fragment (404) — KANBAN-105
+            total_bytes += download_file(
+                HF_RAW_URL + urllib.parse.quote(pdf_path), dest)
         except Exception as exc:  # noqa: BLE001 - one bad download must not abort the run
             failed.append(f"{pdf_path}: {type(exc).__name__}: {exc}")
             continue

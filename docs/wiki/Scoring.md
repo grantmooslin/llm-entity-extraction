@@ -8,7 +8,7 @@ the run manifests, and `reports/experiment_log.jsonl` never disagree.
 ## 0. Where the scoring lives — the `llm-dojo-scoring` package
 
 The scoring definitions are **outsourced to the `llm-dojo-scoring` package**
-(KANBAN-044 / KANBAN-047, pinned `@v0.7.0` in `pyproject.toml` +
+(KANBAN-044 / KANBAN-047, pinned `@v0.10.0` in `pyproject.toml` +
 `requirements.txt`), the **single source shared with llm-mailroom**. The local
 `src/` modules are thin re-export shims so every import site (eval runners,
 reporting scripts, tests, and llm-mailroom's `pip install -e .` imports) keeps
@@ -52,7 +52,7 @@ llm_dojo_scoring.cli`).
 ### 0.1 The unified scoring layer & the score-emitter bridge (v0.19.0+)
 
 Since KANBAN-061 the package also owns this repo's metric **infrastructure**
-(pinned `@v0.5.1` at adoption, current pin `@v0.7.0`); calculations are
+(pinned `@v0.5.1` at adoption, current pin `@v0.10.0`); calculations are
 untouched — Hungarian matching, embedding rescue, bootstrap CI and CUAD
 equivalences all live upstream unchanged:
 
@@ -354,6 +354,19 @@ rows (`docclass_merged.jsonl`, 7-class `DOCCLASS_SCHEMA`).
 
 Per-row flags carried in the record: `doc_type_ok`, `subclass_ok`,
 `subclass_ok_equiv`, `failure_mode`, `input_mode`, `fallback_reason`.
+
+### Correspondence-only surface (`run_correspondence_eval.py`)
+
+KANBAN-103 adds a correspondence-only sibling on Hugging Face
+`Lucius-Morningstar/enron-correspondence-dedup` (agent-blind `default` joined
+to `ground_truth` on `filename`; rows with `expected != correspondence` are
+dropped). Predicted fields lock to the Hub GT assortment:
+`doc_type`↔`expected`, `doc_subclass`↔`expected_subclass`,
+`sentiment_label`/`sentiment_score`↔ same names. Default draw: 200
+subclass-stratified rows, seed 42. Extra trackers:
+`sentiment_label_accuracy`, `sentiment_score_ok` (band 0.25),
+`sentiment_score_mae`, `correspondence_exact`, per-sentiment tables,
+`sentiment_miss` failure mode.
 
 ## 8. Task-aware scoring dispatcher (`llm_dojo_scoring.tasks`)
 

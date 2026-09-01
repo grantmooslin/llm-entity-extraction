@@ -34,9 +34,11 @@ def classify_failure(doc_type_ok: bool, subclass_ok: bool,
 
     Returns ``None`` when the row is fully correct, ``"doc_type_miss"`` when
     the primary class was wrong, and ``"subclass_miss"`` when the primary
-    class was right but the second-level subclass was wrong.
+    class was right but the second-level subclass was wrong. Rows with no
+    subclass ground truth (``subclass_ok is None``) never receive a
+    ``subclass_miss`` failure mode.
     """
-    if doc_type_ok and subclass_ok:
+    if doc_type_ok and subclass_ok is not False:
         return None
     if not doc_type_ok:
         return "doc_type_miss"

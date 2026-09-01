@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.38">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -12,10 +12,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -39,14 +42,14 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-69d842fd5fdac13cf096465bd46c717d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-57434043a5e03403d8c661cda76ea56d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-69d842fd5fdac13cf096465bd46c717d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-054c96d0537fa70bc8f6b9b071341401.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-919dda0a379ac40e641359ec180ac24f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-054c96d0537fa70bc8f6b9b071341401.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -534,6 +537,141 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
+<td>KANBAN-102</td>
+<td>— (board-only)</td>
+<td><code>blocked</code></td>
+<td><strong>Pin consumers to <code>llm-dojo-scoring@v0.10.0</code></strong> — entity PR <a href="https://github.com/Exios66/llm-entity-extraction/pull/56">#56</a> ready (<code>v0.7.0</code>→<code>v0.10.0</code>); mailroom + The-Mailroom pins prepared locally + patches at <code>/opt/cursor/artifacts/*-pin-v0.10.0.patch</code>. <strong>Blocker:</strong> <code>CONSUMER_REPOS_GITHUB_TOKEN</code> unset — <code>cursor[bot]</code> 403 on push to sibling repos.</td>
+<td>cloud-agent 2026-08-27</td>
+<td>next release sweep</td>
+<td>entity <a href="https://github.com/Exios66/llm-entity-extraction/pull/56">#56</a>; patches apply-clean on main; waiting on token or manual <code>git am</code></td>
+</tr>
+<tr class="even">
+<td>KANBAN-101</td>
+<td><a href="https://github.com/Exios66/llm-entity-extraction/issues/53">#53</a></td>
+<td><code>in_review</code></td>
+<td><strong>Docclass pipeline parity bolster + stratified-120 A/B (entity + mailroom)</strong> — 54-key docclass registry (v1 specialists + sorter v7/vision v1); scoring parity (<code>classify_failure</code>, <code>emit_docclass_run_scores</code>); v5 export + <code>run_langfuse_docclass_specialist_eval.py</code> + pinned manifest <code>docclass_ab120_s42_filenames.jsonl</code>.</td>
+<td>cloud-agent 2026-08-26</td>
+<td>next release sweep</td>
+<td><strong>Parity shipped #54</strong> (<code>db10d6f</code>); <strong>A/B 2026-08-26</strong> (v5, n=120 sorter / 24 scored contracts / 24 insurance, seed 42): sorter v6→v7 exact 0.5833→0.6833 (+10pp), subclass 0.5917→0.6917, doc_type 0.9917 flat; contracts v0→v1 overall 0.6884→0.8444 (+15.6pp); insurance v0→v1 0.6957→0.6904 (flat). PR #55</td>
+</tr>
+<tr class="odd">
+<td>KANBAN-098</td>
+<td><a href="https://github.com/Exios66/llm-mailroom/issues/17">llm-mailroom #17</a></td>
+<td><code>done</code></td>
+<td><strong>Lane B: arbiter-approved re-extraction unreachable (composed-path trap)</strong> — self-discovered defect 2026-08-24 during KANBAN-095 notebook work; demonstrated live in <code>notebooks/03_review_lanes.ipynb</code>. The approving arbiter sets <code>arbiter_retry_count=1</code> (<code>arbiter_node</code>) while <code>after_retry_extraction_gated</code> demands <code>&lt; 1</code>, so approved re-extractions escalate to humans instead of firing <code>retry_extract</code>; the second judge pass never runs. Both halves unit-pinned green separately; composition dead-ends. Fix shape: increment only after the retry fires, or accept <code>&lt;= 1</code> (still bounding to one retry); composed approve→re-extract→re-judge test pin required. Scope: llm-mailroom graph code + tests.</td>
+<td>ox-alpha 2026-08-24</td>
+<td>next mailroom release sweep</td>
+<td>claimed 2026-08-24 at spawn (per §5(f), before KANBAN-095 closed); issue #17 filed with full evidence. <strong>FIXED &amp; CLOSED 2026-08-24</strong> — llm-mailroom <code>cac4256</code> (pushed <code>9b119a6..cac4256</code>): <code>after_arbiter</code> bound made approval-INCLUSIVE (<code>&lt; 1</code> → <code>&lt;= 1</code>) with full rationale in the docstring — the approving node’s approval-time increment is load-bearing (the retrying extract node reads the count to weave the fix-list into its prompt), so the first approval now dispatches; a SECOND arbitration demanding another retry still finds the budget spent and escalates; one-retry-per-document bound unchanged. Lane-B unit pin updated; NEW composed-path pins <code>src/tests/test_kanban098_arbiter_retry_path.py</code> (3 network-free tests on the REAL graph: approve → re-extract → re-judge → compile → archive, no <code>route-for-review</code> span; plus the second-demand escalation); notebook 03 narrative + stored outputs regenerated to demonstrate the FIXED path end-to-end; CHANGELOG [Unreleased] ### Fixed entry same commit; suite <strong>462 passed</strong> (459 prior + 3); <strong>#17 CLOSED</strong> with full-trail closing comment</td>
+</tr>
+<tr class="even">
+<td>KANBAN-097</td>
+<td><a href="https://github.com/Exios66/llm-entity-extraction/issues/51">#51</a></td>
+<td><code>in_progress</code></td>
+<td><strong>Docclass role-prompt mutation iteration testing + per-role eval tasks (agent bench suite)</strong> — human directive 2026-08-24: prompt mutation iteration testing across the KANBAN-090 docclass roster (7 specialists, sorter reviewer, judge trio, arbiter, boss, docclass sorter) PLUS proper eval tasks measuring scoring/performance/success. (1) RULE-4 REPAIR: absorbs the unclaimed uncommitted working-tree work found at session start — <code>insurance_claims_specialist_v0</code> + <code>InsuranceClaimsSpecialist</code>, <code>agents/pipeline_agents.py</code> role wrappers, <code>scripts/run_agent_bench.py</code> (edge/judge-mutation/conflicts), <code>scripts/gen_edge_cases.py</code> (273 deterministic adversarial items w/ machine-checkable expectations), <code>scripts/gt_workbench.py</code>, <code>data/gt/</code> (34+11+27 hand-GT rows, 400 insurance real-GT rows) — no card owned it; this card now does. (2) Every roster role gets an eval task: reviewer/sorter blind-classification scoring added to the bench; compact append-only records into <code>reports/experiment_log.jsonl</code>; <code>--dry-run</code> gate on money-spending modes; network-free test pins. (3) qwen3.7-flash baselines per role → failure-cluster diagnosis → surgical <code>.replace()</code> mutations (one lesson per version) → same-seed same-surface A/Bs with noise-floor honesty (GEPA discipline per the prompt-engineer protocol). Honest scope note: due_diligence/compliance/court_opinions specialists have NO local GT packets yet — their edge suites generate once GT lands (documented residue).</td>
+<td>ox-alpha 2026-08-24</td>
+<td>next release sweep</td>
+<td>claimed 2026-08-24 at session start — issue #51 created; foundation verification done pre-claim (kanban090 pins green, bench scripts import clean, GT shapes verified); baselines + mutation A/Bs to follow in this session</td>
+</tr>
+<tr class="odd">
+<td>KANBAN-099</td>
+<td>— (board-only)</td>
+<td><code>backlog</code></td>
+<td>**INCIDENT: canonical reports/experiment_log.jsonl TRUNCATED (204 -&gt; ~29 rows) sometime between KANBAN-094’s close (<code>6127d5f</code>, 2026-08-24 morning) and the ox-alpha session start (~17:00 same day) — discovered when build_site.py’s new orphan-pruner (KANBAN-094) tried to delete 162 tracked run files against the shrunken source; pruned tree RESTORED via git checkout before any commit. The JSONL is LOCAL-ONLY (gitignored since KANBAN-053), so git cannot restore it directly. RECONSTRUCTION PLAN (one documented backfill, the sanctioned exception): rebuild the missing rows from the TRACKED per-run site payloads docs/data/runs/{001..204}.json (+ mailroom mirror md for prose fields), preserve the 42 current rows incl.&nbsp;9 new agent_bench records, verify count=204+new, regenerate experiment_log.md + site data from THE reconstructed source, add a network-free pin asserting runs/*.json count == jsonl row count so silent truncation can never pass again. Root cause unknown (candidate: a prior session’s render/backfill accident); audit shell history/other agents’ logs if available.</td>
+<td>unclaimed</td>
+<td>next release sweep</td>
+<td>opened 2026-08-24 by ox-alpha at KANBAN-097 close-out</td>
+</tr>
+<tr class="even">
+<td>KANBAN-100</td>
+<td>— (board-only)</td>
+<td><code>backlog</code></td>
+<td><strong>Durability roster completion + judge trio surfaces + insurance v2 lesson (KANBAN-097 residue) — † numbered KANBAN-100 after colliding with the concurrently-claimed Lane-B card that took KANBAN-098 (mailroom #17); KANBAN-085 renumbering precedent</strong> — spawned BEFORE 097 closed per the no-orphaned-scope rule. (1) GT packets for due_diligence / compliance_filing / court_opinions / merger_agreement specialists so their edge suites can generate (framework ready; data missing — their bench modes exit ‘no suite’ today); (2) judge-mutation surfaces for the completeness + classification judges (correctness done); (3) <code>insurance_claims_specialist_v2</code> candidate lesson: claim_type guessing on partial views (residual true fabrications in v1 A/B); (4) scorer-band calibration: damages_description compositions of visible tokens (overlap &gt;=0.4) flagged as fabrication — decide whether summary fields warrant a looser evidence band; (5) sorter/reviewer edge suite spans only the 4 classes with local GT (merger_agreement absent).</td>
+<td>unclaimed</td>
+<td>next release sweep</td>
+<td>opened 2026-08-24 at KANBAN-097 close-out; renumbered 098-&gt;100 same day on collision</td>
+</tr>
+<tr class="odd">
+<td>KANBAN-093</td>
+<td><a href="https://github.com/Exios66/llm-entity-extraction/issues/49">#49</a></td>
+<td><code>done</code></td>
+<td><strong>The-Mailroom v0.2.0 official GitHub release + README collapsibles + UI/TUI screenshots</strong> — human directive 2026-08-24 (Discord): cut the official v0.2.0 release (changelog already declares <code>[0.2.0] - 2026-08-23</code>; accumulated <code>[Unreleased]</code> furnishing entries fold INTO that header per their tagging law — tag must match the changelog header exactly), annotated tag, push main+tags, <code>gh release create v0.2.0</code>, then mandated <code>wiki/sync-wiki.sh</code>. README gains <code>&lt;details&gt;</code> collapsibles around long operational blocks and a screenshots gallery. Screenshots = REAL pixels via their documented test seam (<code>create_app(source=LangfuseSource(client=FakeClient(...)))</code> + rich make_trace fixtures served by uvicorn; headless-Chrome captures of floor/metrics/review; genuine <code>mailroom-tui --once</code> pty frame) — no Langfuse creds exist on this machine so demo seeding is unavailable; fixture-seeded exactly like their test suite, never mockups. Images land in <code>docs/screenshots/</code>. Suite holds <strong>84 passed</strong> before the release commit.</td>
+<td>hermes 2026-08-24</td>
+<td>The-Mailroom v0.2.0</td>
+<td>shipped 2026-08-24 — <a href="https://github.com/Exios66/The-Mailroom/releases/tag/v0.2.0">v0.2.0 released</a>; tag <code>9949dbf</code> peels to <code>f451632</code> = main HEAD (ls-remote peel-verified); suite <strong>99 passed</strong> on merged tree (incl.&nbsp;sibling’s 15 new tests); screenshots <code>docs/screenshots/{floor,review,metrics,tui-console}.png</code> (real stack, FakeClient seam); <code>&lt;details&gt;</code> ×3 + release badge; CHANGELOG folded into <code>[0.2.0] - 2026-08-24</code>, sibling’s post-declaration work preserved under fresh <code>[Unreleased]</code>; issue #49 closed + <code>shipped</code>. Open scope: wiki init blocked — <code>.wiki.git</code> 404s until first page exists in web UI (no API path); one click then rerun sync-wiki.sh. Incident: parallel agent’s <code>checkout hotfix/review-queue-dispatch-key</code> yanked shared-clone HEAD mid-task; recovered collision-free via pure ref surgery (push-by-SHA), their branch untouched</td>
+</tr>
+<tr class="even">
+<td>KANBAN-095</td>
+<td><a href="https://github.com/Exios66/llm-mailroom/issues/15">llm-mailroom #15</a></td>
+<td><code>done</code></td>
+<td><strong>Formal notebook suite plan for llm-mailroom</strong> — human directive 2026-08-24 (Signal): draft the full, previously-never-formalized plan for the llm-mailroom notebooks — Jupyter notebooks illustrating the different functionalities and agent interactions/dynamics of the full pipeline, including one that runs an example pipeline run through the agents showing the outputs and the role of each agent, under the notebook subdirectory. Deliverable: <code>notebooks/PLAN.md</code> plan of record — suite roster (00 anatomy → 08 observability), one shared <code>pipeline_lab.py</code> bench driving the REAL graph through the test suite’s network-free mock seam (<code>FakeLangChainLLM</code> + mocked OpenAI client), honesty labels, KANBAN-078-style guards (hostile-cwd headless exec), incremental build order. Plan-only card; implementation is follow-on steps under the same issue.</td>
+<td>hermes 2026-08-24</td>
+<td>—</td>
+<td>claimed 2026-08-24 — issue #15 created + claim comment posted (5400443861); PLAN.md drafted from live recon (13-node graph, 15-agent taxonomy, conftest seam, DocumentState lanes). <strong>PLAN SHIPPED 2026-08-24</strong> — llm-mailroom <code>7cc14da</code> (notebooks/PLAN.md + README suite-plan section + CHANGELOG entry; suite <strong>410 passed</strong>, baseline held); board mirror this repo <code>9645ec0</code> (governance files only, KANBAN-094 lane untouched). Implementation proceeds notebook-by-notebook under #15 per the plan’s build order (bench → 01 → 00 → 02/03 → 04/05 → 06/07/08). <strong>IMPLEMENTATION SHIPPED 2026-08-24 — CARD CLOSED</strong> — llm-mailroom <code>9b119a6</code> (pushed <code>b39cc2d..9b119a6</code>): all nine notebooks 00–08 with stored headlessly-reproducible outputs on the REAL graph; bench gains sequence-scripting + genuine provider-shaped flaky seam + idempotent <code>LabSandbox.open()</code> (double-open env leak found &amp; fixed by the new guards); <code>src/tests/test_notebook_suite.py</code> enforces all four PLAN duties; README rescoped; CHANGELOG entry same commit; full suite <strong>459 passed</strong> (410 baseline + 49 guards); issue <strong>#15 CLOSED</strong> with full-trail closing comment. Discovered scope spawned BEFORE close per §5(f): <strong>KANBAN-098</strong> (<a href="https://github.com/Exios66/llm-mailroom/issues/17">llm-mailroom #17</a>) — Lane B composed-path trap demonstrated live in notebook 03</td>
+</tr>
+<tr class="odd">
+<td>KANBAN-094</td>
+<td>— (board-only)</td>
+<td><code>done</code></td>
+<td><strong>Single-source-of-truth repair: contracteval side-log merged into the canonical experiment log + derived-tree pruning (self-discovered defect 2026-08-24)</strong> — the Posit site pins (<code>test_rendered_pages_committed</code>, <code>test_quarto_render_is_deterministic_and_clean</code>) have been failing as ‘chronic baseline’ since the 2026-08-18 contracteval batch: 8 runs wrote per-run JSONs into <code>docs/data/runs/</code> but their log rows landed in an untracked side file <code>reports/experiment_log_contracteval.jsonl</code>, breaking the <code>reports/experiment_log.jsonl</code> ⇒ <code>build_site.py</code> ⇒ <code>docs/data/runs/{n:03d}.json</code> derivation chain (195 log rows vs 203 run files; deep-link count pin 203≠195). One more side row (<code>qwen3.7-flash_contracteval_v5</code>) never produced a run file at all (run aborted on key-limit exhaustion). Fix: merge all 9 side rows into the canonical append-only JSONL (hazard-sanitized, chronological), regenerate <code>experiment_log.md</code> + site data from THE single source, teach <code>build_site.py</code> to prune orphaned run files so the tree is always exactly <code>{001..N}</code>, add network-free pins for the single-log law. Side file removed after verified absorption; v5 stays honestly absent until its rerun.</td>
+<td>hermes (2026-08-24)</td>
+<td>—</td>
+<td>TRUTH COMMITTED 2026-08-24 — <code>6127d5f</code>: canonical JSONL 195→204 rows (side file deleted after absorption proof), experiment_log.md + site data + pre-render includes + rendered Posit pages regenerated from THE source ({001..204}, deep-links 204=204); build_site.py orphan-prune + –check file-drift detection; _pre-render.py re-execs into the repo venv when driven by bare python3; CHANGELOG [Unreleased] entry; NEW tests/test_kanban094_single_source_truth.py (5 network-free pins). SHIPPED 2026-08-24 — posit verification suite <strong>14 passed / exit 0</strong> (<code>test_rendered_pages_committed</code>, <code>test_quarto_render_is_deterministic_and_clean</code>, + 5 new pins all green): the chronic pair is closed at root, derived tree provably self-healing</td>
+</tr>
+<tr class="even">
+<td>KANBAN-096</td>
+<td><a href="https://github.com/Exios66/llm-entity-extraction/issues/50">#50</a></td>
+<td><code>done</code></td>
+<td><strong>Modal-hosted vLLM serving capability for llm-entity-extraction (cross-repo parity with mailroom KANBAN-064)</strong> — human directive 2026-08-24 (Discord): integrate + utilize Modal+vLLM across BOTH pipelines INCLUDING ALL CONFIG FILES + LOCAL INFRA. Mailroom side already ships complete (064 / v0.4.1: deploy/modal_vllm.py + [deploy] extra + runbook + 12 tests; this card verifies it under mailroom #16). Entity scope: <code>deploy/modal_vllm.py</code> sibling Modal app (same env-knob contract: MODEL/GPU/QUANTIZATION/MAX_MODEL_LEN/API_TOKEN/HF_TOKEN, persistent HF-cache volume); provider seam DOCUMENTED end-to-end through the existing env-overridable <code>OPENROUTER_BASE_URL</code> chokepoints (<code>agents/base_agent.py::llm()</code> LangChain eval path + <code>src/openrouter_utils.py</code> raw path incl.&nbsp;the vision classifier) — shared <code>VLLM_BASE_URL</code>/<code>VLLM_API_KEY</code> contract so ONE deployment backs BOTH repos; <code>[deploy]</code> extra + requirements/deploy.txt honoring the KANBAN-081 dependency-manifest law; config/environments/.env.example deploy blocks; <code>deploy/README.md</code> runbook (setup/deploy/smoke/flip/teardown/cost) + smoke script; network-free guard suite (stubbed-modal app load, pure argv builder, manifest parity, runtime-tree-stays-deploy-clean census, env-seam pins). Non-goals: switching any default serving path (OpenRouter stays primary), live GPU deploys from CI.</td>
+<td>hermes (2026-08-24)</td>
+<td>—</td>
+<td>issues #50 + mailroom #16; CHANGELOG [Unreleased] both repos. PROOF 2026-08-24: capability suite 21/21 network-free green (dotenv-regression pin included); entity suite 685 passed / 3 failed / 4 skipped — failures = documented kanban076 hub-sha chronic + PRE-EXISTING docclass drift (39b3d5a Aug-18 added <code>attorney_demand</code> to taxonomy without listing it in <code>sorter_docclass_v0</code>; zero files of this card touched); mailroom verify-only pass 12/12 + issue #16 CLOSED verified (<code>c31bfd5</code> pushed there); seam repaired to call-time resolution across base_agent/llm_chain/classifier</td>
+</tr>
+<tr class="odd">
+<td>KANBAN-092</td>
+<td><a href="https://github.com/Exios66/llm-entity-extraction/issues/48">#48</a></td>
+<td><code>done</code></td>
+<td><strong>Overhaul The-Mailroom root README</strong> — human directive 2026-08-24 (Discord): the visualizer’s README is bland (102 lines, zero badges, near-zero sister-repo references) despite the repo being a fully governed family member. Surfaces: The-Mailroom <code>README.md</code> overhaul (factual static badge row ONLY — no release/license/CI badges: no v0.2.0 tag/release exists remotely, repo has neither LICENSE nor workflows, per KANBAN-089 honesty precedent; governed-constellation family section with YOU-ARE-HERE marker covering llm-mailroom upstream / llm-entity-extraction prompt loop / llm-dojo-scoring engine / corpus feeds / atticus-investigation eval sibling / graph sites; new trace-contract &amp; schema-mirror-duty section deferring to AGENTS.md as authority; structure/dividers; ALL existing operational content kept), same-commit CHANGELOG <code>[Unreleased]</code> entry per their mandatory release law, <code>wiki/Home.md</code> family paragraph (mirror spirit; published by their release train). Docs-only; suite holds pre-edit baseline <strong>84 passed</strong> (captured on this machine via out-of-tree venv per their no-venv-in-repo rule).</td>
+<td>hermes 2026-08-24</td>
+<td>— (changelog-only, ships in Exios66/The-Mailroom)</td>
+<td>claimed 2026-08-24 — issue #48 created + claim comment posted (comment 5391489974); recon complete against cloned tree @ <code>4e53830</code>: house rules read in full, badge honesty gaps verified, suite baseline green. <strong>SHIPPED 2026-08-24</strong> (The-Mailroom <code>435bb04</code>, pushed <code>4e53830..435bb04</code>, closes #48): README rebuilt 102 → 177 lines — factual static badge row (<code>version 0.2.0</code> / <code>python 3.11+</code> / <code>data source: Langfuse only</code>; NO release/license/CI badges — none exist to honestly badge), “The governed constellation” section (YOU-ARE-HERE ASCII diagram + seven-repo at-a-glance table linking llm-mailroom’s canonical sister-repos map), new “The trace contract &amp; the mirror duty” section (same-window mirror rule + visible-by-design breakage map, AGENTS.md as authority), <code>[!IMPORTANT]</code> schema-cache restart alert, dividers, honest “No license published yet” close; every operational byte preserved (17 load-bearing strings verified present); wiki/Home.md constellation paragraph added (published by their release train per their law). Same-commit CHANGELOG <code>[Unreleased]</code> entry. Proof: fences balanced (10), single H1, tables clean, internal link to AGENTS.md resolves, suite <strong>84 passed</strong> before and after (0.34s) — docs-only, zero behavior change</td>
+</tr>
+<tr class="even">
+<td>KANBAN-091</td>
+<td><a href="https://github.com/Exios66/llm-entity-extraction/issues/47">#47</a></td>
+<td><code>done</code></td>
+<td><strong>Add The-Mailroom visualizer to the umbrella docs</strong> — human directive 2026-08-23 (Discord): <a href="https://github.com/Exios66/The-Mailroom">The-Mailroom</a> (pixel-art Langfuse-driven visual engine, v0.2.0) appears in ZERO umbrella surfaces despite being a fully governed family member (own AGENTS.md with schema-mirror sync duty back to llm-mailroom, own semver release train, own wiki). Surfaces: mailroom <code>docs/sister-repos.md</code> (constellation diagram + at-a-glance row + dedicated section), mailroom README umbrella row, mailroom wiki Home, entity <code>docs/sister-repos.md</code>, entity README prose, BOTH CHANGELOGs (one card / one issue / both changelogs, KANBAN-061 precedent). Docs-only; suites hold baselines.</td>
+<td>hermes 2026-08-23</td>
+<td>— (changelog-only)</td>
+<td>claimed 2026-08-23 — issue #47 created + claim comment posted; recon done against the cloned The-Mailroom tree. <strong>SHIPPED 2026-08-24</strong> (closes #47): entity <code>76567a5</code> + llm-mailroom <code>5cf8b60</code> — all six surfaces live: mailroom sister-repos (constellation diagram node, At-a-glance ‘Downstream visualizer’ row, dedicated ‘The-Mailroom — the visual engine’ section incl.&nbsp;the schema-mirror duty), mailroom README Umbrella row, mailroom wiki Home paragraph (pushed to the live wiki <code>d441b74</code>), entity sister-repos (diagram <code>visualizer:</code> line + downstream table row), entity README working-surfaces prose, both CHANGELOGs <code>[Unreleased]</code>. Docs-only; suites hold baselines (mailroom 405 passed; entity 654 passed / chronic-only failures).</td>
+</tr>
+<tr class="odd">
+<td>KANBAN-090</td>
+<td><a href="https://github.com/Exios66/llm-entity-extraction/issues/46">#46</a></td>
+<td><code>done</code></td>
+<td><strong>Dedicated docclass prompt variants for every classification-chain role</strong> — human directive 2026-08-23 (Discord): developed + deployed docclass prompts for all 7 specialists (contracts, corporate_records, due_diligence, correspondence, compliance, court_opinions, insurance_claims), the sorter reviewer, the judge trio (completeness/classification/correctness), the arbiter, the boss, and the docclass sorter — each under a SEPARATE prompt module in BOTH repos: entity <code>src/prompts_docclass.py</code> (re-exporting the existing sorter_docclass v0–v6 family byte-identical + derived specialist/boss/judge variants off real bases) and mailroom <code>src/langchain_agents/prompts_docclass.py</code> (mirrored from local bases); wired for deployment through the Langfuse sync seam under distinct <code>mailroom-*-docclass</code> names; runtime defaults unchanged (additive-only doctrine).</td>
+<td>hermes 2026-08-23</td>
+<td>— (changelog-only)</td>
+<td>issue #46 created + claim comment posted 2026-08-23; card claimed same-session per Phase 0/1. <strong>SHIPPED 2026-08-23</strong> (closes #46): entity <code>3df3747</code> — <code>src/prompts_docclass.py</code> with 21-key <code>DOCCLASS_PROMPT_VERSIONS</code> (8 sorter-docclass re-exports byte-identical + 10 single-anchor <code>.replace()</code> derivatives of real base constants + 3 authored-fresh V0s: reviewer / arbiter / insurance_claims, provenance-commented), merged into <code>PROMPT_VERSIONS</code> at the prompts_archive-style tail (versions <strong>103 → 116</strong>, zero collisions asserted at import); mailroom <code>79b0126</code> — <code>src/langchain_agents/prompts_docclass.py</code>, <strong>13 variants, every one a PURE APPEND</strong> (<code>variant.startswith(base)</code> in full) of mailroom’s own production bases incl.&nbsp;house reviewer/arbiter/insurance constants; deployment seam: entity registration-IS-deployment via the eval Langfuse sync (all 21 keys mirrored like every family), mailroom OPT-IN ONLY — new <code>scripts/sync_prompts.py --docclass</code> pushes namespaced <code>mailroom-docclass-&lt;key&gt;</code> prompts, the thirteen agent-pinned production templates provably untouched (count pin held, negative assertions on every template). Shared DOCCLASS ARM CONTEXT block byte-compatible across repos (extended 8-class set incl.&nbsp;insurance_claim+merger_agreement; doc_subclass dims: CUAD contract subtypes / merger consideration types / title-derived record types); per-role rules: routing label = state not ground truth, claim-documentation + M&amp;A leakage read-through, judge trio subclass-specific support requirements + cross-family leakage checks, classification judge grades the extended set with family discriminators, boss routes classification-fault conflicts to human review. Runtime defaults unchanged both sides (opt-in by key only). Guards: entity 6 network-free tests (<code>tests/test_kanban090_docclass_prompts.py</code>), mailroom 4 (<code>src/tests/test_kanban090_docclass_prompts.py</code>). Proof: targeted prompt suites green (entity 70 = 64 existing + 6 new; mailroom 9 = 5 existing + 4 new); FULL suites: mailroom <strong>405 passed</strong> (20.5s, zero regressions vs 401 baseline), entity <strong>654 passed / 2 failed / 4 skipped</strong> with the 2 failures proven pre-existing by stash-to-clean-HEAD replay (the documented chronic derived-site posit pair) and kanban076 hub-sha deselected (needs live localhost:6006). CHANGELOG <code>[Unreleased]</code> entries in the same commits.</td>
+</tr>
+<tr class="even">
+<td>KANBAN-089</td>
+<td><a href="https://github.com/Exios66/llm-entity-extraction/issues/45">#45</a></td>
+<td><code>done</code></td>
+<td><strong>llm-mailroom root README polish retrofit</strong> — human directive 2026-08-23 (Discord): aesthetic/enhancement pass tying the README together cleanly on top of the shipped KANBAN-082 docile skeleton — <code>&lt;details&gt;</code> toggle sections for long operational blocks, an at-a-glance facts table under the badge row, GitHub alert callouts for genuinely important operational warnings, honest badge cleanup (no license/CI badges — repo has neither), visual-rhythm/divider pass. Docs-only; zero behavior change; suite must hold the 401-passed baseline. Every number re-derived from the tree before writing.</td>
+<td>hermes 2026-08-23</td>
+<td>— (changelog-only)</td>
+<td>claimed 2026-08-23 — issue #45 created + claim comment posted (comment 5390723579); work ships in llm-mailroom per cross-repo convention. <strong>SHIPPED 2026-08-23</strong> (mailroom <code>f9da346</code>): at-a-glance facts table under the badge row; green release badge <code>v0.4.1</code> (pyproject+tag matched); GitHub alert callouts <code>[!NOTE]</code> (zero-DB quick-start) + <code>[!IMPORTANT]</code> (taxonomy-cache restart gotcha); three <code>&lt;details&gt;</code> toggles (config cookbook, Ollama shortlist, deployment runbook); dividers between the four major parts. Honesty rules held: NO license/CI badges (repo has neither), license row states “not yet published”. Pre-push proof: fences balanced (38), all 33 internal anchors resolve under GitHub slug math, summaries single-line closed, at-a-glance table 2 cells/row, suite <strong>401 passed</strong> (20.2s) — docs-only, zero behavior change; CHANGELOG <code>[Unreleased]</code> entry in the same commit</td>
+</tr>
+<tr class="odd">
+<td>KANBAN-088</td>
+<td><a href="https://github.com/Exios66/llm-entity-extraction/issues/44">#44</a></td>
+<td><code>done</code></td>
+<td><strong>Family-wide JSONL line-boundary hazard guard — sweep remaining ensure_ascii=False writers</strong> (carve-out from KANBAN-087 residue): Hub-bound/line-oriented writers (enron publishers, legalbench pack/streamers, docclass builders merged/v5/pilot) adopt <code>export_bt_to_hf.sanitize_line_boundary_chars</code>; purely-local intermediates get documented exemptions; pins extended network-free. Published artifacts verified hazard-free in the 2026-08-24 staging census — prevention, not incident response.</td>
+<td>hermes 2026-08-24</td>
+<td>— (changelog-only)</td>
+<td>issue #44 created + claim comment posted 2026-08-24; queued behind in-flight family work. <strong>SHIPPED 2026-08-24</strong> (closes #44, entity <code>95d8bf0</code>): census 15 sites / 11 files; canonical <code>scripts/datasets/_jsonl_safety.py</code> (verbatim extraction from the exporter) + <code>safe_jsonl_line</code>; exporter delegates via object-identical re-exports (kanban087 pins hold unchanged); 9 row-writer sites across 7 files adopted (backfill_extraction_kpis, build_docclass_merged, build_legalbench_full_pack ×2, publish_enron_correspondence(+dedup), stream_legalbench_tasks_to_bt ×2, build_docclass_v5); 5 sites exempted with justification markers (3 field-value dumps, 2 CSV-cell flattens, braintrust_utils hash input); guards <code>tests/test_kanban088_jsonl_safety_sweep.py</code> (5 network-free incl.&nbsp;repo-wide no-unmarked-hazard-sites scan). Suite <strong>668 passed</strong> (663 + 5), failures byte-matching documented baseline.</td>
+</tr>
+<tr class="even">
 <td>KANBAN-084</td>
 <td><a href="https://github.com/Exios66/llm-entity-extraction/issues/43">#43</a></td>
 <td><code>done</code></td>
@@ -542,7 +680,7 @@ ul.task-list li input[type="checkbox"] {
 <td>— (changelog-only)</td>
 <td>claimed 2026-08-23 — issue #43 created + claim comment posted; recon: parent = 810 GT rows / 4 doc_types / 46 subclass strata (stratum sizes 1–57); honest gap declared (parent holds 4 of mailroom’s 7 classes — coverage = all types/subtypes present in source); plan: deterministic stratified draw, parent split preservation, two-config blind/GT publish per KANBAN-079 doctrine. <strong>SHIPPED 2026-08-23</strong> (closes #43): <a href="https://huggingface.co/datasets/Lucius-Morningstar/docclass-pilot">docclass-pilot</a> live — 138 rows / 48 strata (quota=3), blind+GT configs, deterministic sha256-within-stratum draw, datasets-server green; parent evolved to <strong>schema v5</strong> (1,210 rows, +400 insurance_claim w/ InsuranceClaimExtraction GT contract; clause-level answer keys ground_truth-only: CUAD 509/509 contracts with 13,753/13,753 spans verified at exact char offsets, MAUD 152/152 mergers; subclass canon 28→26 contract subclasses killing the Affiliate/Endorsement duplicate-bucket skew, distinct buckets pinned unmerged); 10 network-free pins (<code>test_kanban084_pilot_sample.py</code>), suite 613 passed with residuals proven pre-existing on a pristine detached-HEAD worktree baseline; scope addenda (claims class + masterlabels-derived clause GT + subclass normalization) directed by Jack in-band same-day and folded into this card.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>KANBAN-083</td>
 <td><a href="https://github.com/Exios66/llm-entity-extraction/issues/41">#41</a></td>
 <td><code>done</code></td>
@@ -551,16 +689,16 @@ ul.task-list li input[type="checkbox"] {
 <td>changelog-only</td>
 <td><strong>SHIPPED 2026-08-23</strong> (<code>49a66c4</code>, closes #41): root dirs <strong>13 -&gt; 10</strong> — <code>board/</code>+<code>discussion/</code> -&gt; <code>governance/</code>, <code>wiki/</code> -&gt; <code>docs/wiki/</code> (matches mailroom’s convention), <code>site/</code> -&gt; <code>docs/posit-src/</code>. Unmoved by design: <code>reports/</code>, <code>data/</code>, package dirs (25–49 live refs each). Lockstep census-driven updates: <code>_quarto.yml</code> output-dir deepened (<code>../../docs/posit</code>), <code>_pre-render.py</code> ROOT depth + governance reads, <code>build_site.py</code>, <code>render_message_board_qmd.py</code>, <code>test_posit_site.py</code> (SITE_DIR, div-balance read, git pathspec, yml-contract re-pin), README layout block (+ stale root-memos row from 080 removed), docs/README, wiki mirror pages, <code>.gitignore</code> rules. Portal render PROVEN from new home; wiki synced via <code>docs/wiki/sync-wiki.sh</code> (123efda). Baseline discipline: pristine-HEAD worktree baseline 617p/9f captured first; shipped tree 633p effective / 2f — both survivors are the documented chronic classes (explorer deep-link drift 195-vs-203, kanban076 hub-sha data check); ZERO move-caused failures. <strong>Residue RESOLVED same-day:</strong> AGENTS.md path-doctrine rows (9 lines) APPROVED by Jack in-band and landed post-consent; sibling’s live .qmd insert mid-write caused a tag-splice, repaired line-level with assertions before commit.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>KANBAN-087</td>
 <td>— (board-only)</td>
-<td><code>in_progress</code></td>
-<td><strong>Hub dataset broken: mailroom-cuad-contracts-full DatasetGenerationError (human report 2026-08-23)</strong> — <code>ujson_loads</code> ‘Expected object or value’ during Hub parquet conversion. Root cause found by download forensics: the JSONL is structurally valid (510/510 lines) but ONE record (line 73) carries 16 literal U+2028 LINE SEPARATOR chars inside <code>.input.doc_text</code> (CUAD master-clauses PDF-extraction artifact); the Hub worker’s <code>batch.splitlines()</code> treats U+2028 as a record boundary INSIDE the row, shredding it into invalid fragments. Writer hole: <code>export_bt_to_hf.py:272</code> dumps with <code>ensure_ascii=False</code>, letting the raw char through. Plan: local <code>load_dataset</code> reproduction (receipt), sanitizer in exporter, sanitized republish + manifest regen, green re-verification.</td>
+<td><code>done</code></td>
+<td><strong>Hub dataset broken: mailroom-cuad-contracts-full DatasetGenerationError (human report 2026-08-23)</strong> — ROOT CAUSE: JSONL was structurally valid (510/510 parse) but ONE record (line 73) carried 16 literal U+2028 LINE SEPARATOR chars inside <code>.input.doc_text</code>; Hub worker parses batches via str.splitlines() which treats U+2028 as a record break INSIDE the row and shreds it into invalid fragments (<code>ujson_loads ValueError</code>), while local datasets 5.x splits BYTES and loads happily — version-dependent landmine. SHIPPED: exporter guard <code>sanitize_line_boundary_chars()</code> (U+2028/U+2029/NEL escaped losslessly at write time); staging sha-matched Hub bytes (<code>cac0c845…</code>), sanitized with the exporter’s own function, per-row semantic round-trip asserted (0 mismatches), worker-shape A/B proven (526 shredded pieces → 510 intact); republished under canonical names overwriting broken blobs (after evicting misnamed <code>_repaired</code> duplicates from the first upload attempt); verified tree census=4 files, fresh-download round-trip sha=<code>c8beefd6…</code>, manifest consistent, datasets-server <code>pending: [] / failed: []</code>; 6 network-free pins in <code>tests/test_kanban087_jsonl_hazards.py</code>.</td>
 <td>hermes 2026-08-23</td>
 <td>— (changelog-only)</td>
-<td>work in flight</td>
+<td>FIXED + republished clean 2026-08-24; commit lands exporter guard + pins + CHANGELOG <code>[Unreleased]</code> bullet; honest residue: 12+ sibling <code>ensure_ascii=False</code> writers in scripts/datasets lack the same guard — carve-out for a future sweep card if the family grows another Hub-bound writer</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>KANBAN-086</td>
 <td>— (board-only)</td>
 <td><code>done</code></td>
@@ -569,16 +707,16 @@ ul.task-list li input[type="checkbox"] {
 <td>— (changelog-only)</td>
 <td>SHIPPED same-day: commit lands tests/test_posit_site.py + CHANGELOG <code>[Unreleased]</code> entry (same-commit rule); board-only card per §8 (small/single-session/test-only).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>KANBAN-085</td>
 <td><a href="https://github.com/Exios66/llm-entity-extraction/issues/42">#42</a></td>
-<td><code>backlog</code></td>
+<td><code>done</code></td>
 <td><strong>validate_pipeline.py FIXTURE_EXPECTATIONS keys never match — intrinsic fixture expectations silently dead (carve-out from KANBAN-082)</strong> — <code>rel = path.relative_to(REPO_ROOT)</code> compares against repo-root-relative paths but keys say <code>tests/fixtures/…</code> / <code>examples/sources/…</code> while reality is <code>src/tests/fixtures/…</code> / <code>docs/examples/sources/…</code>, so every standalone fixture’s intrinsic (doc_class, subtype) expectation silently skips. Fix: correct key prefixes, add network-free regression test asserting every key resolves/matches ≥1 file, run validate_pipeline.py end-to-end to confirm expectations engage. Functional code — carved out of the docs-only KANBAN-082 ship. Numbering note: opened as KANBAN-083, renumbered twice after colliding with concurrently-shipped cards (#41 → KANBAN-083, #43 → KANBAN-084).</td>
-<td>unassigned</td>
+<td>hermes 2026-08-24</td>
 <td>next release sweep</td>
-<td>—</td>
+<td>claimed 2026-08-24 by hermes per human sweep directive (issue comment 5391361131). <strong>SHIPPED 2026-08-24</strong> (closes #42): llm-mailroom <code>1401f95</code> — all 14 FIXTURE_EXPECTATIONS keys corrected to repo-root-relative truth (<code>src/tests/fixtures/…</code>, <code>docs/examples/sources/…</code>); NEW 5-guard network-free regression suite <code>src/tests/test_kanban085_fixture_expectations.py</code> (no stale prefixes / literal keys on disk / globs match ≥1 fixture / matcher provably engages per entry / registry pinned at 14); e2e proof <code>validate_pipeline.py --fixtures --sources</code>: expectations engage, per-class accuracy populated across all 7 classes, 21/22 matched-expected. Honest residue flagged: evidence-based mock classifies <code>insurance_claim/sample_claim.txt</code> as contract/other (0/1) — mock-evidence limitation, invisible while the map was dead, documented in CHANGELOG + issue. Suite 410 passed (405 + 5).</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>KANBAN-082</td>
 <td><a href="https://github.com/Exios66/llm-entity-extraction/issues/40">#40</a></td>
 <td><code>done</code></td>
@@ -587,7 +725,7 @@ ul.task-list li input[type="checkbox"] {
 <td>— (changelog-only)</td>
 <td><strong>SHIPPED 2026-08-23</strong> — llm-mailroom commit <a href="https://github.com/Exios66/llm-mailroom/commit/5030d7d"><code>5030d7d</code></a> pushed (5 files, +169/−65): README rebuilt docile-style — pixel-art banner <code>docs/assets/banner.png</code> (owl-mailroom masthead; gibberish AI-label text erased via scripted pixel surgery + vision QA rounds), badge row, repo-consists-of list, grouped TOC, NEW agent-organization mermaid map (15 agents / 7 doc classes read fresh from <code>taxonomy.yaml</code>; old diagram’s “6 specialists” corrected); API truth-fixed (phantom <code>POST /ops/pause</code> removed, real <code>GET /queue</code> documented, bearer-token guard stated per-route) with the same fixes + corrected “no auth” claim in <code>src/api/README.md</code>; Quick Start fixture path corrected to <code>src/tests/fixtures/...</code>; <code>README.md#installing</code> anchor added (repairs 4 vendored openrouter-* skill links); umbrella table linking the repo constellation (sourced from <code>docs/sister-repos.md</code>). docmd (<span class="citation" data-cites="docmd/core">@docmd/core</span> v0.9.4, Node ≥20) integrated as zero-config local docs renderer: <code>npx @docmd/core dev/build</code> documented in README §Browsing the Docs Locally, <code>site/</code> gitignored, local build proof <strong>27 pages in ~4s</strong> (sidebar nav, offline search, llms.txt). Suite: <strong>401 passed</strong> = shipped KANBAN-078 baseline byte-identical (docs-only change; PYTHONPATH-scrubbed run). Integrity gates green: all 26 TOC anchors resolve, all 12 relative link/image targets exist, mermaid/fence balance, repo-wide stale-ref sweep clean (frozen audit-report prose left as history). Mailroom CHANGELOG <code>[Unreleased]</code> entry in same commit. Honest residue carved out as <strong>KANBAN-085</strong>/<a href="https://github.com/Exios66/llm-entity-extraction/issues/42">#42</a>: <code>validate_pipeline.py</code> FIXTURE_EXPECTATIONS keys never match — intrinsic fixture expectations silently dead. Issue #40 closed manually post-archive (cross-repo closes-#N no-op).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>KANBAN-081</td>
 <td><a href="https://github.com/Exios66/llm-entity-extraction/issues/39">#39</a></td>
 <td><code>done</code></td>
@@ -596,7 +734,7 @@ ul.task-list li input[type="checkbox"] {
 <td>— (changelog-only)</td>
 <td><strong>SHIPPED 2026-08-23:</strong> core floor frozen at exactly 8 packages (pyproject <code>dependencies</code> ≡ root <code>requirements.txt</code>, parity-tested); extras <code>[tracing] [evals] [datasets] [reporting] [embeddings] [dev] [all]</code> + legacy <code>[pdf]</code> alias mirror <code>requirements/&lt;batch&gt;.txt</code> 1:1. Defects fixed: tracing stack was MISSING from pyproject entirely (bare <code>pip install -e .</code> could not import the default sink <code>src/tracing.py</code>); <code>openpyxl</code> + <code>huggingface_hub</code> were imported-but-undeclared; <code>pandas</code>/<code>pyarrow</code> dead pins removed (AST census: zero imports, no notebooks exist). Guard: NEW <code>tests/test_dependency_manifests.py</code> — 6 network-free pins incl.&nbsp;live AST census of agents/+src/ against a module→batch owner map (batch modules may use core ∪ their batch only). <strong>Proof-before-push:</strong> fresh venv (python3.13 / pip 26.1.2) core-only install from clean tree copy → <code>src.prompts</code> (103 prompt versions) + <code>agents.sorter_agent</code> import GREEN with phoenix/langfuse/opentelemetry/braintrust/huggingface-hub/sentence-transformers VERIFIABLY ABSENT; <code>-e ".[tracing]"</code> add-on → <code>src.tracing</code> imports and initializes the live Phoenix tracer. Suite delta vs pristine-HEAD worktree baseline: 611→627 passed (+6 new pins; FAILED set byte-identical: 7 chronic posit renders + kanban076 hub-sha check). <strong>Honest residue:</strong> <code>matplotlib</code>/<code>openpyxl</code> still reach core installs transitively — llm-dojo-scoring v0.7.0 declares them in its own <code>install_requires</code> (upstream dojo slim-down owed); AGENTS.md quickstart dep lines approved-and-landed same day (in-band Jack approval).</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>KANBAN-080</td>
 <td><a href="https://github.com/Exios66/llm-entity-extraction/issues/38">#38</a></td>
 <td><code>done</code></td>
@@ -605,7 +743,7 @@ ul.task-list li input[type="checkbox"] {
 <td>changelog-only</td>
 <td>SHIPPED 2026-08-23 — entity-extraction commit <a href="https://github.com/Exios66/llm-entity-extraction/commit/1ac476c"><code>1ac476c</code></a> pushed (38 files): fresh-install archive proof GREEN on pushed tag <code>v0.20.0</code> (<code>langchain-core</code> 1.6.0 live on default PyPI — the train’s floor failure was a stale index view; <code>src.prompts</code> imports clean from the archived tree, 103 prompt versions); root de-clutter shipped with all live references updated in lockstep — SCORING.md→docs/SCORING.md, deploy_phoenix.sh→scripts/deploy/, root memos/ merged into docs/memos/ (<strong>site memos tab now serves all 34 memos incl.&nbsp;v34–v39, was silently 22</strong>), tracked .bak cruft removed, legacy root board symlinks deleted; frozen history untouched. Graphify built code-only (3,402 nodes / 7,252 edges / 151 communities, graphify 0.9.48) and published at <a href="https://exios66.github.io/llm-entity-extraction-graph/">llm-entity-extraction-graph</a> (verified HTTP 200 on / and /report.html); NEW <code>docs/sister-repos.md</code> umbrella map; links wired README/wiki Home/wiki _Sidebar + mailroom reciprocal commit <a href="https://github.com/Exios66/llm-mailroom/commit/b1ef37a"><code>b1ef37a</code></a>. Derived artifacts regenerated (meta.json scoring_md, memos.json 22→34, benchmarks refreshed live 1,438 rows, posit pages re-rendered). Targeted suite (test_posit_site + test_graphify_skill): <strong>12 passed</strong>, failures byte-identical to the documented chronic pair (test_rendered_pages_committed, test_quarto_render_is_deterministic_and_clean — pre-existing derived-site classes). Issue <a href="https://github.com/Exios66/llm-entity-extraction/issues/38">#38</a> auto-closed COMPLETED via <code>closes #38</code>. <strong>Same-day follow-up: all 5 AGENTS.md path-doctrine lines APPROVED by Jack and landed</strong> (file-map row, scoring pointer, checklist cite, memo cite, memos-section header) — zero stale <code>memos/</code>/<code>SCORING.md</code> refs remain in agent doctrine.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>KANBAN-079</td>
 <td><a href="https://github.com/Exios66/llm-entity-extraction/issues/37">#37</a></td>
 <td><code>done</code></td>
@@ -614,7 +752,7 @@ ul.task-list li input[type="checkbox"] {
 <td>v0.20.1</td>
 <td>SHIPPED 2026-08-23 — entity-extraction commit <a href="https://github.com/Exios66/llm-entity-extraction/commit/bd8b2c7"><code>bd8b2c7</code></a> pushed: publisher v2 rewrite (enrichment stage importing Enron-Evaluation-Environment labelers <code>content_topics.py</code> + <code>sentiment_scorer.py</code> @ <a href="https://github.com/Exios66/Enron-Evaluation-Environment/commit/c3bb908"><code>c3bb908</code></a>, never forked; two card-declared configs; legacy monolithic jsonl DELETED from the Hub root; per-file sha verify LFS ≥10MB + round-trip below); determinism proven (two independent builds byte-identical across ALL FOUR data files); Hub <a href="https://huggingface.co/datasets/Lucius-Morningstar/enron-correspondence-dedup"><code>Lucius-Morningstar/enron-correspondence-dedup</code></a> republished 247,523 rows / 222,572+24,951 per config — all four files sha-verified GREEN; datasets-server conversion GREEN (4 splits, pending 0 / failed 0) and first-rows proof: <code>default/train</code> exposes ZERO GT keys, <code>ground_truth/train</code> serves all nine, both lead <code>allen-p/_sent_mail/1.</code> (join integrity live); distributions: topics general_business 74.2% / energy_market 8.7% / …all 11 keys populated, sentiment 167,964 neutral / 51,668 positive / 27,891 negative; honest gaps on card+manifest (lexicon sentiment = weak labels, single-topic ~2000-char head window, exact-hash dedup only); pins 3 deliberate re-pins + 10 new <code>test_kanban079_gt_separation.py</code>; suite <strong>621 passed</strong> (+19 vs pristine HEAD 602), failure set byte-identical (8 chronic posit renders)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>KANBAN-078</td>
 <td>— (board-only)</td>
 <td><code>done</code></td>
@@ -623,7 +761,7 @@ ul.task-list li input[type="checkbox"] {
 <td>— (changelog-only)</td>
 <td>SHIPPED 2026-08-23 — mailroom commit <a href="https://github.com/Exios66/llm-mailroom"><code>c9ea57a</code></a> pushed: <code>notebooks/dataset_browser.ipynb</code> (thin, Docile-pattern) + reusable <code>notebooks/dataset_browser.py</code> + folder README; ground truth = <code>docs/examples/samples/manifest.csv</code> (30 rows, provenance rule CUAD|external = REAL), observed layer = read-only catalog join (<code>data/mailroom.db</code>, URI mode=ro; missing/schema-less degrade to empty); ipywidgets picker behind new <code>[notebooks]</code> extra, plain-text fallback on core install; kernel-cwd-proof bootstrap; pdfplumber first-page preview (verified live: contract_01 → 2,527 raw chars embedded); HTML escaping pinned; 10 network-free pins <code>src/tests/test_dataset_browser.py</code>; full suite <strong>401 passed</strong> (391 baseline + 10). Notebook executed cell-by-cell headlessly incl.&nbsp;hostile-cwd run from <code>notebooks/</code> itself</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>KANBAN-077</td>
 <td><a href="https://github.com/Exios66/llm-entity-extraction/issues/36">#36</a></td>
 <td><code>done</code></td>
@@ -632,7 +770,7 @@ ul.task-list li input[type="checkbox"] {
 <td>— (changelog-only)</td>
 <td>SHIPPED 2026-08-23 — mailroom <code>b7d2f79</code> (15 files, +307/−52): architecture.md 13 nodes + real edge map from routing.py + MemorySaver-default checkpointer truth; agents.md §8 Insurance Claims Specialist (schema table + honest gap) + vendored-prompt lineage corrected (<code>sorter</code> alias→V13); configuration.md +MAILROOM_CHECKPOINTER/MAILROOM_JUDGE_VERIFY/VLLM_API_KEY; testing.md+README node-count fixes; sister-repos umbrella map (entity-extraction, dojo-scoring <span class="citation" data-cites="v0.7.0">@v0.7.0</span>, Enron-Eval-Env, claims-data-eda, atticus-investigation, llm-mailroom-graph). Wiki push <code>92341ef</code>: 13 pages (+1801/−522), sync script now refreshes all 7 mirrors from canonical docs at sync time. Verified: suite <strong>391 passed</strong> (= documented baseline, docs-only), wiki pages all HTTP 200, Agents page renders Insurance Claims Specialist + SORTER_PROMPT_V13 + claims-data-eda. AGENTS.md staleness cured under the protection gate with user approval. Changelog <code>[Unreleased]</code> entry in ship commit; closes <a href="https://github.com/Exios66/llm-entity-extraction/issues/36">#36</a></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>KANBAN-076</td>
 <td>— (board-only)</td>
 <td><code>done</code></td>
@@ -641,7 +779,7 @@ ul.task-list li input[type="checkbox"] {
 <td>— (changelog-only)</td>
 <td>SHIPPED 2026-08-23 — final datasets-server verification <strong>ALL THREE GREEN</strong>: <a href="https://huggingface.co/datasets/Lucius-Morningstar/enron-correspondence">enron-correspondence</a> 3 parquet files / <strong>517,390 rows</strong> / 8 typed features; <a href="https://huggingface.co/datasets/Lucius-Morningstar/enron-correspondence-dedup">enron-correspondence-dedup</a> 2 / <strong>247,523</strong> / 8 (hub LFS sha == local <code>e2f7241f…</code>-built artifact); <a href="https://huggingface.co/datasets/Lucius-Morningstar/docclass-merged">docclass-merged</a> 1 / <strong>700</strong> / 7 after rounds 3–4 (<code>normalize_metadata_rows()</code>: uniform key union, EVERY value a plain string — nested dicts AND lists as sorted-key JSON strings; fingerprint unchanged <code>cd652e77…</code>; final blob <code>af0a5324bb65…</code> local==hub). Canary repos deleted post-verdict. 15 network-free pins in <code>tests/test_kanban076_hf_sync_finish.py</code>. Changelog <code>[Unreleased]</code> entry in ship commit</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>KANBAN-075</td>
 <td><a href="https://github.com/Exios66/llm-entity-extraction/issues/35">#35</a></td>
 <td><code>done</code></td>
@@ -650,7 +788,7 @@ ul.task-list li input[type="checkbox"] {
 <td>— (changelog-only)</td>
 <td>SHIPPED 2026-08-22 — AGENTS.md guidelines section + sidecar + 9 pins; suite <strong>597✓ / 7 documented posit fails unchanged / 4 skip</strong> (= documented 588 baseline + exactly the 9 new pins); changelog <code>[Unreleased]</code> entry in ship commit; closes #35</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>KANBAN-070</td>
 <td>— (board-only)</td>
 <td><code>blocked</code></td>
@@ -659,7 +797,7 @@ ul.task-list li input[type="checkbox"] {
 <td>— (changelog-only)</td>
 <td>BLOCKED 2026-08-22: BT write path dead — org plan quota <code>num_log_bytes_calendar_months</code> violated on every logging batch (dataset insert reported “152 inserted, 0 failed” but live catalog shows <strong>0 rows</strong> — the write rolled back when telemetry quota killed the session; verified via read-only BTQL 2026-08-22). MAUD 152-row local dump survives at <code>data/maud/contracts.jsonl</code>. Unblock: BT plan upgrade OR skip-BT entirely — superseded by KANBAN-071 which publishes these corpora direct-to-HF from upstream sources</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>KANBAN-069</td>
 <td><a href="https://github.com/Exios66/llm-entity-extraction/issues/34">#34</a></td>
 <td><code>done</code></td>
@@ -667,6 +805,15 @@ ul.task-list li input[type="checkbox"] {
 <td>hermes 2026-08-21</td>
 <td>— (changelog-only)</td>
 <td>issue #34; SHIPPED 2026-08-22 — 3 repos live + verified: <a href="https://huggingface.co/datasets/Lucius-Morningstar/mailroom-cuad-contracts">mailroom-cuad-contracts</a> (50 rows + 546 page PNGs, 596 row→image refs resolve), <a href="https://huggingface.co/datasets/Lucius-Morningstar/mailroom-cuad-contracts-full">mailroom-cuad-contracts-full</a> (510 rows, LFS sha256 byte-identical), <a href="https://huggingface.co/datasets/Lucius-Morningstar/mailroom-lb-hearsay">mailroom-lb-hearsay</a> (5 rows); tooling <code>scripts/datasets/export_bt_to_hf.py</code> (read-only BTQL export) + <code>publish_hf_mirror.py</code> (cards+upload+sha verify); honest gaps in <code>EXPORT_SUMMARY.json</code> (MAUD/S-1 exist-but-empty upstream, LB-classification names never created — populate upstream, re-run pair); suite <strong>571✓</strong> (+8 network-free pins <code>tests/test_kanban069_hf_mirror.py</code>), failure set = documented 7 posit renders unchanged. Carve-out: populating the empty upstream datasets is follow-on work for their streamer owners, not this card</td>
+</tr>
+<tr class="odd">
+<td>KANBAN-068</td>
+<td><a href="https://github.com/Exios66/llm-entity-extraction/issues/33">#33</a></td>
+<td><code>in_progress</code></td>
+<td><strong>Dedicated Jupyter notebooks per scoring process</strong> (carve-out of KANBAN-067, human directive): six fully functional notebooks showcasing every feature of each scoring process end-to-end.</td>
+<td>hermes 2026-08-24</td>
+<td>— (changelog-only)</td>
+<td><strong>EXEMPLAR SHIPPED 2026-08-24</strong> per human sweep directive (entity <code>8bf6e49</code>): <code>notebooks/03_doc_type_bundles.ipynb</code> (doc-type bundles = the v0.7.0 headline process) — DOC_TYPE_BUNDLES walkthrough + get_doc_bundle honesty-resolver tour + closing honest-gap table derived from REAL experiment_log data (195 records / 19,642 scored doc rows: contract ×16783, correspondence ×407, merger_agreement ×335, corporate_record ×69, compliance_filing ×44, due_diligence ×4 have real benchmark rows; court_opinion + insurance_claim genuinely declared-pending). Thin-notebook KANBAN-078 pattern: kernel-cwd-proof bootstrap, stdlib-only cells, zero network/LLM. Guards: tests/test_kanban068_bundles_notebook.py (4 network-free incl.&nbsp;hostile-cwd headless nbclient execution asserting the gap summary). Install: new <code>[notebooks]</code> extra ⇔ requirements/notebooks.txt under the KANBAN-081 parity contract, joined into [all]/all.txt. <code>notebooks/README.md</code> scopes all six + conventions. REMAINING: 01 classification, 02 typed-field extraction, 04 audit/verification, 05 chained pipelines, 06 report/aggregation — same pattern. Suite <strong>663 passed</strong>.</td>
 </tr>
 <tr class="even">
 <td>KANBAN-067</td>
@@ -770,9 +917,9 @@ ul.task-list li input[type="checkbox"] {
 <tr class="odd">
 <td>KANBAN-072</td>
 <td><a href="https://github.com/Exios66/llm-entity-extraction/issues/25">#25</a></td>
-<td><code>backlog</code></td>
+<td><code>in_progress</code></td>
 <td><strong>Contract specialist improvements — verbatim CUAD/MAUD category questions + agent inquiry schemas (human-filed issue 2026-08-21)</strong> — integrate The Atticus Project’s verbatim CUAD description prompts (Change Of Control, Anti-Assignment, Notice Period To Terminate Renewal, Termination For Convenience, Price Restrictions, Most Favored Nation, Governing Law, … full 41) and MAUD verbatim deal-point queries (MAE/MAC definition + scope exclusions, ordinary-course covenants + consent restrictions, No-Shop/Go-Shop + fiduciary-out, breakup/termination fees, Outside/Drop-Dead Date) into the contracts specialist via the unified agent-inquiry schema from the issue (<code>agent_inquiry_templates</code>: per-category prompt + target_dataset). <strong>Complementary to the landed registry</strong> <code>config/clause_categories.yaml</code> (#26, closed under KANBAN-061): the YAML holds names/class_ids/answer_types/confidence; THIS card wires the verbatim question texts + inquiry templates into prompt surfaces/agent routing and measures on the extraction surfaces (v34→v39+audit lineage, KANBAN-054..060). Scope guard: same-surface A/B per governed workflow; no champion change without a paired win.</td>
-<td>unclaimed</td>
+<td>hermes 2026-08-24</td>
 <td>v0.19.5</td>
 <td>issue #25; <code>config/clause_categories.yaml</code>; GEPA lineage memos</td>
 </tr>
@@ -867,6 +1014,7 @@ ul.task-list li input[type="checkbox"] {
 <p>Post to the discussion board by appending a new entry at the TOP of <code>entries</code> in <code>MESSAGE_BOARD_DISCUSSION.qmd</code> (the <code>::: {.entry ...}</code> block template in its “How to append” section — date + agent + card + subject + body), and mirror lane changes on the card table above.</p>
 <p>Archive (completed work — kept for auditability)</p>
 <div class="line-block">Card | Shipped in | Commit / tag | Result |<br>
+KANBAN-097 | [Unreleased] (2026-08-24) | close-out commit (this one); foundation <code>9483437</code>; concurrent lane <code>1afa047</code>; closes #51 | <strong>Docclass role-prompt mutation iteration testing + per-role eval tasks — DONE.</strong> Eval tasks for every roster role (edge/judge-mutation/conflicts/blind-classification), deterministic scoring, –dry-run gates, append-only agent_bench records; silent no-op judge pilot_v1 repaired; insurance_claims_specialist_v1 mutation validated (template-fabrication class eliminated); judge v1 = FPR-dominant Pareto champion (0.00 vs 0.88); reviewer 20/20 after GT-label fix; boss 1.00 / arbiter 0.70. Residue -&gt; KANBAN-100; log-truncation incident -&gt; KANBAN-099. Key results: judge-mutation matched arm n=48 seed-42; conflicts n=10/role; reviewer+insurance edge n=20 each. |<br>
 KANBAN-074 | — (changelog-only, 2026-08-22) | this close-out commit; datasets live on the Hub (commitless artifacts) | <strong>HF family completeness: deterministic splits + cleaned Enron correspondence corpus</strong> — human directive 2026-08-22 (changelog current; metadata/labels/GT/splits across the HF family, incl.&nbsp;cleaned Enron). SHIPPED 2026-08-22 — <a href="https://huggingface.co/datasets/Lucius-Morningstar/enron-correspondence">enron-correspondence</a> NEW: FULL cleaned CMU corpus, <strong>517,390 rows / 150 custodians / zero dropped</strong>, GT = shared 10-key labeler with on-row <code>label_evidence</code> (email 505,929 · memo 3,568 · press_release 2,520 · notice 2,842 · letter 2,077 · demand 315 · meeting_request 135 · attorney_demand 4), splits 465,570/51,820 via the family rule <code>md5(filename)%10==0→test</code>; LFS sha local==hub <code>0554a5973935…</code>; datasets-server GREEN. <a href="https://huggingface.co/datasets/Lucius-Morningstar/docclass-merged">docclass-merged</a> → <strong>schema v3</strong>: per-row <code>split</code> column added to v2’s subclass+filename, all three non-null on 700 rows (<code>split_coverage</code> 628/72 in manifest); republished, LFS sha local==hub <code>af7705368c83…</code>, row 0 serves <code>Co_Branding</code>/<code>train</code>. One split implementation (<code>assign_split()</code>), imported by both publishers — no forked rule; builder+publisher guards extended to require it. Family audit recorded honestly: legalbench-full ships native upstream train/test TSVs (complete); 3 BT mirrors are whole-gold eval pools (splits not applicable — documented, not manufactured). New tooling <code>scripts/datasets/publish_enron_correspondence.py</code>; +4 pins (split determinism/single-source, dump split coverage, enron guard pins). Suite <strong>588✓ / 7 documented posit fails unchanged / 4 skip</strong> |<br>
 KANBAN-073 | — (changelog-only, 2026-08-22) | commit: KANBAN-073 close-out (this commit); dataset live on the Hub (commitless artifact) | <strong>docclass-merged schema v2 — contract subclasses + file names on every row; Hub viewer <code>string→null</code> cast-crash fixed — SHIPPED 2026-08-22</strong> (human directive 2026-08-22). <a href="https://huggingface.co/datasets/Lucius-Morningstar/docclass-merged">docclass-merged</a> now carries non-null string <code>expected_subclass</code> + <code>filename</code> on ALL 700 rows: contracts use CUAD’s own grouping (<code>metadata.category</code>, <strong>28 groups</strong> — Marketing, Maintenance, License_Agreements, …) with <code>filename</code> = source-PDF basename; MAUD consideration types + S-1 record subclasses already carried both. Root cause of the reported viewer crash (<code>DatasetGenerationError: Couldn't cast array of type string to null</code>): the old file was written CUAD-first with all-null subclass/empty filename → JSON loader inferred null-typed columns from opening batches → crashed casting later string batches. Fix + guardrails: builder refuses to write any row lacking either field; publisher gained a pre-upload schema guard refusing partial-null uploads (this bug class can never ship again); manifest records <code>schema_version: 2</code> + coverage (700/700 filenames, 700/700 subclasses, 28 contract groups); 4 new network-free pins (<code>tests/test_kanban071_hf_pack.py</code> → 12). Republished + verified GREEN: LFS sha256 local == hub (<code>3bd9d74de9f1…</code>), deterministic fingerprint <code>cd652e77…</code>, datasets-server serves clean — no pending/failed conversions, <code>first-rows</code> types both label columns as <code>string</code> with real values on row 0. Bonus side effect: the docclass eval runner grades <code>expected_subclass</code> when present, so contracts now participate in subclass scoring (previously skipped) — strictly richer eval surface, zero runner changes. Suite <strong>585✓ / 7 documented posit fails unchanged / 4 skip</strong> (+4 = exactly the new pins). |<br>
 KANBAN-071 | — (changelog-only, 2026-08-22) | commit: KANBAN-071 close-out (this commit); datasets live on the Hub (commitless artifact) | <strong>Full LegalBench subsets + docclass merged corpus → Hugging Face, CUAD-quality label enrichment — SHIPPED 2026-08-22</strong> (human directive 2026-08-22). Two verified Hub datasets under <code>Lucius-Morningstar</code>: <a href="https://huggingface.co/datasets/Lucius-Morningstar/legalbench-full">legalbench-full</a> — ALL 162 upstream task dirs of HazyResearch/legalbench fetched verbatim (160 with data: 856 train rows; 16 test splits = 10,219 rows; 2 honestly EMPTY), plus the CUAD enrichment layer for all 38 <code>cuad_*</code> tasks: every {excerpt, Yes/No} row re-joined to CUAD_v1.json expert annotations via whitespace-flexible excerpt location (199 exact + 1 fuzzy / 20 span-unmatched / 8 unknown-contract = 228/228 dispositioned, none dropped) with char offsets + overlapping clause questions + expert spans attached, and an on-row <code>category_audit</code> cross-checking LB’s label vs CUAD’s highlights ON THE EXCERPT (<strong>192 agree / 8 SUSPECT / 0 mismatch</strong> — flags ride along, labels never rewritten). <a href="https://huggingface.co/datasets/Lucius-Morningstar/docclass-merged">docclass-merged</a> — 700 rows = CUAD 509 (local staging-export reuse, BT untouched) + MAUD 152 + S-1 39, deterministic fingerprint <code>5b682f62…</code>. Verification GREEN twice (pack re-upload = independent reproduction): legalbench-full <strong>379/379 files byte-proven via git-blob OID</strong> vs Hub tree + aggregates round-trip hash; docclass-merged LFS sha256 local == hub (<code>c8faf0ab6ed8…</code>). Tooling: <code>scripts/datasets/build_legalbench_full_pack.py</code> + <code>scripts/datasets/publish_kanban071.py</code>; <code>build_docclass_merged.py</code> local-first loader. Side effects: restored missing <code>data/maud/classification.jsonl</code> (25,827 rows) and fixed a latent <code>FigureCanvasBase.get_renderer</code> crash in the EDA footer-collision test helper (test was skip-guarded until this session’s CUAD download un-skipped it). Suite <strong>573✓/7 documented posit fails unchanged</strong> + 8 new network-free pins <code>tests/test_kanban071_hf_pack.py</code>. Honest gaps in <code>ENRICHMENT_REPORT.json</code>: 20 excerpts unlocatable, 8 unknown contracts, 8 SUSPECT audit rows — flagged on-row, never silently dropped or rewritten. |<br>

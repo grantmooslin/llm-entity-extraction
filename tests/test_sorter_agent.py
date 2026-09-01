@@ -111,8 +111,11 @@ def test_docclass_schema_extends_shared_surface():
     assert SORTER_SCHEMA["properties"]["doc_type"]["enum"] == DOC_CLASS_KEYS  # untouched
     enum = DOCCLASS_SCHEMA["properties"]["doc_type"]["enum"]
     assert enum == DOCCLASS_CLASS_KEYS
-    assert enum[-1] == MERGER_AGREEMENT_CLASS["key"]
-    assert len(enum) == len(DOC_CLASS_KEYS) + 1
+    # merger_agreement appended first (KANBAN-033); insurance_claim joined
+    # with the durability program — order is append-order, not semantic.
+    assert enum[-1] == "insurance_claim"
+    assert "merger_agreement" in enum
+    assert len(enum) == len(DOCCLASS_CLASS_KEYS)  # 6 shared + merger + insurance
     subclass = DOCCLASS_SCHEMA["properties"]["doc_subclass"]
     assert subclass["type"] == ["string", "null"]
     assert set(subclass["enum"]) == set(DOC_SUBCLASS_KEYS)

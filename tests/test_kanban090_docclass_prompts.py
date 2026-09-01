@@ -11,7 +11,7 @@ Guards three things:
    the docclass context block.
 """
 
-EXPECTED_DOCCLASS_KEY_COUNT = 21  # 8 sorter re-exports + 10 derived + 3 authored
+EXPECTED_DOCCLASS_KEY_COUNT = 58  # 32 KANBAN-090 + 22 KANBAN-101 + 4 KANBAN-103
 
 
 def _doc():
@@ -61,7 +61,13 @@ def test_sorter_family_is_reexported_byte_identical():
         ("SORTER_DOCCLASS_PROMPT_V0", "sorter_docclass_v0"),
         ("SORTER_DOCCLASS_PROMPT_V3", "sorter_docclass_v3"),
         ("SORTER_DOCCLASS_PROMPT_V6", "sorter_docclass_v6"),
+        ("SORTER_DOCCLASS_PROMPT_V7", "sorter_docclass_v7"),
+        ("SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V0", "sorter_docclass_correspondence_v0"),
+        ("SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V1", "sorter_docclass_correspondence_v1"),
+        ("SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V2", "sorter_docclass_correspondence_v2"),
+        ("SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V3", "sorter_docclass_correspondence_v3"),
         ("SORTER_DOCCLASS_VISION_PROMPT_V0", "sorter_docclass_vision_v0"),
+        ("SORTER_DOCCLASS_VISION_PROMPT_V1", "sorter_docclass_vision_v1"),
     ]:
         # Same OBJECT, not just equal bytes — a re-export, never a redefinition.
         assert DOCCLASS_PROMPT_VERSIONS[key] is getattr(P, mod_name), key
@@ -170,6 +176,45 @@ def test_authored_fresh_v0s_carry_provenance_and_schema():
         "denial_reasons",
     ):
         assert field in INSURANCE_CLAIMS_SPECIALIST_DOCCLASS_PROMPT_V0
+
+
+def test_v1_variants_carry_kanban101_markers():
+    from src.prompts_docclass import DOCCLASS_PROMPT_VERSIONS
+
+    kanban101_keys = [
+        "contracts_specialist_docclass_v1",
+        "corporate_records_specialist_docclass_v1",
+        "due_diligence_specialist_docclass_v1",
+        "correspondence_specialist_docclass_v1",
+        "compliance_specialist_docclass_v1",
+        "court_opinions_specialist_docclass_v1",
+        "insurance_claims_specialist_docclass_v1",
+        "reviewer_docclass_v1",
+        "arbiter_docclass_v1",
+        "boss_docclass_v1",
+        "judge_docclass_v1",
+        "judge_classification_docclass_v1",
+        "judge_correctness_docclass_v1",
+    ]
+    for key in kanban101_keys:
+        assert key in DOCCLASS_PROMPT_VERSIONS
+        assert "(KANBAN-101)" in DOCCLASS_PROMPT_VERSIONS[key], key
+
+
+def test_pilot_specialist_variants_present():
+    from src.prompts_docclass import DOCCLASS_PROMPT_VERSIONS
+
+    for key in (
+        "contracts_specialist_docclass_pilot_v0",
+        "corporate_records_specialist_docclass_pilot_v0",
+        "due_diligence_specialist_docclass_pilot_v0",
+        "correspondence_specialist_docclass_pilot_v0",
+        "compliance_specialist_docclass_pilot_v0",
+        "court_opinions_specialist_docclass_pilot_v0",
+        "insurance_claims_specialist_docclass_pilot_v0",
+    ):
+        assert key in DOCCLASS_PROMPT_VERSIONS
+        assert "pilot" in DOCCLASS_PROMPT_VERSIONS[key].lower() or "PILOT" in DOCCLASS_PROMPT_VERSIONS[key]
 
 
 def test_runtime_defaults_untouched():

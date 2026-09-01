@@ -34,7 +34,7 @@ CORE_EXPECTED = {
     "python-dotenv": ">=1.0.0",
     "PyYAML": ">=6.0",
     "structlog": ">=24.0",
-    "llm-dojo-scoring": "@ git+https://github.com/Exios66/llm-dojo-scoring.git@v0.7.0",
+    "llm-dojo-scoring": "@ git+https://github.com/Exios66/llm-dojo-scoring.git@v0.10.0",
 }
 
 EXTRA_TO_BATCH_FILE = {

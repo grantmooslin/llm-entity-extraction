@@ -37,6 +37,30 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 SITE_DIR = Path(__file__).resolve().parent
 
 sys.path.insert(0, str(ROOT / "src"))
+
+
+def _ensure_scoring_deps() -> None:
+    """Re-exec under the repo venv when the active interpreter lacks the
+    scoring package (KANBAN-094). Quarto invokes bare ``python3`` for this
+    hook; system interpreters may not have ``llm_dojo_scoring`` installed,
+    which made ``from experiment_log import ...`` die mid-render. Re-exec is
+    transparent: same argv, same stdio, same exit code."""
+    import os
+
+    try:
+        import llm_dojo_scoring  # noqa: F401
+    except ImportError:
+        pass
+    else:
+        return
+    candidate = ROOT / ".venv" / "bin" / "python"
+    if (candidate.exists()
+            and os.path.realpath(candidate) != os.path.realpath(sys.executable)):
+        os.execv(str(candidate), [str(candidate), str(Path(__file__)), *sys.argv[1:]])
+
+
+_ensure_scoring_deps()
+
 from experiment_log import render_full_log  # noqa: E402
 
 # Sections that exist only to dump per-document/results content — omitted from

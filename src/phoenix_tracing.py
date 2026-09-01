@@ -48,8 +48,37 @@ def phoenix_enabled() -> bool:
 
     Reads PHOENIX_TRACING (default: enabled). When disabled the module
     degrades to a no-op tracer so runs are unaffected.
+
+    ``load_env()`` runs first so a dotenv ``PHOENIX_TRACING=disabled`` wins
+    even when this module is imported before the caller loads dotenv
+    (KANBAN-103: the first correspondence run imported the tracer at
+    module-import time and default-on OTLP-spammed a down Phoenix).
     """
+    try:
+        from src.env_utils import load_env
+
+        load_env()
+    except Exception:  # noqa: BLE001 — observability must never break the run
+        pass
     return os.environ.get("PHOENIX_TRACING", "enabled").strip().lower() in _TRUE_VALUES
+
+
+def phoenix_endpoint_reachable(timeout: float = 0.5) -> bool:
+    """Return True when the Phoenix HTTP server answers.
+
+    Probes the REST base (``PHOENIX_ENDPOINT`` with the ``/v1/traces`` suffix
+    stripped). A down server must not attach a BatchSpanProcessor — that is
+    what produced the 50+ ``Failed to export span batch`` lines on the
+    KANBAN-103 v0 run.
+    """
+    try:
+        import urllib.request
+
+        req = urllib.request.Request(_phoenix_server_base(), method="GET")
+        with urllib.request.urlopen(req, timeout=timeout):
+            return True
+    except Exception:  # noqa: BLE001 — down/refused/timeout => treat as absent
+        return False
 
 
 def _instrument_openai() -> None:
@@ -97,6 +126,14 @@ def _init_opentelemetry() -> Any | None:
     """
     if not phoenix_enabled():
         logger.info("phoenix_tracing_disabled", reason="PHOENIX_TRACING not enabled")
+        return None
+    if not phoenix_endpoint_reachable():
+        logger.info(
+            "phoenix_tracing_disabled",
+            reason="phoenix endpoint unreachable",
+            endpoint=os.environ.get(
+                "PHOENIX_ENDPOINT", "http://localhost:6006/v1/traces"),
+        )
         return None
     try:
         from opentelemetry import trace

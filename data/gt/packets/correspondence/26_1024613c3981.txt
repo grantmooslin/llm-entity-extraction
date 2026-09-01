@@ -1,0 +1,11 @@
+FILENAME: hyatt-k/to_do/51.
+GT_CLASS: correspondence
+CHARS: 102
+============================================================
+TASK ASSIGNMENT
+
+Status: completed
+
+Task Priority: 1
+Task Due On: 5/22/2000
+Task Start Date: 5/22/2000

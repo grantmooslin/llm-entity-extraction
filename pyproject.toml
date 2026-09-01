@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "llm-entity-extraction"
-version = "0.20.0"
+version = "0.21.0"
 description = "LangChain agents (sorter, specialists, judge) + prompt experiment loop for legal document classification and entity extraction"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -28,7 +28,7 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "PyYAML>=6.0",
     "structlog>=24.0",
-    "llm-dojo-scoring @ git+https://github.com/Exios66/llm-dojo-scoring.git@v0.7.0",
+    "llm-dojo-scoring @ git+https://github.com/Exios66/llm-dojo-scoring.git@v0.10.0",
 ]
 
 # Purpose-scoped batches mirroring requirements/<batch>.txt (KANBAN-081).
@@ -60,13 +60,19 @@ notebooks = [
     "nbclient>=0.10",
     "ipykernel>=6.29",
 ]
+# Modal-deployed vLLM serving (KANBAN-096, deploy/modal_vllm.py). Deploy-time
+# only — the runtime eval pipeline never imports modal. Install with:
+#   pip install -e ".[deploy]"
+deploy = [
+    "modal>=0.73",
+]
 dev = [
     "pytest>=8.0",
     "pytest-mock>=3.14",
     "llm-entity-extraction[tracing]",
 ]
 all = [
-    "llm-entity-extraction[tracing,evals,datasets,reporting,embeddings,notebooks]",
+    "llm-entity-extraction[tracing,evals,datasets,reporting,embeddings,notebooks,deploy]",
 ]
 pdf = ["llm-entity-extraction[datasets]"]  # legacy alias for [datasets]
 

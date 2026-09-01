@@ -1,350 +1,2038 @@
 {
  "type": "experiment",
- "task": "contract_entity_extraction",
- "experiment_name": "qwen3.7-flash_contracts_specialist_v2_extraction",
- "git": {
-  "commit": "25eaddd",
-  "dirty": false
- },
+ "experiment_name": "qwen_qwen3.7-flash_sorter_docclass_v6_docclass_merged_ab",
+ "task": "docclass_classification",
  "model": "qwen/qwen3.7-flash",
- "prompt_version": "contracts_specialist_v2",
+ "prompt_versions": {
+  "sorter": "sorter_docclass_v6"
+ },
  "data_source": {
-  "project": "mailroom-eval/mailroom-cuad-contracts",
-  "ground_truth": "cuad_v1_clause_labels",
-  "dataset_fingerprint": "19ead966edadf5cf02c8965dd261e0c4bf953f291ab73c91e3c6b97d62ec6028",
-  "n_samples": 10,
-  "sample_requested": 10,
+  "datasets": "mailroom-maud-contracts,mailroom-cuad-contracts-full,mailroom-s1-corporate-records",
+  "ground_truth": "doc_type + doc_subclass",
+  "ground_truth_mode": "maud_consideration_gt / s1_record_type / cuad_subtype",
+  "dataset_fingerprint": "fa16e25a91631122b3e1d2111dadeca05194bcf162dd22474a2890fc83fcb7cb",
+  "n_samples": 30,
+  "sample_requested": 0,
+  "stratified": 30,
   "limit": null,
   "seed": 42
  },
  "parameters": {
-  "temperature": 0.1,
-  "max_tokens": 16384,
+  "datasets": "mailroom-maud-contracts,mailroom-cuad-contracts-full,mailroom-s1-corporate-records",
+  "sample": 0,
+  "stratified": 30,
+  "seed": 42,
   "max_input_chars": 100000,
-  "reasoning_effort": "none",
-  "max_concurrency": 4,
-  "bt_scores": "overall",
-  "judge": false,
-  "manifest": "data/manifests/extract_live10_v2.jsonl"
- },
- "tokens": {
-  "prompt_tokens": 71840,
-  "completion_tokens": 39965,
-  "total_tokens": 111805,
-  "cost_usd": 0.0,
-  "cost_total_usd": 0,
-  "rows_with_usage": 10,
-  "cost_estimated_usd": 0.007351
- },
- "scores": {
-  "overall_extraction_score": 0.6563,
-  "field_presence": 0.98,
-  "schema_valid": 1.0,
-  "per_field": {
-   "effective_date": 0.8465,
-   "governing_law": 0.9443,
-   "key_obligations": 0.2663,
-   "parties": 0.5334,
-   "renewal_terms": 0.5781,
-   "term_length": 0.9441,
-   "termination_clauses": 0.2857
-  },
-  "entity_list_f1": {
-   "key_obligations": 0.2663,
-   "parties": 0.5333,
-   "termination_clauses": 0.2857
+  "max_tokens": 4096,
+  "reasoning_effort": "medium",
+  "temperature": 0.1,
+  "input_mode": "text",
+  "vision_pages": "all",
+  "pdf_dir": null,
+  "max_concurrency": 10,
+  "rate_limit_retries": 0,
+  "tracing_backend": "langfuse",
+  "tracing_meta": {
+   "project": "llm-dojo",
+   "environment": "llm-dojo",
+   "base_url": "https://us.cloud.langfuse.com",
+   "session_id": "qwen_qwen3.7-flash_sorter_docclass_v6_docclass_merged_ab",
+   "trace_name": "docclass_classification",
+   "disabled": false
   }
  },
- "n_rows": 10,
- "n_ok": 10,
- "n_error": 0,
- "results": [
+ "scores": {
+  "doc_type_accuracy": 0.9667,
+  "doc_type_accuracy_ci": {
+   "lo": 0.9,
+   "hi": 1.0,
+   "half": 0.05,
+   "n": 30,
+   "seed": 42,
+   "n_boot": 2000,
+   "method": "percentile-bootstrap"
+  },
+  "subclass_accuracy": 0.6667,
+  "subclass_accuracy_ci": {
+   "lo": 0.5,
+   "hi": 0.8333,
+   "half": 0.1667,
+   "n": 30,
+   "seed": 42,
+   "n_boot": 2000,
+   "method": "percentile-bootstrap"
+  },
+  "subclass_accuracy_equiv": 0.6333,
+  "exact_match": 0.6333,
+  "exact_match_ci": {
+   "lo": 0.4667,
+   "hi": 0.8,
+   "half": 0.1667,
+   "n": 30,
+   "seed": 42,
+   "n_boot": 2000,
+   "method": "percentile-bootstrap"
+  },
+  "confidence": 0.951,
+  "n_rows": 30,
+  "n_errors": 0,
+  "per_class_accuracy": {
+   "contract": 1.0,
+   "corporate_record": 0.9,
+   "merger_agreement": 1.0
+  },
+  "per_subclass_accuracy": {
+   "Development": 1.0,
+   "Franchise": 1.0,
+   "Hosting": 1.0,
+   "IP": 1.0,
+   "Manufacturing": 1.0,
+   "Outsourcing": 1.0,
+   "Supply": 1.0,
+   "Transportation": 1.0,
+   "all_cash": 1.0,
+   "all_stock": 0.6667,
+   "articles_of_incorporation": 0.2857,
+   "mixed_cash_stock": 0.3333,
+   "other": 0.0,
+   "powers_of_attorney": 0.0,
+   "rights_instrument": 1.0
+  },
+  "per_subclass_support": {
+   "Development": 2,
+   "Franchise": 1,
+   "Hosting": 1,
+   "IP": 1,
+   "Manufacturing": 2,
+   "Outsourcing": 1,
+   "Supply": 1,
+   "Transportation": 1,
+   "all_cash": 3,
+   "all_stock": 3,
+   "articles_of_incorporation": 7,
+   "mixed_cash_stock": 3,
+   "other": 1,
+   "powers_of_attorney": 1,
+   "rights_instrument": 2
+  },
+  "subclass_confusion": {
+   "Development": {
+    "development": 2
+   },
+   "Franchise": {
+    "franchise": 1
+   },
+   "Hosting": {
+    "hosting": 1
+   },
+   "IP": {
+    "ip": 1
+   },
+   "Manufacturing": {
+    "manufacturing": 2
+   },
+   "Outsourcing": {
+    "outsourcing": 1
+   },
+   "Supply": {
+    "supply": 1
+   },
+   "Transportation": {
+    "transportation": 1
+   },
+   "all_cash": {
+    "all_cash": 3
+   },
+   "all_stock": {
+    "all_stock": 2,
+    "all_cash": 1
+   },
+   "articles_of_incorporation": {
+    "articles_of_incorporation": 2,
+    "other": 2,
+    "bylaws": 3
+   },
+   "mixed_cash_stock": {
+    "all_stock": 2,
+    "mixed_cash_stock": 1
+   },
+   "other": {
+    "all_stock": 1
+   },
+   "powers_of_attorney": {
+    "bylaws": 1
+   },
+   "rights_instrument": {
+    "rights_instrument": 1,
+    "other": 1
+   }
+  },
+  "equiv_recovered": [],
+  "input_mode_counts": {
+   "text": 30
+  },
+  "sorter": {
+   "failure_insights": {
+    "mode_counts": {
+     "subclass_miss": 10,
+     "doc_type_miss": 1
+    },
+    "n_failed": 11,
+    "failures": [
+     {
+      "filename": "0001547903-13-000020_a41specimenclassacommonsto.htm",
+      "expected": {
+       "doc_type": "corporate_record",
+       "doc_subclass": "articles_of_incorporation"
+      },
+      "predicted": {
+       "doc_type": "corporate_record",
+       "doc_subclass": "other"
+      },
+      "failure_mode": "subclass_miss",
+      "reasoning": "The document is a specimen stock certificate for Class A Common Stock of NMI Holdings, Inc., presented as Exhibit 4.1. Per rule 3, the SEC exhibit wrapper is disregarded in favor of the substantive form, which is a corporate record evidencing share ownership. It does not match any of the specifically enumerated record types in rule 33, so doc_subclass is set to 'other'. Note: contract_subtype must be null when doc_type is not contract; corrected to null."
+     },
+     {
+      "filename": "0001078782-12-001347_s1_ex3z2.htm",
+      "expected": {
+       "doc_type": "corporate_record",
+       "doc_subclass": "articles_of_incorporation"
+      },
+      "predicted": {
+       "doc_type": "corporate_record",
+       "doc_subclass": "bylaws"
+      },
+      "failure_mode": "subclass_miss",
+      "reasoning": "The document is explicitly titled 'BYLAWS OF SIMPLE PRODUCTS CORPORATION' and contains standard internal governance provisions organized into Articles covering offices, stockholder/director meetings, officers, stock certificates, and indemnification. Per Rule 32, corporate records filed as SEC exhibits (e.g., EX-3.2) retain their substantive classification as corporate records rather than compliance filings. The title directly matches the 'bylaws' subclass per Rule 33."
+     },
+     {
+      "filename": "0001615774-14-000417_s100510_ex4-6.htm",
+      "expected": {
+       "doc_type": "corporate_record",
+       "doc_subclass": "rights_instrument"
+      },
+      "predicted": {
+       "doc_type": "contract",
+       "doc_subclass": "other"
+      },
+      "failure_mode": "doc_type_miss",
+      "reasoning": "The document is a formal 'WARRANT AGREEMENT' executed between the issuing company and a warrant agent, detailing the issuance, exercise, redemption, adjustment, and transfer mechanics of the warrants. Its substantive form is a bilateral contract governing financial instrument terms. It does not fit any specific commercial family (e.g., license, distribution, service, or agency) and is not a corporate governance record or regulatory filing, thus classifying it as 'other'. The SEC exhibit wrapper does not change its substantive contractual nature per rule 3."
+     },
+     {
+      "filename": "0001144204-19-043489_tv528080_ex3-2.htm",
+      "expected": {
+       "doc_type": "corporate_record",
+       "doc_subclass": "articles_of_incorporation"
+      },
+      "predicted": {
+       "doc_type": "corporate_record",
+       "doc_subclass": "bylaws"
+      },
+      "failure_mode": "subclass_miss",
+      "reasoning": "The document is labeled EXHIBIT 3.2 and contains the Organizational Minutes of the Initial Board of Directors along with the full text of the BY-LAWS OF INCUMAKER, INC. Per Rule 32, corporate governance records like bylaws attached to SEC filings as exhibits retain their substantive classification as corporate_record rather than compliance_filing. Per Rule 33, the doc_subclass is correctly identified as 'bylaws' based on the document's own title. No competing signals are present."
+     },
+     {
+      "filename": "0001469709-14-000003_ex3_2apg.htm",
+      "expected": {
+       "doc_type": "corporate_record",
+       "doc_subclass": "articles_of_incorporation"
+      },
+      "predicted": {
+       "doc_type": "corporate_record",
+       "doc_subclass": "bylaws"
+      },
+      "failure_mode": "subclass_miss",
+      "reasoning": "The document is explicitly titled 'EXHIBIT 3.2 BYLAWS' and contains standard internal governance provisions for a Nevada corporation, including sections on shareholder meetings, board of directors, officers, and amendment procedures. Per rule 32, exhibits filed as corporate governance records are classified as corporate_record, and per rule 33, the subclass is bylaws."
+     },
+     {
+      "filename": "0001469709-14-000529_ex3_2apg.htm",
+      "expected": {
+       "doc_type": "corporate_record",
+       "doc_subclass": "powers_of_attorney"
+      },
+      "predicted": {
+       "doc_type": "corporate_record",
+       "doc_subclass": "bylaws"
+      },
+      "failure_mode": "subclass_miss",
+      "reasoning": "The document is explicitly titled 'BYLAWS OF SWEETS & TREATS, INC.' and contains standard corporate governance provisions regarding stockholders, directors, officers, meetings, voting, and amendment procedures. Per Rule 32, corporate records such as bylaws filed as SEC exhibits (here, Exhibit 3.2) retain their substantive classification as corporate_record rather than compliance_filing. The content and exhibit wrapper confirm this classification."
+     },
+     {
+      "filename": "0001547903-13-000006_a41specimenclassacommonsto.htm",
+      "expected": {
+       "doc_type": "corporate_record",
+       "doc_subclass": "articles_of_incorporation"
+      },
+      "predicted": {
+       "doc_type": "corporate_record",
+       "doc_subclass": "other"
+      },
+      "failure_mode": "subclass_miss",
+      "reasoning": "The document is a specimen stock certificate for Class A Common Stock of NMI Holdings, Inc. It certifies share ownership, outlines transfer and assignment procedures, and features corporate seal and officer signature blocks. Its substantive form is a corporate securities/governance instrument rather than a commercial contract or regulatory filing. Since it does not match the specific record-type subcategories listed (e.g., bylaws, articles of incorporation), it is classified as corporate_record with doc_subclass 'other'."
+     },
+     {
+      "filename": "contract_105_merger_agreement.txt",
+      "expected": {
+       "doc_type": "merger_agreement",
+       "doc_subclass": "mixed_cash_stock"
+      },
+      "predicted": {
+       "doc_type": "merger_agreement",
+       "doc_subclass": "all_stock"
+      },
+      "failure_mode": "subclass_miss",
+      "reasoning": "The document title is explicitly 'AGREEMENT AND PLAN OF MERGER'. It contains classic M&A deal structure provisions, including parties labeled as Parent, US Holdco, Merger Sub, and Company; dedicated articles for 'THE MERGER', 'EFFECT OF THE MERGER ON CAPITAL STOCK', representations and warranties, covenants, conditions precedent, and termination rights. The consideration mechanics reference 'Parent Share Issuance' and a 'Parent Equity Conversion Ratio' based on a 'Cash Equivalent Consideration' (standard for cross-border stock conversions), confirming an all-stock transaction. Under Rule 31, this is classified as a merger_agreement."
+     },
+     {
+      "filename": "contract_145_merger_agreement.txt",
+      "expected": {
+       "doc_type": "merger_agreement",
+       "doc_subclass": "other"
+      },
+      "predicted": {
+       "doc_type": "merger_agreement",
+       "doc_subclass": "all_stock"
+      },
+      "failure_mode": "subclass_miss",
+      "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and contains standard M&A operative machinery including 'THE MERGER', 'Representations and Warranties', 'Conditions to the Merger', 'Termination', and an 'Exchange Ratio' converting East Common Stock into Central Common Stock. Per Rule 31, this title and structure mandate classification as merger_agreement. The consideration section (Section 1.6) specifies that shares will be converted solely into shares of Central Common Stock (with cash provided only for fractional share interests), which aligns with the all_stock subclass."
+     },
+     {
+      "filename": "contract_5_merger_agreement.txt",
+      "expected": {
+       "doc_type": "merger_agreement",
+       "doc_subclass": "mixed_cash_stock"
+      },
+      "predicted": {
+       "doc_type": "merger_agreement",
+       "doc_subclass": "all_stock"
+      },
+      "failure_mode": "subclass_miss",
+      "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and contains standard M&A machinery: parties structured as Parent, Merger Subs, and Company; articles covering The Mergers, Reps & Warranties, Conditions to Closing, No-Solicitation covenants, and Termination Payments. The consideration structure centers on an 'Exchange Ratio' based on the Parent's ADS price, indicating a stock-based acquisition. Per Rule 31, this is classified as merger_agreement rather than contract."
+     },
+     {
+      "filename": "contract_100_merger_agreement.txt",
+      "expected": {
+       "doc_type": "merger_agreement",
+       "doc_subclass": "all_stock"
+      },
+      "predicted": {
+       "doc_type": "merger_agreement",
+       "doc_subclass": "all_cash"
+      },
+      "failure_mode": "subclass_miss",
+      "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and contains standard M&A operative machinery including 'THE MERGER,' representations and warranties of the Company and Parent/Merger Sub, closing conditions, and termination provisions. The consideration section defines the Merger Consideration as '$56.00 in cash,' confirming an all-cash deal. Per rules 31 and 33, this is classified as a merger_agreement with doc_subclass all_cash."
+     }
+    ]
+   }
+  }
+ },
+ "per_row": [
   {
-   "filename": "document_41",
+   "filename": "OTISWORLDWIDECORP_04_03_2020-EX-10.4-INTELLECTUAL PROPERTY AGREEMENT by and among UNITED TECHNOLOGIES CORPORATION, OTIS WORLDWIDE CORPORATION and CARRIER ~1.PDF",
    "status": "completed",
    "error": null,
-   "overall_score": 0.6296,
-   "field_presence": 1.0,
-   "schema_valid": 1.0,
-   "field_scores": {
-    "effective_date": 1.0,
-    "key_obligations": 0.2222,
-    "parties": 0.6667
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "ip",
+    "doc_subclass": "ip",
+    "expected_doc_type": "contract",
+    "expected_subclass": "IP",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'INTELLECTUAL PROPERTY AGREEMENT' and its operative provisions govern the assignment, licensing, and ownership of intellectual property rights among the parties. Pursuant to Rule 22, any agreement titled 'Intellectual Property Agreement' is classified under the 'ip' subtype, overriding any license-grant machinery present in the text.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
    },
-   "entity_list_f1": {
-    "key_obligations": 0.22222222222222224,
-    "parties": 0.6666666666666666
-   },
-   "ambiguous_fields": [
-    "parties"
-   ],
-   "tokens": {
-    "prompt_tokens": 1262,
-    "completion_tokens": 434,
-    "total_tokens": 1696,
+   "sorter_tokens": {
+    "prompt_tokens": 19282,
+    "completion_tokens": 1432,
+    "total_tokens": 20714,
     "cost": null
    }
   },
   {
-   "filename": "document_8",
+   "filename": "BIOFRONTERAAG_04_29_2019-EX-4.17-SUPPLY AGREEMENT.PDF",
    "status": "completed",
    "error": null,
-   "overall_score": 0.5778,
-   "field_presence": 1.0,
-   "schema_valid": 1.0,
-   "field_scores": {
-    "effective_date": 0.6157,
-    "governing_law": 0.9769,
-    "key_obligations": 0.2963,
-    "parties": 0.0,
-    "term_length": 1.0
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "supply",
+    "doc_subclass": "supply",
+    "expected_doc_type": "contract",
+    "expected_subclass": "Supply",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'SUPPLY AGREEMENT' and its operative provisions govern the manufacture, forecasting, purchase orders, specifications, and delivery of pharmaceutical products from the Supplier to the Buyer. This aligns directly with the 'supply' contract family.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
    },
-   "entity_list_f1": {
-    "key_obligations": 0.29629629629629634,
-    "parties": 0.0
-   },
-   "ambiguous_fields": [
-    "effective_date"
-   ],
-   "tokens": {
-    "prompt_tokens": 4766,
-    "completion_tokens": 1985,
-    "total_tokens": 6751,
+   "sorter_tokens": {
+    "prompt_tokens": 19715,
+    "completion_tokens": 1073,
+    "total_tokens": 20788,
     "cost": null
    }
   },
   {
-   "filename": "document_2",
+   "filename": "AIRTECHINTERNATIONALGROUPINC_05_08_2000-EX-10.4-FRANCHISE AGREEMENT.PDF",
    "status": "completed",
    "error": null,
-   "overall_score": 0.5433,
-   "field_presence": 0.8,
-   "schema_valid": 1.0,
-   "field_scores": {
-    "effective_date": 1.0,
-    "governing_law": 0.8416,
-    "key_obligations": 0.2083,
-    "parties": 0.6667,
-    "renewal_terms": 0.0
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "franchise",
+    "doc_subclass": "franchise",
+    "expected_doc_type": "contract",
+    "expected_subclass": "Franchise",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'AIRSOPURE FRANCHISE AGREEMENT' and contains standard franchise operative clauses, including the grant of franchise rights, exclusive territory, initial franchise fee, ongoing royalty and advertising fees based on gross sales, mandatory compliance with an Operations Manual, trademark licensing for the branded system, and post-termination non-compete covenants. These elements definitively place it in the franchise family.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
    },
-   "entity_list_f1": {
-    "key_obligations": 0.20833333333333331,
-    "parties": 0.6666666666666666
-   },
-   "ambiguous_fields": [
-    "governing_law",
-    "parties"
-   ],
-   "tokens": {
-    "prompt_tokens": 4885,
-    "completion_tokens": 3215,
-    "total_tokens": 8100,
+   "sorter_tokens": {
+    "prompt_tokens": 22175,
+    "completion_tokens": 775,
+    "total_tokens": 22950,
     "cost": null
    }
   },
   {
-   "filename": "document_18",
+   "filename": "ReedsInc_20191113_10-Q_EX-10.4_11888303_EX-10.4_Development Agreement.pdf",
    "status": "completed",
    "error": null,
-   "overall_score": 0.5788,
-   "field_presence": 1.0,
-   "schema_valid": 1.0,
-   "field_scores": {
-    "effective_date": 0.5899,
-    "governing_law": 1.0,
-    "key_obligations": 0.1692,
-    "parties": 0.6667,
-    "term_length": 0.7614,
-    "termination_clauses": 0.2857
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "development",
+    "doc_subclass": "development",
+    "expected_doc_type": "contract",
+    "expected_subclass": "Development",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'Recipe Development Agreement' and its operative clauses establish a Development Committee to approve milestones, outline obligations to create commercial production-ready products, and assign resulting IP to Reed's. These features align directly with the development family under rules 19 and 21, with no competing substantive machinery.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
    },
-   "entity_list_f1": {
-    "key_obligations": 0.16923076923076924,
-    "parties": 0.6666666666666666,
-    "termination_clauses": 0.2857142857142857
-   },
-   "ambiguous_fields": [
-    "effective_date",
-    "parties",
-    "term_length"
-   ],
-   "tokens": {
-    "prompt_tokens": 23268,
-    "completion_tokens": 13861,
-    "total_tokens": 37129,
+   "sorter_tokens": {
+    "prompt_tokens": 12121,
+    "completion_tokens": 1194,
+    "total_tokens": 13315,
     "cost": null
    }
   },
   {
-   "filename": "document_16",
+   "filename": "ElPolloLocoHoldingsInc_20200306_10-K_EX-10.16_12041700_EX-10.16_Development Agreement.pdf",
    "status": "completed",
    "error": null,
-   "overall_score": 0.703,
-   "field_presence": 1.0,
-   "schema_valid": 1.0,
-   "field_scores": {
-    "effective_date": 0.5839,
-    "governing_law": 0.873,
-    "key_obligations": 0.4878,
-    "parties": 0.6667,
-    "term_length": 0.9034
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "development",
+    "doc_subclass": "development",
+    "expected_doc_type": "contract",
+    "expected_subclass": "Development",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'EL POLLO LOCO\u00ae FRANCHISE DEVELOPMENT AGREEMENT' and its operative clauses focus on granting development rights, establishing a development schedule with site commitment and opening dates, and collecting development fees. Per rule 21, a 'Franchise Development Agreement' is classified under the development family, as the individual unit franchise agreements act only as the delivery mechanism for the developed locations.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
    },
-   "entity_list_f1": {
-    "key_obligations": 0.4878048780487804,
-    "parties": 0.6666666666666666
-   },
-   "ambiguous_fields": [
-    "effective_date",
-    "parties"
-   ],
-   "tokens": {
-    "prompt_tokens": 6174,
-    "completion_tokens": 4106,
-    "total_tokens": 10280,
+   "sorter_tokens": {
+    "prompt_tokens": 19364,
+    "completion_tokens": 1221,
+    "total_tokens": 20585,
     "cost": null
    }
   },
   {
-   "filename": "document_15",
+   "filename": "ELECTRAMECCANICA VEHICLES CORP. - Manufacturing Agreement .PDF",
    "status": "completed",
    "error": null,
-   "overall_score": 0.767,
-   "field_presence": 1.0,
-   "schema_valid": 1.0,
-   "field_scores": {
-    "effective_date": 1.0,
-    "governing_law": 1.0,
-    "key_obligations": 0.1681,
-    "parties": 0.6667,
-    "term_length": 1.0
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "manufacturing",
+    "doc_subclass": "manufacturing",
+    "expected_doc_type": "contract",
+    "expected_subclass": "Manufacturing",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'MANUFACTURING AGREEMENT' and its operative provisions govern the production, specifications, purchase orders, pricing, and quality control of electric vehicles by the Manufacturer for EMV. This squarely aligns with the manufacturing contract family.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
    },
-   "entity_list_f1": {
-    "key_obligations": 0.1680672268907563,
-    "parties": 0.6666666666666666
-   },
-   "ambiguous_fields": [
-    "parties"
-   ],
-   "tokens": {
-    "prompt_tokens": 11348,
-    "completion_tokens": 7260,
-    "total_tokens": 18608,
+   "sorter_tokens": {
+    "prompt_tokens": 15935,
+    "completion_tokens": 1208,
+    "total_tokens": 17143,
     "cost": null
    }
   },
   {
-   "filename": "document_9",
+   "filename": "DRAGONSYSTEMSINC_01_08_1999-EX-10.17-OUTSOURCING AGREEMENT.PDF",
    "status": "completed",
    "error": null,
-   "overall_score": 0.6279,
-   "field_presence": 1.0,
-   "schema_valid": 1.0,
-   "field_scores": {
-    "effective_date": 1.0,
-    "governing_law": 0.8764,
-    "key_obligations": 0.2632,
-    "parties": 0.0,
-    "term_length": 1.0
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "outsourcing",
+    "doc_subclass": "outsourcing",
+    "expected_doc_type": "contract",
+    "expected_subclass": "Outsourcing",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'OUTSOURCING AGREEMENT'. Under Rule 24, any agreement bearing the 'Outsourcing Agreement' title is classified as outsourcing, regardless of whether the operative clauses detail manufacturing, production, or other service obligations. The substantive form aligns directly with the outsourcing contract subtype.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
    },
-   "entity_list_f1": {
-    "key_obligations": 0.2631578947368421,
-    "parties": 0.0
-   },
-   "ambiguous_fields": [],
-   "tokens": {
-    "prompt_tokens": 8124,
-    "completion_tokens": 4190,
-    "total_tokens": 12314,
+   "sorter_tokens": {
+    "prompt_tokens": 8065,
+    "completion_tokens": 1178,
+    "total_tokens": 9243,
     "cost": null
    }
   },
   {
-   "filename": "document_7",
+   "filename": "BellringBrandsInc_20190920_S-1_EX-10.12_11817081_EX-10.12_Manufacturing Agreement1.pdf",
    "status": "completed",
    "error": null,
-   "overall_score": 0.6997,
-   "field_presence": 1.0,
-   "schema_valid": 1.0,
-   "field_scores": {
-    "effective_date": 1.0,
-    "key_obligations": 0.0976,
-    "parties": 0.6667,
-    "renewal_terms": 0.7342,
-    "term_length": 1.0
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "manufacturing",
+    "doc_subclass": "manufacturing",
+    "expected_doc_type": "contract",
+    "expected_subclass": "Manufacturing",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'MANUFACTURING AGREEMENT' and its operative clauses govern the contract manufacturing of food products, including production schedules, minimum annual order volumes, purchase orders, delivery terms, pricing, quality control, and risk of loss. This squarely matches the manufacturing family.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
    },
-   "entity_list_f1": {
-    "key_obligations": 0.0975609756097561,
-    "parties": 0.6666666666666666
-   },
-   "ambiguous_fields": [
-    "parties",
-    "renewal_terms"
-   ],
-   "tokens": {
-    "prompt_tokens": 5574,
-    "completion_tokens": 1759,
-    "total_tokens": 7333,
+   "sorter_tokens": {
+    "prompt_tokens": 15078,
+    "completion_tokens": 686,
+    "total_tokens": 15764,
     "cost": null
    }
   },
   {
-   "filename": "document_35",
+   "filename": "RangeResourcesLouisianaInc_20150417_8-K_EX-10.5_9045501_EX-10.5_Transportation Agreement.pdf",
    "status": "completed",
    "error": null,
-   "overall_score": 0.644,
-   "field_presence": 1.0,
-   "schema_valid": 1.0,
-   "field_scores": {
-    "effective_date": 0.6751,
-    "governing_law": 0.9867,
-    "key_obligations": 0.25,
-    "parties": 0.6667,
-    "renewal_terms": 1.0,
-    "termination_clauses": 0.2857
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "transportation",
+    "doc_subclass": "transportation",
+    "expected_doc_type": "contract",
+    "expected_subclass": "Transportation",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'TRANSPORTATION SERVICES AGREEMENT' and its operative provisions govern the design, construction, and operation of a pipeline system to transport Shipper Product, including tariff rates, nominations, common carrier compliance, and payment terms. This directly aligns with the transportation agreement family.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
    },
-   "entity_list_f1": {
-    "key_obligations": 0.25,
-    "parties": 0.6666666666666666,
-    "termination_clauses": 0.2857142857142857
-   },
-   "ambiguous_fields": [
-    "effective_date",
-    "parties"
-   ],
-   "tokens": {
-    "prompt_tokens": 4466,
-    "completion_tokens": 2784,
-    "total_tokens": 7250,
+   "sorter_tokens": {
+    "prompt_tokens": 28513,
+    "completion_tokens": 831,
+    "total_tokens": 29344,
     "cost": null
    }
   },
   {
-   "filename": "document_6",
+   "filename": "BEYONDCOMCORP_08_03_2000-EX-10.2-CO-HOSTING AGREEMENT.PDF",
    "status": "completed",
    "error": null,
-   "overall_score": 0.7917,
-   "field_presence": 1.0,
-   "schema_valid": 1.0,
-   "field_scores": {
-    "effective_date": 1.0,
-    "governing_law": 1.0,
-    "key_obligations": 0.5,
-    "parties": 0.6667
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "hosting",
+    "doc_subclass": "hosting",
+    "expected_doc_type": "contract",
+    "expected_subclass": "Hosting",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'CO-HOSTING AGREEMENT'. Per Rule 14, a Co-Hosting Agreement is specifically classified as hosting. The operative clauses detail the provision of hosted internet locations, hot links, and related marketing placements, confirming the hosting family classification.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
    },
-   "entity_list_f1": {
-    "key_obligations": 0.5,
-    "parties": 0.6666666666666666
+   "sorter_tokens": {
+    "prompt_tokens": 18023,
+    "completion_tokens": 1319,
+    "total_tokens": 19342,
+    "cost": null
+   }
+  },
+  {
+   "filename": "0001561743-13-000006_exhibit32amendedandrestate.htm",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "corporate_record",
+    "contract_subtype": "other",
+    "doc_subclass": "articles_of_incorporation",
+    "expected_doc_type": "corporate_record",
+    "expected_subclass": "articles_of_incorporation",
+    "confidence": 0.98,
+    "reasoning": "The document is explicitly titled 'Amended and Restated Certificate of Incorporation' and contains standard corporate governance provisions regarding authorized capital, stockholder rights, director liability, and indemnification. Per Rule 32, the SEC exhibit wrapper ('EX-3.2') does not change the substantive form, making it a corporate_record. Under Rule 33, the specific record type is articles_of_incorporation.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
    },
-   "ambiguous_fields": [
-    "key_obligations",
-    "parties"
-   ],
-   "tokens": {
-    "prompt_tokens": 1973,
-    "completion_tokens": 371,
-    "total_tokens": 2344,
+   "sorter_tokens": {
+    "prompt_tokens": 12564,
+    "completion_tokens": 1068,
+    "total_tokens": 13632,
+    "cost": null
+   }
+  },
+  {
+   "filename": "0001079974-08-000839_artdimensionss1x42_9252008.htm",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "corporate_record",
+    "contract_subtype": "other",
+    "doc_subclass": "rights_instrument",
+    "expected_doc_type": "corporate_record",
+    "expected_subclass": "rights_instrument",
+    "confidence": 0.85,
+    "reasoning": "The document is a Warrant Certificate (Exhibit 4.2) filed as part of an SEC registration statement. It establishes the terms under which the holder may purchase shares of common stock, functioning as an instrument defining securityholder rights. Per corpus conventions for EX-4.x exhibits and rule 33, this substantive form is classified as a corporate record with the rights_instrument subclass.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 11777,
+    "completion_tokens": 2349,
+    "total_tokens": 14126,
+    "cost": null
+   }
+  },
+  {
+   "filename": "0001547903-13-000020_a41specimenclassacommonsto.htm",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "corporate_record",
+    "contract_subtype": "other",
+    "doc_subclass": "other",
+    "expected_doc_type": "corporate_record",
+    "expected_subclass": "articles_of_incorporation",
+    "confidence": 0.95,
+    "reasoning": "The document is a specimen stock certificate for Class A Common Stock of NMI Holdings, Inc., presented as Exhibit 4.1. Per rule 3, the SEC exhibit wrapper is disregarded in favor of the substantive form, which is a corporate record evidencing share ownership. It does not match any of the specifically enumerated record types in rule 33, so doc_subclass is set to 'other'. Note: contract_subtype must be null when doc_type is not contract; corrected to null.",
+    "doc_type_ok": true,
+    "subclass_ok": false,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "subclass_miss",
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 7176,
+    "completion_tokens": 2378,
+    "total_tokens": 9554,
+    "cost": null
+   }
+  },
+  {
+   "filename": "0001079974-08-000839_artdimensionss1x31_9252008.htm",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "corporate_record",
+    "contract_subtype": "other",
+    "doc_subclass": "articles_of_incorporation",
+    "expected_doc_type": "corporate_record",
+    "expected_subclass": "articles_of_incorporation",
+    "confidence": 0.95,
+    "reasoning": "The document is filed as EXHIBIT 3.1 and explicitly states it is 'incorporated into the foregoing Articles of Incorporation.' Its substantive provisions cover authorized capital, internal corporate governance, director indemnification, and shareholder voting mechanics, which are hallmark features of articles of incorporation. Per rule 32, the SEC exhibit wrapper does not alter the substantive classification, and per rule 33, the record type is correctly identified as articles_of_incorporation.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 8568,
+    "completion_tokens": 1657,
+    "total_tokens": 10225,
+    "cost": null
+   }
+  },
+  {
+   "filename": "0001078782-12-001347_s1_ex3z2.htm",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "corporate_record",
+    "contract_subtype": "other",
+    "doc_subclass": "bylaws",
+    "expected_doc_type": "corporate_record",
+    "expected_subclass": "articles_of_incorporation",
+    "confidence": 0.98,
+    "reasoning": "The document is explicitly titled 'BYLAWS OF SIMPLE PRODUCTS CORPORATION' and contains standard internal governance provisions organized into Articles covering offices, stockholder/director meetings, officers, stock certificates, and indemnification. Per Rule 32, corporate records filed as SEC exhibits (e.g., EX-3.2) retain their substantive classification as corporate records rather than compliance filings. The title directly matches the 'bylaws' subclass per Rule 33.",
+    "doc_type_ok": true,
+    "subclass_ok": false,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "subclass_miss",
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 13733,
+    "completion_tokens": 1541,
+    "total_tokens": 15274,
+    "cost": null
+   }
+  },
+  {
+   "filename": "0001615774-14-000417_s100510_ex4-6.htm",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "other",
+    "doc_subclass": "other",
+    "expected_doc_type": "corporate_record",
+    "expected_subclass": "rights_instrument",
+    "confidence": 0.9,
+    "reasoning": "The document is a formal 'WARRANT AGREEMENT' executed between the issuing company and a warrant agent, detailing the issuance, exercise, redemption, adjustment, and transfer mechanics of the warrants. Its substantive form is a bilateral contract governing financial instrument terms. It does not fit any specific commercial family (e.g., license, distribution, service, or agency) and is not a corporate governance record or regulatory filing, thus classifying it as 'other'. The SEC exhibit wrapper does not change its substantive contractual nature per rule 3.",
+    "doc_type_ok": false,
+    "subclass_ok": true,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "doc_type_miss",
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 17765,
+    "completion_tokens": 2007,
+    "total_tokens": 19772,
+    "cost": null
+   }
+  },
+  {
+   "filename": "0001144204-19-043489_tv528080_ex3-2.htm",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "corporate_record",
+    "contract_subtype": "other",
+    "doc_subclass": "bylaws",
+    "expected_doc_type": "corporate_record",
+    "expected_subclass": "articles_of_incorporation",
+    "confidence": 0.95,
+    "reasoning": "The document is labeled EXHIBIT 3.2 and contains the Organizational Minutes of the Initial Board of Directors along with the full text of the BY-LAWS OF INCUMAKER, INC. Per Rule 32, corporate governance records like bylaws attached to SEC filings as exhibits retain their substantive classification as corporate_record rather than compliance_filing. Per Rule 33, the doc_subclass is correctly identified as 'bylaws' based on the document's own title. No competing signals are present.",
+    "doc_type_ok": true,
+    "subclass_ok": false,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "subclass_miss",
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 13546,
+    "completion_tokens": 960,
+    "total_tokens": 14506,
+    "cost": null
+   }
+  },
+  {
+   "filename": "0001469709-14-000003_ex3_2apg.htm",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "corporate_record",
+    "contract_subtype": "other",
+    "doc_subclass": "bylaws",
+    "expected_doc_type": "corporate_record",
+    "expected_subclass": "articles_of_incorporation",
+    "confidence": 0.98,
+    "reasoning": "The document is explicitly titled 'EXHIBIT 3.2 BYLAWS' and contains standard internal governance provisions for a Nevada corporation, including sections on shareholder meetings, board of directors, officers, and amendment procedures. Per rule 32, exhibits filed as corporate governance records are classified as corporate_record, and per rule 33, the subclass is bylaws.",
+    "doc_type_ok": true,
+    "subclass_ok": false,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "subclass_miss",
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 12543,
+    "completion_tokens": 1114,
+    "total_tokens": 13657,
+    "cost": null
+   }
+  },
+  {
+   "filename": "0001469709-14-000529_ex3_2apg.htm",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "corporate_record",
+    "contract_subtype": "other",
+    "doc_subclass": "bylaws",
+    "expected_doc_type": "corporate_record",
+    "expected_subclass": "powers_of_attorney",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'BYLAWS OF SWEETS & TREATS, INC.' and contains standard corporate governance provisions regarding stockholders, directors, officers, meetings, voting, and amendment procedures. Per Rule 32, corporate records such as bylaws filed as SEC exhibits (here, Exhibit 3.2) retain their substantive classification as corporate_record rather than compliance_filing. The content and exhibit wrapper confirm this classification.",
+    "doc_type_ok": true,
+    "subclass_ok": false,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "subclass_miss",
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 13462,
+    "completion_tokens": 1232,
+    "total_tokens": 14694,
+    "cost": null
+   }
+  },
+  {
+   "filename": "0001547903-13-000006_a41specimenclassacommonsto.htm",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "corporate_record",
+    "contract_subtype": "other",
+    "doc_subclass": "other",
+    "expected_doc_type": "corporate_record",
+    "expected_subclass": "articles_of_incorporation",
+    "confidence": 0.95,
+    "reasoning": "The document is a specimen stock certificate for Class A Common Stock of NMI Holdings, Inc. It certifies share ownership, outlines transfer and assignment procedures, and features corporate seal and officer signature blocks. Its substantive form is a corporate securities/governance instrument rather than a commercial contract or regulatory filing. Since it does not match the specific record-type subcategories listed (e.g., bylaws, articles of incorporation), it is classified as corporate_record with doc_subclass 'other'.",
+    "doc_type_ok": true,
+    "subclass_ok": false,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "subclass_miss",
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 7176,
+    "completion_tokens": 2359,
+    "total_tokens": 9535,
+    "cost": null
+   }
+  },
+  {
+   "filename": "contract_105_merger_agreement.txt",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "merger_agreement",
+    "contract_subtype": "other",
+    "doc_subclass": "all_stock",
+    "expected_doc_type": "merger_agreement",
+    "expected_subclass": "mixed_cash_stock",
+    "confidence": 0.95,
+    "reasoning": "The document title is explicitly 'AGREEMENT AND PLAN OF MERGER'. It contains classic M&A deal structure provisions, including parties labeled as Parent, US Holdco, Merger Sub, and Company; dedicated articles for 'THE MERGER', 'EFFECT OF THE MERGER ON CAPITAL STOCK', representations and warranties, covenants, conditions precedent, and termination rights. The consideration mechanics reference 'Parent Share Issuance' and a 'Parent Equity Conversion Ratio' based on a 'Cash Equivalent Consideration' (standard for cross-border stock conversions), confirming an all-stock transaction. Under Rule 31, this is classified as a merger_agreement.",
+    "doc_type_ok": true,
+    "subclass_ok": false,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "subclass_miss",
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 28226,
+    "completion_tokens": 1946,
+    "total_tokens": 30172,
+    "cost": null
+   }
+  },
+  {
+   "filename": "contract_92_merger_agreement.txt",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "merger_agreement",
+    "contract_subtype": "other",
+    "doc_subclass": "all_cash",
+    "expected_doc_type": "merger_agreement",
+    "expected_subclass": "all_cash",
+    "confidence": 0.98,
+    "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and contains standard M&A deal structures, including Parent/Merger Sub counterparty designations, merger mechanics, representations and warranties, covenants, conditions precedent, and termination fees. The recitals specify that Company stock will be converted into a fixed cash amount per share ($14.51, amended to $16.99), indicating an all-cash consideration structure. Thus, it firmly belongs to the merger_agreement class with an ",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 27803,
+    "completion_tokens": 989,
+    "total_tokens": 28792,
+    "cost": null
+   }
+  },
+  {
+   "filename": "contract_145_merger_agreement.txt",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "merger_agreement",
+    "contract_subtype": "other",
+    "doc_subclass": "all_stock",
+    "expected_doc_type": "merger_agreement",
+    "expected_subclass": "other",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and contains standard M&A operative machinery including 'THE MERGER', 'Representations and Warranties', 'Conditions to the Merger', 'Termination', and an 'Exchange Ratio' converting East Common Stock into Central Common Stock. Per Rule 31, this title and structure mandate classification as merger_agreement. The consideration section (Section 1.6) specifies that shares will be converted solely into shares of Central Common Stock (with cash provided only for fractional share interests), which aligns with the all_stock subclass.",
+    "doc_type_ok": true,
+    "subclass_ok": false,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "subclass_miss",
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 28493,
+    "completion_tokens": 1252,
+    "total_tokens": 29745,
+    "cost": null
+   }
+  },
+  {
+   "filename": "contract_89_merger_agreement.txt",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "merger_agreement",
+    "contract_subtype": "other",
+    "doc_subclass": "all_cash",
+    "expected_doc_type": "merger_agreement",
+    "expected_subclass": "all_cash",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and follows the standard M&A structure with a Parent/Merger Sub counterparty, Effective Time mechanics, Merger Consideration set at '$23.50 per Share in cash', extensive representations and warranties, covenants, and closing conditions. Under rule 31, this title and machinery mandate the merger_agreement class. The consideration is purely monetary, satisfying rule 33 for doc_subclass 'all_cash'. Although the latter portion of the f",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 27561,
+    "completion_tokens": 1587,
+    "total_tokens": 29148,
+    "cost": null
+   }
+  },
+  {
+   "filename": "contract_5_merger_agreement.txt",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "merger_agreement",
+    "contract_subtype": "other",
+    "doc_subclass": "all_stock",
+    "expected_doc_type": "merger_agreement",
+    "expected_subclass": "mixed_cash_stock",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and contains standard M&A machinery: parties structured as Parent, Merger Subs, and Company; articles covering The Mergers, Reps & Warranties, Conditions to Closing, No-Solicitation covenants, and Termination Payments. The consideration structure centers on an 'Exchange Ratio' based on the Parent's ADS price, indicating a stock-based acquisition. Per Rule 31, this is classified as merger_agreement rather than contract.",
+    "doc_type_ok": true,
+    "subclass_ok": false,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "subclass_miss",
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 28124,
+    "completion_tokens": 2068,
+    "total_tokens": 30192,
+    "cost": null
+   }
+  },
+  {
+   "filename": "contract_150_merger_agreement.txt",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "merger_agreement",
+    "contract_subtype": "other",
+    "doc_subclass": "all_stock",
+    "expected_doc_type": "merger_agreement",
+    "expected_subclass": "all_stock",
+    "confidence": 0.98,
+    "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and contains classic M&A deal structures including a merger mechanics section, extensive representations and warranties, covenants, closing conditions, and termination fees. The consideration section (Section 1.5) specifies that Company Common Stock will be converted into shares of Parent Common Stock based on a fixed exchange ratio, with only mechanical cash payments for fractional shares, confirming an all-stock consideration typ",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 27669,
+    "completion_tokens": 1534,
+    "total_tokens": 29203,
+    "cost": null
+   }
+  },
+  {
+   "filename": "contract_66_merger_agreement.txt",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "merger_agreement",
+    "contract_subtype": "other",
+    "doc_subclass": "all_stock",
+    "expected_doc_type": "merger_agreement",
+    "expected_subclass": "all_stock",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and contains standard M&A deal structures including Merger Subs, Effective Time mechanics, capital stock conversion via an exchange ratio, extensive reps & warranties, covenants, and termination fees. Under rule 31, this title and operative machinery classify it as a merger_agreement. The consideration consists of Parent ADSs issued pursuant to an exchange ratio, with cash provided only for fractional shares, making it an all_stock",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 28165,
+    "completion_tokens": 1757,
+    "total_tokens": 29922,
+    "cost": null
+   }
+  },
+  {
+   "filename": "contract_99_merger_agreement.txt",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "merger_agreement",
+    "contract_subtype": "other",
+    "doc_subclass": "all_cash",
+    "expected_doc_type": "merger_agreement",
+    "expected_subclass": "all_cash",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and contains standard M&A machinery, including a Parent/Merger Sub structure, a tender offer followed by a merger, extensive representations and warranties, covenants, conditions to consummation, and closing mechanics. The consideration is explicitly stated as '$9.00 per Company Share... in cash', confirming an all-cash transaction. Under rule 31, this title and structure mandate classification as merger_agreement with an all_cash ",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 28042,
+    "completion_tokens": 863,
+    "total_tokens": 28905,
+    "cost": null
+   }
+  },
+  {
+   "filename": "contract_27_merger_agreement.txt",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "merger_agreement",
+    "contract_subtype": "other",
+    "doc_subclass": "mixed_cash_stock",
+    "expected_doc_type": "merger_agreement",
+    "expected_subclass": "mixed_cash_stock",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and contains standard M&A machinery including a Parent, Merger Sub, Company, merger effective time mechanics, representations and warranties, and closing conditions. Section 2.1 specifies the Merger Consideration consists of both cash ($220.00 per share) and shares of Parent Common Stock, triggering the mixed_cash_stock subclass under rule 33.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 27501,
+    "completion_tokens": 890,
+    "total_tokens": 28391,
+    "cost": null
+   }
+  },
+  {
+   "filename": "contract_100_merger_agreement.txt",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "merger_agreement",
+    "contract_subtype": "other",
+    "doc_subclass": "all_cash",
+    "expected_doc_type": "merger_agreement",
+    "expected_subclass": "all_stock",
+    "confidence": 0.98,
+    "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and contains standard M&A operative machinery including 'THE MERGER,' representations and warranties of the Company and Parent/Merger Sub, closing conditions, and termination provisions. The consideration section defines the Merger Consideration as '$56.00 in cash,' confirming an all-cash deal. Per rules 31 and 33, this is classified as a merger_agreement with doc_subclass all_cash.",
+    "doc_type_ok": true,
+    "subclass_ok": false,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "subclass_miss",
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 31103,
+    "completion_tokens": 1301,
+    "total_tokens": 32404,
     "cost": null
    }
   }
  ],
- "timestamp": "2026-08-09T20:39:28.310699+00:00"
+ "results": [
+  {
+   "filename": "OTISWORLDWIDECORP_04_03_2020-EX-10.4-INTELLECTUAL PROPERTY AGREEMENT by and among UNITED TECHNOLOGIES CORPORATION, OTIS WORLDWIDE CORPORATION and CARRIER ~1.PDF",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "ip",
+    "doc_subclass": "ip",
+    "expected_doc_type": "contract",
+    "expected_subclass": "IP",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'INTELLECTUAL PROPERTY AGREEMENT' and its operative provisions govern the assignment, licensing, and ownership of intellectual property rights among the parties. Pursuant to Rule 22, any agreement titled 'Intellectual Property Agreement' is classified under the 'ip' subtype, overriding any license-grant machinery present in the text.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 19282,
+    "completion_tokens": 1432,
+    "total_tokens": 20714,
+    "cost": null
+   }
+  },
+  {
+   "filename": "BIOFRONTERAAG_04_29_2019-EX-4.17-SUPPLY AGREEMENT.PDF",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "supply",
+    "doc_subclass": "supply",
+    "expected_doc_type": "contract",
+    "expected_subclass": "Supply",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'SUPPLY AGREEMENT' and its operative provisions govern the manufacture, forecasting, purchase orders, specifications, and delivery of pharmaceutical products from the Supplier to the Buyer. This aligns directly with the 'supply' contract family.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 19715,
+    "completion_tokens": 1073,
+    "total_tokens": 20788,
+    "cost": null
+   }
+  },
+  {
+   "filename": "AIRTECHINTERNATIONALGROUPINC_05_08_2000-EX-10.4-FRANCHISE AGREEMENT.PDF",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "franchise",
+    "doc_subclass": "franchise",
+    "expected_doc_type": "contract",
+    "expected_subclass": "Franchise",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'AIRSOPURE FRANCHISE AGREEMENT' and contains standard franchise operative clauses, including the grant of franchise rights, exclusive territory, initial franchise fee, ongoing royalty and advertising fees based on gross sales, mandatory compliance with an Operations Manual, trademark licensing for the branded system, and post-termination non-compete covenants. These elements definitively place it in the franchise family.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 22175,
+    "completion_tokens": 775,
+    "total_tokens": 22950,
+    "cost": null
+   }
+  },
+  {
+   "filename": "ReedsInc_20191113_10-Q_EX-10.4_11888303_EX-10.4_Development Agreement.pdf",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "development",
+    "doc_subclass": "development",
+    "expected_doc_type": "contract",
+    "expected_subclass": "Development",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'Recipe Development Agreement' and its operative clauses establish a Development Committee to approve milestones, outline obligations to create commercial production-ready products, and assign resulting IP to Reed's. These features align directly with the development family under rules 19 and 21, with no competing substantive machinery.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 12121,
+    "completion_tokens": 1194,
+    "total_tokens": 13315,
+    "cost": null
+   }
+  },
+  {
+   "filename": "ElPolloLocoHoldingsInc_20200306_10-K_EX-10.16_12041700_EX-10.16_Development Agreement.pdf",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "development",
+    "doc_subclass": "development",
+    "expected_doc_type": "contract",
+    "expected_subclass": "Development",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'EL POLLO LOCO\u00ae FRANCHISE DEVELOPMENT AGREEMENT' and its operative clauses focus on granting development rights, establishing a development schedule with site commitment and opening dates, and collecting development fees. Per rule 21, a 'Franchise Development Agreement' is classified under the development family, as the individual unit franchise agreements act only as the delivery mechanism for the developed locations.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 19364,
+    "completion_tokens": 1221,
+    "total_tokens": 20585,
+    "cost": null
+   }
+  },
+  {
+   "filename": "ELECTRAMECCANICA VEHICLES CORP. - Manufacturing Agreement .PDF",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "manufacturing",
+    "doc_subclass": "manufacturing",
+    "expected_doc_type": "contract",
+    "expected_subclass": "Manufacturing",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'MANUFACTURING AGREEMENT' and its operative provisions govern the production, specifications, purchase orders, pricing, and quality control of electric vehicles by the Manufacturer for EMV. This squarely aligns with the manufacturing contract family.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 15935,
+    "completion_tokens": 1208,
+    "total_tokens": 17143,
+    "cost": null
+   }
+  },
+  {
+   "filename": "DRAGONSYSTEMSINC_01_08_1999-EX-10.17-OUTSOURCING AGREEMENT.PDF",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "outsourcing",
+    "doc_subclass": "outsourcing",
+    "expected_doc_type": "contract",
+    "expected_subclass": "Outsourcing",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'OUTSOURCING AGREEMENT'. Under Rule 24, any agreement bearing the 'Outsourcing Agreement' title is classified as outsourcing, regardless of whether the operative clauses detail manufacturing, production, or other service obligations. The substantive form aligns directly with the outsourcing contract subtype.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 8065,
+    "completion_tokens": 1178,
+    "total_tokens": 9243,
+    "cost": null
+   }
+  },
+  {
+   "filename": "BellringBrandsInc_20190920_S-1_EX-10.12_11817081_EX-10.12_Manufacturing Agreement1.pdf",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "manufacturing",
+    "doc_subclass": "manufacturing",
+    "expected_doc_type": "contract",
+    "expected_subclass": "Manufacturing",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'MANUFACTURING AGREEMENT' and its operative clauses govern the contract manufacturing of food products, including production schedules, minimum annual order volumes, purchase orders, delivery terms, pricing, quality control, and risk of loss. This squarely matches the manufacturing family.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 15078,
+    "completion_tokens": 686,
+    "total_tokens": 15764,
+    "cost": null
+   }
+  },
+  {
+   "filename": "RangeResourcesLouisianaInc_20150417_8-K_EX-10.5_9045501_EX-10.5_Transportation Agreement.pdf",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "transportation",
+    "doc_subclass": "transportation",
+    "expected_doc_type": "contract",
+    "expected_subclass": "Transportation",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'TRANSPORTATION SERVICES AGREEMENT' and its operative provisions govern the design, construction, and operation of a pipeline system to transport Shipper Product, including tariff rates, nominations, common carrier compliance, and payment terms. This directly aligns with the transportation agreement family.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 28513,
+    "completion_tokens": 831,
+    "total_tokens": 29344,
+    "cost": null
+   }
+  },
+  {
+   "filename": "BEYONDCOMCORP_08_03_2000-EX-10.2-CO-HOSTING AGREEMENT.PDF",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "hosting",
+    "doc_subclass": "hosting",
+    "expected_doc_type": "contract",
+    "expected_subclass": "Hosting",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'CO-HOSTING AGREEMENT'. Per Rule 14, a Co-Hosting Agreement is specifically classified as hosting. The operative clauses detail the provision of hosted internet locations, hot links, and related marketing placements, confirming the hosting family classification.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 18023,
+    "completion_tokens": 1319,
+    "total_tokens": 19342,
+    "cost": null
+   }
+  },
+  {
+   "filename": "0001561743-13-000006_exhibit32amendedandrestate.htm",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "corporate_record",
+    "contract_subtype": "other",
+    "doc_subclass": "articles_of_incorporation",
+    "expected_doc_type": "corporate_record",
+    "expected_subclass": "articles_of_incorporation",
+    "confidence": 0.98,
+    "reasoning": "The document is explicitly titled 'Amended and Restated Certificate of Incorporation' and contains standard corporate governance provisions regarding authorized capital, stockholder rights, director liability, and indemnification. Per Rule 32, the SEC exhibit wrapper ('EX-3.2') does not change the substantive form, making it a corporate_record. Under Rule 33, the specific record type is articles_of_incorporation.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 12564,
+    "completion_tokens": 1068,
+    "total_tokens": 13632,
+    "cost": null
+   }
+  },
+  {
+   "filename": "0001079974-08-000839_artdimensionss1x42_9252008.htm",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "corporate_record",
+    "contract_subtype": "other",
+    "doc_subclass": "rights_instrument",
+    "expected_doc_type": "corporate_record",
+    "expected_subclass": "rights_instrument",
+    "confidence": 0.85,
+    "reasoning": "The document is a Warrant Certificate (Exhibit 4.2) filed as part of an SEC registration statement. It establishes the terms under which the holder may purchase shares of common stock, functioning as an instrument defining securityholder rights. Per corpus conventions for EX-4.x exhibits and rule 33, this substantive form is classified as a corporate record with the rights_instrument subclass.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 11777,
+    "completion_tokens": 2349,
+    "total_tokens": 14126,
+    "cost": null
+   }
+  },
+  {
+   "filename": "0001547903-13-000020_a41specimenclassacommonsto.htm",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "corporate_record",
+    "contract_subtype": "other",
+    "doc_subclass": "other",
+    "expected_doc_type": "corporate_record",
+    "expected_subclass": "articles_of_incorporation",
+    "confidence": 0.95,
+    "reasoning": "The document is a specimen stock certificate for Class A Common Stock of NMI Holdings, Inc., presented as Exhibit 4.1. Per rule 3, the SEC exhibit wrapper is disregarded in favor of the substantive form, which is a corporate record evidencing share ownership. It does not match any of the specifically enumerated record types in rule 33, so doc_subclass is set to 'other'. Note: contract_subtype must be null when doc_type is not contract; corrected to null.",
+    "doc_type_ok": true,
+    "subclass_ok": false,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "subclass_miss",
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 7176,
+    "completion_tokens": 2378,
+    "total_tokens": 9554,
+    "cost": null
+   }
+  },
+  {
+   "filename": "0001079974-08-000839_artdimensionss1x31_9252008.htm",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "corporate_record",
+    "contract_subtype": "other",
+    "doc_subclass": "articles_of_incorporation",
+    "expected_doc_type": "corporate_record",
+    "expected_subclass": "articles_of_incorporation",
+    "confidence": 0.95,
+    "reasoning": "The document is filed as EXHIBIT 3.1 and explicitly states it is 'incorporated into the foregoing Articles of Incorporation.' Its substantive provisions cover authorized capital, internal corporate governance, director indemnification, and shareholder voting mechanics, which are hallmark features of articles of incorporation. Per rule 32, the SEC exhibit wrapper does not alter the substantive classification, and per rule 33, the record type is correctly identified as articles_of_incorporation.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 8568,
+    "completion_tokens": 1657,
+    "total_tokens": 10225,
+    "cost": null
+   }
+  },
+  {
+   "filename": "0001078782-12-001347_s1_ex3z2.htm",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "corporate_record",
+    "contract_subtype": "other",
+    "doc_subclass": "bylaws",
+    "expected_doc_type": "corporate_record",
+    "expected_subclass": "articles_of_incorporation",
+    "confidence": 0.98,
+    "reasoning": "The document is explicitly titled 'BYLAWS OF SIMPLE PRODUCTS CORPORATION' and contains standard internal governance provisions organized into Articles covering offices, stockholder/director meetings, officers, stock certificates, and indemnification. Per Rule 32, corporate records filed as SEC exhibits (e.g., EX-3.2) retain their substantive classification as corporate records rather than compliance filings. The title directly matches the 'bylaws' subclass per Rule 33.",
+    "doc_type_ok": true,
+    "subclass_ok": false,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "subclass_miss",
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 13733,
+    "completion_tokens": 1541,
+    "total_tokens": 15274,
+    "cost": null
+   }
+  },
+  {
+   "filename": "0001615774-14-000417_s100510_ex4-6.htm",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "contract",
+    "contract_subtype": "other",
+    "doc_subclass": "other",
+    "expected_doc_type": "corporate_record",
+    "expected_subclass": "rights_instrument",
+    "confidence": 0.9,
+    "reasoning": "The document is a formal 'WARRANT AGREEMENT' executed between the issuing company and a warrant agent, detailing the issuance, exercise, redemption, adjustment, and transfer mechanics of the warrants. Its substantive form is a bilateral contract governing financial instrument terms. It does not fit any specific commercial family (e.g., license, distribution, service, or agency) and is not a corporate governance record or regulatory filing, thus classifying it as 'other'. The SEC exhibit wrapper does not change its substantive contractual nature per rule 3.",
+    "doc_type_ok": false,
+    "subclass_ok": true,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "doc_type_miss",
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 17765,
+    "completion_tokens": 2007,
+    "total_tokens": 19772,
+    "cost": null
+   }
+  },
+  {
+   "filename": "0001144204-19-043489_tv528080_ex3-2.htm",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "corporate_record",
+    "contract_subtype": "other",
+    "doc_subclass": "bylaws",
+    "expected_doc_type": "corporate_record",
+    "expected_subclass": "articles_of_incorporation",
+    "confidence": 0.95,
+    "reasoning": "The document is labeled EXHIBIT 3.2 and contains the Organizational Minutes of the Initial Board of Directors along with the full text of the BY-LAWS OF INCUMAKER, INC. Per Rule 32, corporate governance records like bylaws attached to SEC filings as exhibits retain their substantive classification as corporate_record rather than compliance_filing. Per Rule 33, the doc_subclass is correctly identified as 'bylaws' based on the document's own title. No competing signals are present.",
+    "doc_type_ok": true,
+    "subclass_ok": false,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "subclass_miss",
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 13546,
+    "completion_tokens": 960,
+    "total_tokens": 14506,
+    "cost": null
+   }
+  },
+  {
+   "filename": "0001469709-14-000003_ex3_2apg.htm",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "corporate_record",
+    "contract_subtype": "other",
+    "doc_subclass": "bylaws",
+    "expected_doc_type": "corporate_record",
+    "expected_subclass": "articles_of_incorporation",
+    "confidence": 0.98,
+    "reasoning": "The document is explicitly titled 'EXHIBIT 3.2 BYLAWS' and contains standard internal governance provisions for a Nevada corporation, including sections on shareholder meetings, board of directors, officers, and amendment procedures. Per rule 32, exhibits filed as corporate governance records are classified as corporate_record, and per rule 33, the subclass is bylaws.",
+    "doc_type_ok": true,
+    "subclass_ok": false,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "subclass_miss",
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 12543,
+    "completion_tokens": 1114,
+    "total_tokens": 13657,
+    "cost": null
+   }
+  },
+  {
+   "filename": "0001469709-14-000529_ex3_2apg.htm",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "corporate_record",
+    "contract_subtype": "other",
+    "doc_subclass": "bylaws",
+    "expected_doc_type": "corporate_record",
+    "expected_subclass": "powers_of_attorney",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'BYLAWS OF SWEETS & TREATS, INC.' and contains standard corporate governance provisions regarding stockholders, directors, officers, meetings, voting, and amendment procedures. Per Rule 32, corporate records such as bylaws filed as SEC exhibits (here, Exhibit 3.2) retain their substantive classification as corporate_record rather than compliance_filing. The content and exhibit wrapper confirm this classification.",
+    "doc_type_ok": true,
+    "subclass_ok": false,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "subclass_miss",
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 13462,
+    "completion_tokens": 1232,
+    "total_tokens": 14694,
+    "cost": null
+   }
+  },
+  {
+   "filename": "0001547903-13-000006_a41specimenclassacommonsto.htm",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "corporate_record",
+    "contract_subtype": "other",
+    "doc_subclass": "other",
+    "expected_doc_type": "corporate_record",
+    "expected_subclass": "articles_of_incorporation",
+    "confidence": 0.95,
+    "reasoning": "The document is a specimen stock certificate for Class A Common Stock of NMI Holdings, Inc. It certifies share ownership, outlines transfer and assignment procedures, and features corporate seal and officer signature blocks. Its substantive form is a corporate securities/governance instrument rather than a commercial contract or regulatory filing. Since it does not match the specific record-type subcategories listed (e.g., bylaws, articles of incorporation), it is classified as corporate_record with doc_subclass 'other'.",
+    "doc_type_ok": true,
+    "subclass_ok": false,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "subclass_miss",
+    "truncated": false,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 7176,
+    "completion_tokens": 2359,
+    "total_tokens": 9535,
+    "cost": null
+   }
+  },
+  {
+   "filename": "contract_105_merger_agreement.txt",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "merger_agreement",
+    "contract_subtype": "other",
+    "doc_subclass": "all_stock",
+    "expected_doc_type": "merger_agreement",
+    "expected_subclass": "mixed_cash_stock",
+    "confidence": 0.95,
+    "reasoning": "The document title is explicitly 'AGREEMENT AND PLAN OF MERGER'. It contains classic M&A deal structure provisions, including parties labeled as Parent, US Holdco, Merger Sub, and Company; dedicated articles for 'THE MERGER', 'EFFECT OF THE MERGER ON CAPITAL STOCK', representations and warranties, covenants, conditions precedent, and termination rights. The consideration mechanics reference 'Parent Share Issuance' and a 'Parent Equity Conversion Ratio' based on a 'Cash Equivalent Consideration' (standard for cross-border stock conversions), confirming an all-stock transaction. Under Rule 31, this is classified as a merger_agreement.",
+    "doc_type_ok": true,
+    "subclass_ok": false,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "subclass_miss",
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 28226,
+    "completion_tokens": 1946,
+    "total_tokens": 30172,
+    "cost": null
+   }
+  },
+  {
+   "filename": "contract_92_merger_agreement.txt",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "merger_agreement",
+    "contract_subtype": "other",
+    "doc_subclass": "all_cash",
+    "expected_doc_type": "merger_agreement",
+    "expected_subclass": "all_cash",
+    "confidence": 0.98,
+    "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and contains standard M&A deal structures, including Parent/Merger Sub counterparty designations, merger mechanics, representations and warranties, covenants, conditions precedent, and termination fees. The recitals specify that Company stock will be converted into a fixed cash amount per share ($14.51, amended to $16.99), indicating an all-cash consideration structure. Thus, it firmly belongs to the merger_agreement class with an ",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 27803,
+    "completion_tokens": 989,
+    "total_tokens": 28792,
+    "cost": null
+   }
+  },
+  {
+   "filename": "contract_145_merger_agreement.txt",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "merger_agreement",
+    "contract_subtype": "other",
+    "doc_subclass": "all_stock",
+    "expected_doc_type": "merger_agreement",
+    "expected_subclass": "other",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and contains standard M&A operative machinery including 'THE MERGER', 'Representations and Warranties', 'Conditions to the Merger', 'Termination', and an 'Exchange Ratio' converting East Common Stock into Central Common Stock. Per Rule 31, this title and structure mandate classification as merger_agreement. The consideration section (Section 1.6) specifies that shares will be converted solely into shares of Central Common Stock (with cash provided only for fractional share interests), which aligns with the all_stock subclass.",
+    "doc_type_ok": true,
+    "subclass_ok": false,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "subclass_miss",
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 28493,
+    "completion_tokens": 1252,
+    "total_tokens": 29745,
+    "cost": null
+   }
+  },
+  {
+   "filename": "contract_89_merger_agreement.txt",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "merger_agreement",
+    "contract_subtype": "other",
+    "doc_subclass": "all_cash",
+    "expected_doc_type": "merger_agreement",
+    "expected_subclass": "all_cash",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and follows the standard M&A structure with a Parent/Merger Sub counterparty, Effective Time mechanics, Merger Consideration set at '$23.50 per Share in cash', extensive representations and warranties, covenants, and closing conditions. Under rule 31, this title and machinery mandate the merger_agreement class. The consideration is purely monetary, satisfying rule 33 for doc_subclass 'all_cash'. Although the latter portion of the f",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 27561,
+    "completion_tokens": 1587,
+    "total_tokens": 29148,
+    "cost": null
+   }
+  },
+  {
+   "filename": "contract_5_merger_agreement.txt",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "merger_agreement",
+    "contract_subtype": "other",
+    "doc_subclass": "all_stock",
+    "expected_doc_type": "merger_agreement",
+    "expected_subclass": "mixed_cash_stock",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and contains standard M&A machinery: parties structured as Parent, Merger Subs, and Company; articles covering The Mergers, Reps & Warranties, Conditions to Closing, No-Solicitation covenants, and Termination Payments. The consideration structure centers on an 'Exchange Ratio' based on the Parent's ADS price, indicating a stock-based acquisition. Per Rule 31, this is classified as merger_agreement rather than contract.",
+    "doc_type_ok": true,
+    "subclass_ok": false,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "subclass_miss",
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 28124,
+    "completion_tokens": 2068,
+    "total_tokens": 30192,
+    "cost": null
+   }
+  },
+  {
+   "filename": "contract_150_merger_agreement.txt",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "merger_agreement",
+    "contract_subtype": "other",
+    "doc_subclass": "all_stock",
+    "expected_doc_type": "merger_agreement",
+    "expected_subclass": "all_stock",
+    "confidence": 0.98,
+    "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and contains classic M&A deal structures including a merger mechanics section, extensive representations and warranties, covenants, closing conditions, and termination fees. The consideration section (Section 1.5) specifies that Company Common Stock will be converted into shares of Parent Common Stock based on a fixed exchange ratio, with only mechanical cash payments for fractional shares, confirming an all-stock consideration typ",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 27669,
+    "completion_tokens": 1534,
+    "total_tokens": 29203,
+    "cost": null
+   }
+  },
+  {
+   "filename": "contract_66_merger_agreement.txt",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "merger_agreement",
+    "contract_subtype": "other",
+    "doc_subclass": "all_stock",
+    "expected_doc_type": "merger_agreement",
+    "expected_subclass": "all_stock",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and contains standard M&A deal structures including Merger Subs, Effective Time mechanics, capital stock conversion via an exchange ratio, extensive reps & warranties, covenants, and termination fees. Under rule 31, this title and operative machinery classify it as a merger_agreement. The consideration consists of Parent ADSs issued pursuant to an exchange ratio, with cash provided only for fractional shares, making it an all_stock",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 28165,
+    "completion_tokens": 1757,
+    "total_tokens": 29922,
+    "cost": null
+   }
+  },
+  {
+   "filename": "contract_99_merger_agreement.txt",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "merger_agreement",
+    "contract_subtype": "other",
+    "doc_subclass": "all_cash",
+    "expected_doc_type": "merger_agreement",
+    "expected_subclass": "all_cash",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and contains standard M&A machinery, including a Parent/Merger Sub structure, a tender offer followed by a merger, extensive representations and warranties, covenants, conditions to consummation, and closing mechanics. The consideration is explicitly stated as '$9.00 per Company Share... in cash', confirming an all-cash transaction. Under rule 31, this title and structure mandate classification as merger_agreement with an all_cash ",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 28042,
+    "completion_tokens": 863,
+    "total_tokens": 28905,
+    "cost": null
+   }
+  },
+  {
+   "filename": "contract_27_merger_agreement.txt",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "merger_agreement",
+    "contract_subtype": "other",
+    "doc_subclass": "mixed_cash_stock",
+    "expected_doc_type": "merger_agreement",
+    "expected_subclass": "mixed_cash_stock",
+    "confidence": 0.95,
+    "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and contains standard M&A machinery including a Parent, Merger Sub, Company, merger effective time mechanics, representations and warranties, and closing conditions. Section 2.1 specifies the Merger Consideration consists of both cash ($220.00 per share) and shares of Parent Common Stock, triggering the mixed_cash_stock subclass under rule 33.",
+    "doc_type_ok": true,
+    "subclass_ok": true,
+    "subclass_ok_equiv": true,
+    "exact_match": true,
+    "failure_mode": null,
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 27501,
+    "completion_tokens": 890,
+    "total_tokens": 28391,
+    "cost": null
+   }
+  },
+  {
+   "filename": "contract_100_merger_agreement.txt",
+   "status": "completed",
+   "error": null,
+   "sorter": {
+    "doc_type": "merger_agreement",
+    "contract_subtype": "other",
+    "doc_subclass": "all_cash",
+    "expected_doc_type": "merger_agreement",
+    "expected_subclass": "all_stock",
+    "confidence": 0.98,
+    "reasoning": "The document is explicitly titled 'AGREEMENT AND PLAN OF MERGER' and contains standard M&A operative machinery including 'THE MERGER,' representations and warranties of the Company and Parent/Merger Sub, closing conditions, and termination provisions. The consideration section defines the Merger Consideration as '$56.00 in cash,' confirming an all-cash deal. Per rules 31 and 33, this is classified as a merger_agreement with doc_subclass all_cash.",
+    "doc_type_ok": true,
+    "subclass_ok": false,
+    "subclass_ok_equiv": false,
+    "exact_match": false,
+    "failure_mode": "subclass_miss",
+    "truncated": true,
+    "input_mode": "text",
+    "fallback_reason": null
+   },
+   "sorter_tokens": {
+    "prompt_tokens": 31103,
+    "completion_tokens": 1301,
+    "total_tokens": 32404,
+    "cost": null
+   }
+  }
+ ],
+ "tokens": {
+  "sorter": {
+   "prompt_tokens": 579268,
+   "completion_tokens": 41769,
+   "total_tokens": 621037,
+   "cost_usd": 0.0,
+   "cost_total_usd": 0,
+   "cost_estimated_usd": 0.022808,
+   "rows_with_usage": 30
+  },
+  "total": {
+   "prompt_tokens": 579268,
+   "completion_tokens": 41769,
+   "total_tokens": 621037,
+   "cost_usd": 0.0,
+   "cost_total_usd": 0,
+   "cost_estimated_usd": 0.022808,
+   "rows_with_usage": 30
+  }
+ },
+ "git": {
+  "commit": "64420c6",
+  "dirty": true
+ },
+ "timestamp": "2026-08-26T17:58:16.272567+00:00"
 }

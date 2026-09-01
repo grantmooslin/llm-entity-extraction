@@ -147,6 +147,29 @@ def test_scores_emitted_as_openinference_annotations(fake_otel):
     assert root.attributes["annotations.0.label"] == "incorrect"
 
 
+def test_phoenix_endpoint_reachable_false_on_refused(monkeypatch):
+    """A down Phoenix must not attach a BatchSpanProcessor (KANBAN-103)."""
+    import urllib.error
+
+    def boom(*_a, **_k):
+        raise urllib.error.URLError("Connection refused")
+
+    monkeypatch.setattr("urllib.request.urlopen", boom)
+    assert pt.phoenix_endpoint_reachable(timeout=0.05) is False
+
+
+def test_phoenix_endpoint_reachable_true_on_200(monkeypatch):
+    class _Resp:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_a):
+            return False
+
+    monkeypatch.setattr("urllib.request.urlopen", lambda *_a, **_k: _Resp())
+    assert pt.phoenix_endpoint_reachable(timeout=0.05) is True
+
+
 def test_disabled_tracer_is_noop(fake_otel, monkeypatch):
     monkeypatch.setattr(pt, "phoenix_enabled", lambda: False)
     tracer = pt.PhoenixTracer(session_id="exp_ce", tags=["t"], trace_name="contracteval")

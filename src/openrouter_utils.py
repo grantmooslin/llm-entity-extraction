@@ -7,12 +7,48 @@ code changes: OpenRouter (default), a local Ollama server, or a self-hosted vLLM
 
 import os
 
+# KANBAN-096: the URL is now resolved AT CLIENT-BUILD TIME, not import time.
+# Import-time binding meant setting OPENROUTER_BASE_URL via dotenv (loaded
+# lazily by src.env_utils at client construction) never took effect — only
+# real shell exports worked, which silently broke the Modal-vLLM flip story.
+# The resolver functions below are the seam every consumer must use.
+DEFAULT_OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+
+# Deprecated frozen snapshots (kept for backward compatibility with any
+# external importer); in-repo consumers use resolve_*() instead.
 OPENROUTER_BASE_URL = os.environ.get(
-    "OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"
+    "OPENROUTER_BASE_URL", DEFAULT_OPENROUTER_BASE_URL
 ).rstrip("/")
 OPENROUTER_API_URL = os.environ.get(
     "OPENROUTER_API_URL", f"{OPENROUTER_BASE_URL}/chat/completions"
 )
+
+
+def resolve_openrouter_base_url() -> str:
+    """Return the OpenAI-compatible API base, honoring ``OPENROUTER_BASE_URL``.
+
+    Read at call time so dotenv-loaded configuration (``src.env_utils.load_env``
+    runs lazily right before client construction) and test monkeypatches both
+    take effect. This is the entity pipeline's provider seam: point it at
+    OpenRouter (default), a local Ollama server, or a Modal-hosted vLLM
+    deployment without code changes.
+    """
+    return os.environ.get("OPENROUTER_BASE_URL", DEFAULT_OPENROUTER_BASE_URL).rstrip(
+        "/"
+    )
+
+
+def resolve_openrouter_api_url() -> str:
+    """Return the chat-completions endpoint, resolved at call time.
+
+    ``OPENROUTER_API_URL`` overrides wholesale when set; otherwise the
+    standard ``{base}/chat/completions`` shape is composed from
+    :func:`resolve_openrouter_base_url`.
+    """
+    override = os.environ.get("OPENROUTER_API_URL")
+    if override:
+        return override
+    return f"{resolve_openrouter_base_url()}/chat/completions"
 
 OUTPUT_FORMAT_MARKER = "## Output format"
 

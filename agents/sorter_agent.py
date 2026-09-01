@@ -40,8 +40,28 @@ MERGER_AGREEMENT_CLASS = {
     "description": "Merger and acquisition agreements: agreements and plans of "
                    "merger, share/asset purchase agreements (MAUD corpus)",
 }
-DOCCLASS_CLASSES = DOC_CLASSES + [MERGER_AGREEMENT_CLASS]
+# Insurance claim documentation (docclass-merged v5+ / docclass-pilot GT):
+# FNOL forms, adjuster reports/estimates, demand packages, coverage
+# determinations, reservation-of-rights and denial letters, EOB statements.
+INSURANCE_CLAIM_CLASS = {
+    "key": "insurance_claim",
+    "label": "Insurance Claim",
+    "description": "Insurance claim documentation: FNOL forms, adjuster reports "
+                   "and estimates, demand packages, coverage determinations, "
+                   "reservation-of-rights and denial letters, EOB statements",
+}
+DOCCLASS_CLASSES = DOC_CLASSES + [MERGER_AGREEMENT_CLASS, INSURANCE_CLAIM_CLASS]
 DOCCLASS_CLASS_KEYS = [d["key"] for d in DOCCLASS_CLASSES]
+
+# Pilot class universe (KANBAN-090 lineage, docclass-merged/docclass-pilot GT):
+# the 5 primary classes the ground truth actually contains. The three shared
+# classes absent from every GT row (due_diligence, compliance_filing,
+# court_opinion) stay available on the extended surface but are excluded here
+# so the option list matches the data exactly.
+PILOT_CLASS_KEYS = ["contract", "corporate_record", "correspondence",
+                    "insurance_claim", "merger_agreement"]
+DOCCLASS_PILOT_CLASSES = [c for c in DOCCLASS_CLASSES if c["key"] in PILOT_CLASS_KEYS]
+DOCCLASS_PILOT_CLASS_KEYS = [d["key"] for d in DOCCLASS_PILOT_CLASSES]
 
 # Second-level dimension for non-contract doc classes (data-necessitated
 # granularity): consideration type for merger agreements (MAUD expert GT),
@@ -81,9 +101,41 @@ CORPORATE_RECORD_SUBCLASSES = [
      "description": "Officer's certificates (e.g. of incumbency)"},
 ]
 DOC_SUBCLASS_UNKNOWN = "other"
-DOC_SUBCLASSES = MERGER_SUBCLASSES + CORPORATE_RECORD_SUBCLASSES + [
-    {"key": DOC_SUBCLASS_UNKNOWN, "label": "Other", "description": "No matching subclass"}
+CORRESPONDENCE_SUBCLASSES = [
+    {"key": "demand", "label": "Demand Letter",
+     "description": "Payment/performance demand from a party (non-attorney)"},
+    {"key": "attorney_demand", "label": "Attorney Demand Letter",
+     "description": "Demand letter issued by counsel on a law-firm letterhead"},
+    {"key": "meeting_request", "label": "Meeting Request",
+     "description": "Request to schedule/convene a meeting or call"},
+    {"key": "press_release", "label": "Press Release",
+     "description": "Public announcement distributed to media"},
+    {"key": "memo", "label": "Memorandum",
+     "description": "Internal memorandum (TO/FROM/RE or memo header)"},
+    {"key": "email", "label": "Email",
+     "description": "Email message thread (From:/To:/Subject: headers)"},
+    {"key": "letter", "label": "General Letter",
+     "description": "General business/legal correspondence letter"},
+    {"key": "notice", "label": "Notice",
+     "description": "Formal notice: annual-meeting notices, regulatory notices, "
+                    "default/termination notices when not demanding payment"},
 ]
+INSURANCE_CLAIM_SUBCLASSES = [
+    {"key": "carrier", "label": "Carrier Document",
+     "description": "Insurer/carrier-issued claim document (coverage "
+                    "determination, denial, reservation of rights, adjuster "
+                    "report issued by the carrier)"},
+    {"key": "pde", "label": "Prescription Drug Event (PDE) Record",
+     "description": "Pharmacy/prescription drug event claim record"},
+    {"key": "outpatient", "label": "Outpatient Claim",
+     "description": "Outpatient medical claim/EOB documentation"},
+    {"key": "inpatient", "label": "Inpatient Claim",
+     "description": "Inpatient medical claim/EOB documentation"},
+]
+DOC_SUBCLASSES = (MERGER_SUBCLASSES + CORPORATE_RECORD_SUBCLASSES
+                  + CORRESPONDENCE_SUBCLASSES + INSURANCE_CLAIM_SUBCLASSES + [
+    {"key": DOC_SUBCLASS_UNKNOWN, "label": "Other", "description": "No matching subclass"}
+])
 DOC_SUBCLASS_KEYS = [s["key"] for s in DOC_SUBCLASSES]
 
 # Subclass dimension per doc class: which subclass enum applies to which
@@ -91,6 +143,8 @@ DOC_SUBCLASS_KEYS = [s["key"] for s in DOC_SUBCLASSES]
 SUBCLASS_DIMENSIONS: dict[str, list[dict]] = {
     "merger_agreement": MERGER_SUBCLASSES,
     "corporate_record": CORPORATE_RECORD_SUBCLASSES,
+    "correspondence": CORRESPONDENCE_SUBCLASSES,
+    "insurance_claim": INSURANCE_CLAIM_SUBCLASSES,
 }
 
 # Common phrasings that do not normalize to their key (singular/plural,
@@ -259,12 +313,101 @@ DOCCLASS_SCHEMA = build_structured_schema(
             "enum": DOC_SUBCLASS_KEYS,
             "description": "The second-level class: consideration type when doc_type is "
                            "merger_agreement, record type when doc_type is corporate_record, "
+                           "correspondence type when doc_type is correspondence (demand, "
+                           "attorney_demand, meeting_request, press_release, memo, email, "
+                           "letter, notice), claim-document type when doc_type is "
+                           "insurance_claim (carrier, pde, outpatient, inpatient), "
                            "null otherwise. See the subclass list in the prompt.",
         },
         "confidence": {"type": "number", "minimum": 0.0, "maximum": 1.0},
         "reasoning": {"type": "string"},
     },
     title="DocClassClassificationOutput",
+)
+
+# Pilot schema: same shape over the 5-class pilot universe (the classes the
+# docclass-merged / docclass-pilot ground truth actually contains).
+DOCCLASS_PILOT_SCHEMA = build_structured_schema(
+    {
+        "doc_type": {"type": "string", "enum": DOCCLASS_PILOT_CLASS_KEYS},
+        "contract_subtype": {
+            "type": ["string", "null"],
+            "enum": CONTRACT_SUBTYPE_KEYS + [SUBTYPE_UNKNOWN],
+            "description": "The contract family/subgroup — REQUIRED when doc_type is "
+                           "contract, null otherwise. See the subtype list in the prompt.",
+        },
+        "doc_subclass": {
+            "type": ["string", "null"],
+            "enum": DOC_SUBCLASS_KEYS,
+            "description": DOCCLASS_SCHEMA["properties"]["doc_subclass"]["description"],
+        },
+        "confidence": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+        "reasoning": {"type": "string"},
+    },
+    title="DocClassPilotClassificationOutput",
+)
+
+# Correspondence-only eval schema (KANBAN-103): the docclass contract plus
+# sentiment polarity. Used ONLY by the Enron correspondence runner so the
+# CUAD/MAUD/S-1 docclass evals keep their existing output shape.
+SENTIMENT_LABELS = ("negative", "neutral", "positive")
+SENTIMENT_SCORE_BAND = 0.25  # |pred - gt| within this band counts as a hit
+SENTIMENT_LABEL_THRESHOLDS = (-0.15, 0.15)  # score → label agreement band
+
+
+def normalize_sentiment_label(value) -> str | None:
+    """Coerce a raw sentiment label to negative/neutral/positive, or None."""
+    if value is None:
+        return None
+    raw = str(value).strip().lower()
+    return raw if raw in SENTIMENT_LABELS else None
+
+
+def normalize_sentiment_score(value) -> float | None:
+    """Parse and clamp a sentiment score to [-1.0, 1.0], or None."""
+    if value is None or value == "":
+        return None
+    try:
+        score = float(value)
+    except (TypeError, ValueError):
+        return None
+    if score != score:  # NaN
+        return None
+    return max(-1.0, min(1.0, score))
+
+
+def sentiment_label_from_score(score: float | None) -> str | None:
+    """Derive a sentiment label from a clamped score (lexicon-style cutoffs)."""
+    if score is None:
+        return None
+    lo, hi = SENTIMENT_LABEL_THRESHOLDS
+    if score < lo:
+        return "negative"
+    if score > hi:
+        return "positive"
+    return "neutral"
+
+
+CORRESPONDENCE_EVAL_SCHEMA = build_structured_schema(
+    {
+        **DOCCLASS_SCHEMA["properties"],
+        "sentiment_score": {
+            "type": "number",
+            "minimum": -1.0,
+            "maximum": 1.0,
+            "description": "Polarity of the correspondence content in [-1.0, 1.0] "
+                           "(negative = complaint/anger/threat/bad news; 0 = factual/"
+                           "routine; positive = thanks/approval/good news).",
+        },
+        "sentiment_label": {
+            "type": "string",
+            "enum": list(SENTIMENT_LABELS),
+            "description": "Polarity bucket: negative, neutral, or positive. Must "
+                           "agree with sentiment_score (score < -0.15 → negative; "
+                           "score > 0.15 → positive; otherwise neutral).",
+        },
+    },
+    title="CorrespondenceClassificationOutput",
 )
 
 
@@ -359,7 +502,8 @@ class SorterAgent(BaseAgent):
                     confidence=confidence)
         return (doc_type, contract_subtype, confidence, reasoning)
 
-    def classify_json(self, doc_text: str, subtype_focus: bool = False) -> dict:
+    def classify_json(self, doc_text: str, subtype_focus: bool = False,
+                      correspondence_focus: bool = False) -> dict:
         """Classify and return the raw structured dict (used by eval loops).
 
         With ``subtype_focus=True`` the model is explicitly TASKED with
@@ -368,6 +512,11 @@ class SorterAgent(BaseAgent):
         decision being scored — used by the chained eval, whose rows are all
         contracts, so the sorter scores represent the subtype task rather
         than a general doc-type gate.
+
+        With ``correspondence_focus=True`` the model is tasked with the
+        correspondence-only surface (KANBAN-103): ``doc_type`` is
+        correspondence, ``doc_subclass`` is the communication function, and
+        ``sentiment_score`` / ``sentiment_label`` score content polarity.
         """
         truncated = self.truncate_input(doc_text)
         if subtype_focus:
@@ -377,6 +526,17 @@ class SorterAgent(BaseAgent):
                 "SUBTYPE: assign the contract_subtype key that best matches its "
                 "agreement family, and confirm doc_type as \"contract\".\n\n"
                 f"Contract text:\n\n{truncated}"
+            )
+        elif correspondence_focus:
+            user_message = (
+                "This document IS correspondence (all documents in this task "
+                "are correspondence). Assign doc_type as \"correspondence\", "
+                "the communication-function doc_subclass (demand, "
+                "attorney_demand, meeting_request, press_release, memo, email, "
+                "letter, or notice — classify by what the communication DOES, "
+                "not its delivery format), and a sentiment_score / "
+                "sentiment_label for the content.\n\n"
+                f"Correspondence text:\n\n{truncated}"
             )
         else:
             user_message = f"Classify this legal document:\n\n{truncated}"
@@ -396,11 +556,19 @@ class SorterAgent(BaseAgent):
         result["contract_subtype"] = normalize_subtype(
             result.get("contract_subtype") if doc_type == "contract" else None
         )
-        if "doc_subclass" in (self.schema.get("properties") or {}):
+        props = self.schema.get("properties") or {}
+        if "doc_subclass" in props:
             result["doc_subclass"] = normalize_doc_subclass(
                 result.get("doc_subclass") if doc_type in SUBCLASS_DIMENSIONS else None,
                 doc_type,
             )
+        if "sentiment_label" in props or "sentiment_score" in props:
+            score = normalize_sentiment_score(result.get("sentiment_score"))
+            label = normalize_sentiment_label(result.get("sentiment_label"))
+            if label is None:
+                label = sentiment_label_from_score(score)
+            result["sentiment_score"] = score
+            result["sentiment_label"] = label
         return result
 
     # ------------------------------------------------------------------

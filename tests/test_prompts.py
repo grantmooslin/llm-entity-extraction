@@ -451,6 +451,48 @@ def test_sorter_docclass_v6_registered_and_pins_rule_36_sharpened():
     assert "ILLUSTRATIVE, not exhaustive" not in SORTER_DOCCLASS_PROMPT_V4
 
 
+def test_sorter_docclass_v7_registered_and_pins_extended_universe_rules():
+    """sorter_docclass_v7 (KANBAN-101) = v6 + rules 37–43 + widened doc_subclass
+    output contract for correspondence/insurance_claim dimensions."""
+    from src.prompts import SORTER_DOCCLASS_PROMPT_V6, SORTER_DOCCLASS_PROMPT_V7
+
+    assert "sorter_docclass_v7" in PROMPT_VERSIONS
+    p = get_prompt("sorter_docclass_v7")
+    assert "37. AGREEMENT PACKAGES" in p
+    assert "38. INSURANCE CLAIM CLASS" in p
+    assert "39. CORRESPONDENCE SUBCLASS" in p
+    assert "43. CONTRACT VS INSURANCE CLAIM DISAMBIGUATION" in p
+    assert "correspondence, or insurance_claim (rules 33/39/40)" in p
+    assert SORTER_DOCCLASS_PROMPT_V7.startswith(SORTER_DOCCLASS_PROMPT_V6[:300])
+    assert "37. AGREEMENT PACKAGES" not in SORTER_DOCCLASS_PROMPT_V6
+
+
+def test_sorter_docclass_correspondence_v3_speech_act_overrides_hub_lexicon():
+    """KANBAN-103 GEPA v3: .replace() of frozen v2; rule 47 demand speech-act."""
+    from src.prompts import (
+        CORRESPONDENCE_SUBCLASS_V3,
+        SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V2,
+        SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V3,
+    )
+
+    assert "sorter_docclass_correspondence_v3" in PROMPT_VERSIONS
+    v2 = get_prompt("sorter_docclass_correspondence_v2")
+    v3 = get_prompt("sorter_docclass_correspondence_v3")
+    assert v3 is SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V3
+    assert v2 is SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V2
+    assert v3.startswith(v2[:400])
+    assert "46. HUB DEMAND MARKERS" in v3
+    assert "47. DEMAND IS THE SPEECH ACT" in v3
+    assert "47. DEMAND IS THE SPEECH ACT" not in v2
+    assert "OVERRIDES rule 46" in CORRESPONDENCE_SUBCLASS_V3
+    assert "performs the demand" in v3
+    assert "we could send a demand letter" in v3
+    assert "please draft a demand letter" in v3
+    assert "NOT demand" in v3
+    assert "46. HUB DEMAND MARKERS" in v2
+    assert "speech act" not in v2.lower() or "47." not in v2
+
+
 def test_sorter_docclass_prompt_option_list_matches_schema():
     """The doc_subclass options visible in the docclass prompts must match the
     DOCCLASS_SCHEMA enum exactly — a subclass the model can output must be in
@@ -474,12 +516,28 @@ def test_sorter_docclass_prompt_option_list_matches_schema():
     for version in ("sorter_docclass_v0", "sorter_docclass_v1",
                     "sorter_docclass_v2", "sorter_docclass_v3",
                     "sorter_docclass_v4", "sorter_docclass_v5",
-                    "sorter_docclass_v6"):
+                    "sorter_docclass_v6", "sorter_docclass_v7",
+                    "sorter_docclass_correspondence_v0",
+                    "sorter_docclass_correspondence_v1",
+                    "sorter_docclass_correspondence_v2",
+                    "sorter_docclass_correspondence_v3"):
         prompt = SorterAgent(prompt_version=version,
                              doc_classes=DOCCLASS_CLASSES,
                              schema=DOCCLASS_SCHEMA).system_prompt()
-        # Every schema key appears in the rule-33 text.
-        for key in DOC_SUBCLASS_KEYS:
+        # Schema-key presence is lineage-scoped: pilot variants teach ALL
+        # four dimensions; legacy v0..v6 were frozen before the
+        # correspondence/insurance dimensions existed and are never mutated
+        # after a run — they must carry the merger/corporate keys only.
+        if ("pilot" in version or version == "sorter_docclass_v7"
+                or "correspondence" in version):
+            expected_keys = DOC_SUBCLASS_KEYS
+        else:
+            legacy_excluded = {"demand", "attorney_demand", "meeting_request",
+                               "press_release", "memo", "email", "letter",
+                               "notice", "carrier", "pde", "outpatient",
+                               "inpatient"}
+            expected_keys = [k for k in DOC_SUBCLASS_KEYS if k not in legacy_excluded]
+        for key in expected_keys:
             assert key in prompt, f"{version}: doc_subclass key {key!r} missing from the prompt"
         # The output contract names the field.
         assert "- doc_subclass: EXACTLY ONE" in prompt

@@ -20,6 +20,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ENV_DIR = REPO_ROOT / "config" / "environments"
 BRAINTRUST_ENV_FILE = ENV_DIR / "braintrust.env"
+BRAINTRUST_SANDBOX_ENV_FILE = ENV_DIR / "braintrust-sandbox.env"
 DOTENV_FILE = ENV_DIR / ".env"
 LANGFUSE_ENV_FILE = ENV_DIR / "langfuse.env"
 

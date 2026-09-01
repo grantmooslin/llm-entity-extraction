@@ -2,6 +2,7 @@
 # Live (gitignored) dotenv files live under config/environments/.
 config/environments/.env
 config/environments/braintrust.env
+config/environments/braintrust-sandbox.env
 config/environments/langfuse.env
 config/environments/*.env.local
 # Root-level safety net (one release): still block the old paths in case

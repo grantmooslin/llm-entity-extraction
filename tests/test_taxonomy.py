@@ -9,8 +9,8 @@ def test_doc_classes_match_prompts():
     # (KANBAN-033) — the first six stay the sorter's default surface.
     assert keys == [
         "contract", "corporate_record", "due_diligence",
-        "correspondence", "compliance_filing", "court_opinion",
-        "merger_agreement",
+        "correspondence", "insurance_claim", "compliance_filing",
+        "court_opinion", "merger_agreement",
     ]
 
 

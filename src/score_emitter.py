@@ -27,13 +27,48 @@ from src.env_utils import load_env
 
 __all__ = [
     "DEFAULT_MANIFEST_PATH",
+    "CORRESPONDENCE_HEADLINE_METRICS",
+    "DOCCLASS_DASHBOARD_METRICS",
+    "DOCCLASS_HEADLINE_METRICS",
     "build_emitter",
-    "emit_run_scores",
     "dashboard_names",
+    "docclass_dashboard_names",
+    "docclass_headline_names",
+    "emit_docclass_run_scores",
+    "emit_run_scores",
     "headline_names",
 ]
 
 DEFAULT_MANIFEST_PATH = Path("reports/scores_manifest.jsonl")
+
+# Docclass hierarchical task metrics (KANBAN-101). These live in the
+# experiment-log / Langfuse eval runners but are not yet in the shared
+# llm-dojo-scoring registry — emit_docclass_run_scores writes them to the
+# local manifest with a docclass_ agent prefix.
+DOCCLASS_HEADLINE_METRICS: tuple[str, ...] = (
+    "doc_type_accuracy",
+    "subclass_accuracy",
+    "subclass_accuracy_equiv",
+    "exact_match",
+)
+# Correspondence-only extras (KANBAN-103). Live on the dashboard so
+# emit_docclass_run_scores registers them; they are NOT T0 docclass headlines
+# (the mixed-surface runner does not emit them).
+CORRESPONDENCE_HEADLINE_METRICS: tuple[str, ...] = (
+    "sentiment_label_accuracy",
+    "correspondence_exact",
+)
+DOCCLASS_DASHBOARD_METRICS: tuple[str, ...] = DOCCLASS_HEADLINE_METRICS + (
+    "doc_type_accuracy_ci",
+    "subclass_accuracy_ci",
+    "exact_match_ci",
+    "confidence",
+) + CORRESPONDENCE_HEADLINE_METRICS + (
+    "sentiment_label_accuracy_ci",
+    "sentiment_score_ok",
+    "sentiment_score_mae",
+    "correspondence_exact_ci",
+)
 
 
 def build_emitter(
@@ -98,4 +133,80 @@ def dashboard_names(agent: str) -> list[str]:
 
 def headline_names(agent: str) -> list[str]:
     """Strictly T0 — the one-number-per-agent view."""
+    if agent in ("docclass_sorter", "sorter_docclass"):
+        return list(DOCCLASS_HEADLINE_METRICS)
     return headline_metrics(agent)
+
+
+def docclass_headline_names() -> list[str]:
+    """T0 docclass hierarchical metrics for dashboard panels."""
+    return list(DOCCLASS_HEADLINE_METRICS)
+
+
+def docclass_dashboard_names() -> list[str]:
+    """T0+CI docclass metrics for richer dashboard panels."""
+    return list(DOCCLASS_DASHBOARD_METRICS)
+
+
+def _register_docclass_metrics(emitter: Emitter) -> None:
+    """Ad-hoc registry entries until llm-dojo-scoring ships docclass metrics."""
+    from llm_dojo_scoring.registry import MetricTier
+
+    for name in DOCCLASS_DASHBOARD_METRICS:
+        try:
+            emitter.registry.get(name)
+        except KeyError:
+            tier = (
+                MetricTier.HEADLINE
+                if name in DOCCLASS_HEADLINE_METRICS
+                else MetricTier.CORE
+            )
+            emitter.register_metric(
+                name,
+                tier,
+                units="float[0,1]",
+                description=f"KANBAN-101 docclass hierarchical metric: {name}",
+            )
+
+
+def emit_docclass_run_scores(
+    emitter: Emitter,
+    run_id: str,
+    metrics: dict[str, Any],
+    *,
+    metadata: dict[str, Any] | None = None,
+) -> tuple[list[str], list[str]]:
+    """Emit docclass headline/dashboard metrics to the local manifest.
+
+    Docclass metric names are registered ad-hoc when absent from the shared
+    registry; bootstrap CI payloads (dict values) are skipped.
+    """
+    _register_docclass_metrics(emitter)
+    docclass_only = {
+        k: v
+        for k, v in metrics.items()
+        if k in DOCCLASS_DASHBOARD_METRICS and isinstance(v, (int, float))
+    }
+    other = {
+        k: v
+        for k, v in metrics.items()
+        if k not in docclass_only and isinstance(v, (int, float))
+    }
+    emitted, skipped = emit_run_scores(
+        emitter, "sorter", run_id, other, metadata=metadata,
+    )
+    agent = "docclass_sorter"
+    for name, value in docclass_only.items():
+        if value is None:
+            skipped.append(name)
+            continue
+        emitter.emit_score(
+            agent,
+            doc_id=None,
+            metric_name=name,
+            value=value,
+            metadata=metadata or {},
+            run_id=run_id,
+        )
+        emitted.append(name)
+    return emitted, skipped

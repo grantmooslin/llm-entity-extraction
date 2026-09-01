@@ -14,7 +14,7 @@ from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
-from src.openrouter_utils import OPENROUTER_BASE_URL
+from src.openrouter_utils import resolve_openrouter_base_url
 from src.prompts import get_prompt
 from src.taxonomy import load_taxonomy
 
@@ -32,11 +32,16 @@ def build_chat_model(
     max_tokens: int = 4096,
     reasoning_effort: str | None = None,
 ) -> ChatOpenAI:
-    """Build a LangChain ``ChatOpenAI`` pointed at OpenRouter."""
+    """Build a LangChain ``ChatOpenAI`` pointed at the provider seam.
+
+    Defaults to OpenRouter; any OpenAI-compatible endpoint (Ollama, a
+    Modal-hosted vLLM — KANBAN-096) can be swapped in via
+    ``OPENROUTER_BASE_URL``, resolved at call time.
+    """
     llm = ChatOpenAI(
         model=model,
         api_key=api_key or None,
-        base_url=OPENROUTER_BASE_URL,
+        base_url=resolve_openrouter_base_url(),
         temperature=temperature,
         max_tokens=max_tokens,
         timeout=120,

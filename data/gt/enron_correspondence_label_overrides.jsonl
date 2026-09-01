@@ -1,0 +1,27 @@
+{"filename": "arnold-j/deleted_items/243.", "expected_subclass": "notice", "reason": "IT outage FINAL NOTICE, not a legal demand"}
+{"filename": "blair-l/inbox/171.", "expected_subclass": "email", "reason": "mentions they may send a demand letter; the message itself is a deal-status update"}
+{"filename": "blair-l/inbox/88.", "expected_subclass": "notice", "reason": "draft operational notice, not a demand"}
+{"filename": "campbell-l/all_documents/393.", "expected_subclass": "email", "reason": "offers to send a demand letter later; this message is coordination"}
+{"filename": "cash-m/all_documents/30.", "expected_subclass": "email", "reason": "year-end accomplishments list mentioning a demand letter as a past work item"}
+{"filename": "dasovich-j/all_documents/2894.", "expected_subclass": "email", "reason": "FYI of a FERC cease-and-desist filing; not a demand to the recipient"}
+{"filename": "germany-c/bankrupt/transport/trailblazer/5.", "expected_subclass": "email", "reason": "asks a colleague to draft a payment demand letter"}
+{"filename": "germany-c/sent_items/636.", "expected_subclass": "email", "reason": "internal summary of a third-party demand; this message is not the demand"}
+{"filename": "grigsby-m/all_documents/93.", "expected_subclass": "email", "reason": "energy-news newsletter; breach-of-contract is a news item"}
+{"filename": "hain-m/all_documents/916.", "expected_subclass": "email", "reason": "FYI news clip about a breach-of-contract filing"}
+{"filename": "lavorato-j/deleted_items/300.", "expected_subclass": "email", "reason": "internal ops rant; marker hit is incidental"}
+{"filename": "lewis-a/deleted_items/442.", "expected_subclass": "email", "reason": "spam FINAL NOTICE diamond giveaway"}
+{"filename": "mann-k/all_documents/3627.", "expected_subclass": "email", "reason": "pasted contract consequential-damages clause, not a demand"}
+{"filename": "mann-k/sent_items/39.", "expected_subclass": "email", "reason": "asks a colleague to send the notice of default; not the notice"}
+{"filename": "nemec-g/all_documents/728.", "expected_subclass": "email", "reason": "asks Bill to draft a demand letter"}
+{"filename": "ring-r/eesirenewableenergy/13.", "expected_subclass": "email", "reason": "invoice/remit-payment ops email, not a legal demand"}
+{"filename": "sanders-r/all_documents/1047.", "expected_subclass": "email", "reason": "cover note attaching a demand letter for someone else to sign"}
+{"filename": "sanders-r/all_documents/126.", "expected_subclass": "email", "reason": "counsel hypothesizes we could send a demand letter; the message is advice"}
+{"filename": "sanders-r/ecogas/26.", "expected_subclass": "email", "reason": "exact-body twin of all_documents/126.; same hypothetical, not a demand"}
+{"filename": "sanders-r/deleted_items/472.", "expected_subclass": "email", "reason": "reports receipt of a notice of arbitration; this email is not the demand"}
+{"filename": "schoolcraft-d/inbox/junk/351.", "expected_subclass": "email", "reason": "RIGZONE industry news; breach of contract is a headline"}
+{"filename": "shackleton-s/inbox/767.", "expected_subclass": "email", "reason": "internal demand-letter-list logistics"}
+{"filename": "shackleton-s/inbox/862.", "expected_subclass": "email", "reason": "internal note that a prior demand letter was already paid"}
+{"filename": "taylor-m/all_documents/2369.", "expected_subclass": "email", "reason": "Dow Jones clip about a trademark/breach lawsuit"}
+{"filename": "taylor-m/all_documents/3517.", "expected_subclass": "email", "reason": "contract-draft comments; breach is clause language"}
+{"filename": "bailey-s/deleted_items/253.", "expected_subclass": "email", "reason": "Demand Letter Log formatting request"}
+{"filename": "bailey-s/deleted_items/334.", "expected_subclass": "email", "reason": "internal DLL note that a counterparty already paid"}

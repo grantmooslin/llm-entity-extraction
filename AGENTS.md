@@ -316,6 +316,12 @@ python scripts/datasets/stream_legalbench_tasks_to_bt.py --tasks hearsay  # e.g.
 python scripts/eval/run_langfuse_docclass_eval.py --dry-run
 python scripts/eval/run_langfuse_docclass_eval.py --local-dumps data/maud/contracts.jsonl,data/s1_corporate_records/corporate-records.jsonl \
     --stratified 120 --seed 42
+# Correspondence-only Enron eval (KANBAN-103): subclass + sentiment on
+# Lucius-Morningstar/enron-correspondence-dedup. Default 200 stratified,
+# seed 42; Braintrust traces ON. Reserved name
+# qwen3.7-flash_sorter_docclass_correspondence_v0_enron200_s42.
+python scripts/eval/run_correspondence_eval.py --dry-run --stratified 200 --seed 42
+python scripts/eval/run_correspondence_eval.py --stratified 200 --seed 42
 python scripts/datasets/stream_maud_to_bt.py --local-dump data/maud/          # rebuild MAUD dumps
 python scripts/datasets/stream_s1_exhibits.py --max-filings 40 --local-dump data/s1_corporate_records/  # EDGAR S-1 exhibits
 python scripts/eval/sync_langfuse_datasets.py --maud --s1 --dry-run           # mirror dumps into Langfuse
@@ -467,6 +473,7 @@ Key modules:
 | `src/monte_carlo.py` | zero-spend robustness simulation primitives over the joint reasoning corpus (committee voting, confidence-gated escalation, paired-bootstrap prompt ablation, failure-pipeline sim, exemplar mining — KANBAN-048). |
 | `src/langfuse_tracing.py` | Langfuse mirror tracer: one trace per document (session-scoped deterministic id), `agent_observation()` opens one span per pipeline agent with its designated task scores attached to that observation; graceful no-op when keys are missing. |
 | `src/experiment_log.py` | append-only JSONL + markdown renderer (tables, confusion matrices, scoring matrices, outputs, failure insights); `render_full_log()` for the rebuild; the append/git-snapshot/mean/tokens core re-exports `llm_dojo_scoring.experiment` + `.cost`. |
+| `src/correspondence_eval.py` | Enron correspondence eval primitives (KANBAN-103): blind↔GT join on `filename`, subclass-stratified sample, sentiment label/score scoring, predicted↔GT field alignment. |
 | `src/evaluation.py` | dataset validation, fingerprints, `ManifestStore` (thread-safe JSONL resume checkpoints), adaptive `resolve_concurrency`, `call_with_rate_limit_retry`. |
 | `src/scorers.py` | re-export shim → `llm_dojo_scoring.classification` (deterministic scorers exact_match, failure, `normalize_label`) + the local `cost` scorer and name registry. |
 | `src/score_emitter.py` | bridge → `llm_dojo_scoring.emitter` + `.pruning` (KANBAN-061 unified layer): `build_emitter()` (JSONL manifest sink + inert-unless-configured Langfuse), `emit_run_scores()` (registry-validated; unknown/None names returned as skipped, never dropped), `dashboard_names()` / `headline_names()` tier-capped views. |
@@ -477,7 +484,7 @@ Key modules:
 
 The canonical, formula-level reference for every scorer and metric is
 **`docs/SCORING.md`** — where scoring lives (the **`llm-dojo-scoring` package**,
-pinned `@v0.7.0` and shared with llm-mailroom; the local `src/` modules are
+pinned `@v0.10.0` and shared with llm-mailroom; the local `src/` modules are
 thin re-export shims), classification, binary, multiclass, subtype, docclass
 hierarchical, task-aware (MAUD / LegalBench / court opinions / chained), the
 field-type-aware content scorer, factuality audit, judge calibration, chained

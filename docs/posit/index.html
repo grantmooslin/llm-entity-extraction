@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.38">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -12,10 +12,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -39,14 +42,14 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-69d842fd5fdac13cf096465bd46c717d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-57434043a5e03403d8c661cda76ea56d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-69d842fd5fdac13cf096465bd46c717d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-054c96d0537fa70bc8f6b9b071341401.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-919dda0a379ac40e641359ec180ac24f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-054c96d0537fa70bc8f6b9b071341401.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -334,28 +337,28 @@ ul.task-list li input[type="checkbox"] {
 <h2 class="anchored" data-anchor-id="in-one-glance">In one glance</h2>
 <div class="llx-stats">
 <div class="llx-stat">
-<p><span class="num">195</span><span class="lbl">eval runs</span></p>
+<p><span class="num">8</span><span class="lbl">eval runs</span></p>
 </div>
 <div class="llx-stat">
-<p><span class="num">8</span><span class="lbl">models</span></p>
+<p><span class="num">1</span><span class="lbl">models</span></p>
 </div>
 <div class="llx-stat">
-<p><span class="num">72</span><span class="lbl">prompt versions</span></p>
+<p><span class="num">6</span><span class="lbl">prompt versions</span></p>
 </div>
 <div class="llx-stat">
-<p><span class="num">326.3M</span><span class="lbl">tokens billed</span></p>
+<p><span class="num">6.2M</span><span class="lbl">tokens billed</span></p>
 </div>
 <div class="llx-stat">
-<p><span class="num">9</span><span class="lbl">open cards</span></p>
+<p><span class="num">12</span><span class="lbl">open cards</span></p>
 </div>
 <div class="llx-stat">
-<p><span class="num">50</span><span class="lbl">archived cards</span></p>
+<p><span class="num">51</span><span class="lbl">archived cards</span></p>
 </div>
 <div class="llx-stat">
-<p><span class="num">180</span><span class="lbl">discussion entries</span></p>
+<p><span class="num">216</span><span class="lbl">discussion entries</span></p>
 </div>
 </div>
-<p>Tasks covered: chained_sorter_extractor, contract_entity_extraction, docclass_classification, sorter_classification, subtype_classification, task_classification. Latest run: 2026-08-16.</p>
+<p>Tasks covered: docclass_classification, docclass_specialist_extraction. Latest run: 2026-08-26.</p>
 </section>
 <section id="the-three-working-records" class="level2">
 <h2 class="anchored" data-anchor-id="the-three-working-records">The three working records</h2>
@@ -390,76 +393,76 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td>188</td>
-<td><a href="../index.html#/run/188">gpt-4.1-nano_sorter_v13_subtype_langfuse</a></td>
-<td>openai/gpt-4.1-nano</td>
-<td>sorter_v13</td>
-<td>—</td>
-<td>509</td>
-<td>2253240</td>
-</tr>
-<tr class="even">
-<td>189</td>
-<td><a href="../index.html#/run/189">gpt-4o-mini_sorter_v13_subtype_langfuse</a></td>
-<td>openai/gpt-4o-mini</td>
-<td>sorter_v13</td>
-<td>—</td>
-<td>509</td>
-<td>6650765</td>
-</tr>
-<tr class="odd">
-<td>190</td>
-<td><a href="../index.html#/run/190">llama-4-scout_sorter_v13_subtype_langfuse</a></td>
-<td>meta-llama/llama-4-scout</td>
-<td>sorter_v13</td>
-<td>—</td>
-<td>509</td>
-<td>—</td>
-</tr>
-<tr class="even">
-<td>191</td>
-<td><a href="../index.html#/run/191">llama-4-scout_sorter_v13_subtype_langfuse</a></td>
-<td>meta-llama/llama-4-scout</td>
-<td>sorter_v13</td>
-<td>—</td>
-<td>509</td>
-<td>—</td>
-</tr>
-<tr class="odd">
-<td>192</td>
-<td><a href="../index.html#/run/192">llama-4-scout_sorter_v13_subtype_langfuse</a></td>
-<td>meta-llama/llama-4-scout</td>
-<td>sorter_v13</td>
-<td>—</td>
-<td>509</td>
-<td>6644396</td>
-</tr>
-<tr class="even">
-<td>193</td>
-<td><a href="../index.html#/run/193">gpt-4o-mini_sorter_v13_smoke1</a></td>
-<td>openai/gpt-4o-mini</td>
-<td>sorter_v13</td>
-<td>—</td>
 <td>1</td>
-<td>5852</td>
-</tr>
-<tr class="odd">
-<td>194</td>
-<td><a href="../index.html#/run/194">llama-4-scout_sorter_v13_smoke1</a></td>
-<td>meta-llama/llama-4-scout</td>
-<td>sorter_v13</td>
+<td><a href="../index.html#/run/1">qwen_qwen3.7-flash_insurance_claims_specialist_docclass_v1_docclass_ab120_s42</a></td>
+<td>qwen/qwen3.7-flash</td>
+<td>insurance_claims_specialist_docclass_v1</td>
+<td>extraction 0.6904</td>
 <td>—</td>
-<td>1</td>
-<td>6018</td>
+<td>48609</td>
 </tr>
 <tr class="even">
-<td>195</td>
-<td><a href="../index.html#/run/195">meta-llama-llama-3.3-70b-instruct_sorter_v13_subtype_langfuse</a></td>
-<td>meta-llama/llama-3.3-70b-instruct</td>
-<td>sorter_v13</td>
+<td>2</td>
+<td><a href="../index.html#/run/2">qwen_qwen3.7-flash_insurance_claims_specialist_docclass_v0_docclass_ab120_s42</a></td>
+<td>qwen/qwen3.7-flash</td>
+<td>insurance_claims_specialist_docclass_v0</td>
+<td>extraction 0.6957</td>
 <td>—</td>
-<td>509</td>
-<td>6657770</td>
+<td>44376</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td><a href="../index.html#/run/3">qwen_qwen3.7-flash_contracts_specialist_docclass_v1_docclass_ab120_s42</a></td>
+<td>qwen/qwen3.7-flash</td>
+<td>contracts_specialist_docclass_v1</td>
+<td>extraction 0.8444</td>
+<td>—</td>
+<td>655412</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td><a href="../index.html#/run/4">qwen_qwen3.7-flash_contracts_specialist_docclass_v0_docclass_ab120_s42</a></td>
+<td>qwen/qwen3.7-flash</td>
+<td>contracts_specialist_docclass_v0</td>
+<td>extraction 0.6884</td>
+<td>—</td>
+<td>346327</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td><a href="../index.html#/run/5">qwen_qwen3.7-flash_sorter_docclass_v7_docclass_ab120_s42</a></td>
+<td>qwen/qwen3.7-flash</td>
+<td>sorter_docclass_v7</td>
+<td>exact_match 0.6833</td>
+<td>—</td>
+<td>1999237</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td><a href="../index.html#/run/6">qwen_qwen3.7-flash_sorter_docclass_v6_docclass_ab120_s42</a></td>
+<td>qwen/qwen3.7-flash</td>
+<td>sorter_docclass_v6</td>
+<td>exact_match 0.5833</td>
+<td>—</td>
+<td>1873843</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td><a href="../index.html#/run/7">qwen_qwen3.7-flash_sorter_docclass_v7_docclass_merged_ab</a></td>
+<td>qwen/qwen3.7-flash</td>
+<td>sorter_docclass_v7</td>
+<td>exact_match 0.6667</td>
+<td>—</td>
+<td>652282</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td><a href="../index.html#/run/8">qwen_qwen3.7-flash_sorter_docclass_v6_docclass_merged_ab</a></td>
+<td>qwen/qwen3.7-flash</td>
+<td>sorter_docclass_v6</td>
+<td>exact_match 0.6333</td>
+<td>—</td>
+<td>621037</td>
 </tr>
 </tbody>
 </table>

@@ -29,6 +29,6 @@ python-dotenv>=1.0.0
 PyYAML>=6.0
 structlog>=24.0
 
-# Scoring library shared with llm-mailroom (pinned v0.7.0 — single source of
+# Scoring library shared with llm-mailroom (pinned v0.10.0 — single source of
 # scoring definitions across both repos)
-llm-dojo-scoring @ git+https://github.com/Exios66/llm-dojo-scoring.git@v0.7.0
+llm-dojo-scoring @ git+https://github.com/Exios66/llm-dojo-scoring.git@v0.10.0

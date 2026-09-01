@@ -22,6 +22,7 @@ board, and the discussion board under one themed URL.
 | `assets/` | `site.css` + `site.js` — dependency-free, no CDN, no build step; dark "gradient night" theme via masthead toggle, `?theme=dark`, or system preference |
 | `data/` | **Generated** — `meta.json`, `index.json` (run summaries), `runs/{n}.json` (full records) |
 | `slides/` | **Scoring-method decks** (hand-written markdown) — worked example inputs/outputs + concise scientific explanations of every scoring method, written for parallel researchers who do not have time to read all the docs: field-type scoring, entity lists + bipartite matching, MAE/R² regression diagnostics, factuality audit, failure analysis, and how to read the experiment log |
+| `configuration.md` | **Environment configuration guide** — per-provider (OpenRouter / Modal-vLLM / Ollama / generic) and per-trace-sink (Phoenix / Langfuse / Braintrust / LangSmith) setup for THIS repo and llm-mailroom together, with copy-paste recipes |
 | `README.md` | this file |
 
 ## Viewer features

@@ -1,0 +1,33 @@
+# Prompt Engineer specs — one YAML per mutable prompt family.
+#
+# Fields:
+#   base_version_key : lineage head the engineer mutates FROM
+#   target_file      : file holding the registry dict
+#   registry_dict    : name of the dict constant
+#   test_file        : file whose EXPECTED_*_COUNT assertion is bumped
+#   manifest_glob    : failure manifests to decompose (glob, newest used)
+#
+# The engineer tool reads this file to know WHERE to apply mutations; the
+# validation gates (unique anchor, additive-only, version arithmetic,
+# registry/test consistency) are unchanged.
+
+sorter_docclass_pilot:
+  base_version_key: sorter_docclass_pilot_v1
+  target_file: src/prompts_docclass.py
+  registry_dict: DOCCLASS_PROMPT_VERSIONS
+  test_file: tests/test_kanban090_docclass_prompts.py
+  manifest_glob: data/manifests/docclass_pilot140_*.jsonl
+
+judge_correctness_docclass_pilot:
+  base_version_key: judge_correctness_docclass_pilot_v1
+  target_file: src/prompts_docclass.py
+  registry_dict: DOCCLASS_PROMPT_VERSIONS
+  test_file: tests/test_kanban090_docclass_prompts.py
+  manifest_glob: data/manifests/judge_mutation_*.jsonl
+
+contracts_specialist:
+  base_version_key: contracts_specialist_v39
+  target_file: src/prompts.py
+  registry_dict: PROMPT_VERSIONS
+  test_file: tests/test_prompts.py   # upstream mirror count if present
+  manifest_glob: data/manifests/edge_contracts_specialist_*.jsonl

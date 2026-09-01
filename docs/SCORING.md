@@ -8,7 +8,7 @@ the run manifests, and `reports/experiment_log.jsonl` never disagree.
 ## 0. Where the scoring lives — the `llm-dojo-scoring` package
 
 The scoring definitions are **outsourced to the `llm-dojo-scoring` package**
-(KANBAN-044 / KANBAN-047, pinned `@v0.7.0` in `pyproject.toml` +
+(KANBAN-044 / KANBAN-047, pinned `@v0.10.0` in `pyproject.toml` +
 `requirements.txt`), the **single source shared with llm-mailroom**. The local
 `src/` modules are thin re-export shims so every import site (eval runners,
 reporting scripts, tests, and llm-mailroom's `pip install -e .` imports) keeps
@@ -52,7 +52,7 @@ llm_dojo_scoring.cli`).
 ### 0.1 The unified scoring layer & the score-emitter bridge (v0.19.0+)
 
 Since KANBAN-061 the package also owns this repo's metric **infrastructure**
-(pinned `@v0.5.1` at adoption, current pin `@v0.7.0`); calculations are
+(pinned `@v0.5.1` at adoption, current pin `@v0.10.0`); calculations are
 untouched — Hungarian matching, embedding rescue, bootstrap CI and CUAD
 equivalences all live upstream unchanged:
 
@@ -335,8 +335,18 @@ sorter-doc_type/subtype + extractor-overall/presence composite.
 The hierarchical sorter task scores BOTH the primary `doc_type` and the
 second-level `doc_subclass` dimension (consideration type for merger
 agreements — MAUD expert GT; record type for corporate records —
-content-detected). The merged surface is CUAD 509 + MAUD 152 + S-1 15 = 676
-rows (`docclass_merged.jsonl`, 7-class `DOCCLASS_SCHEMA`).
+content-detected; communication type for correspondence; claim-document type
+for insurance_claim). The **extended** merged surface is the schema v5
+`docclass-merged` corpus — **1,210 rows / 8 primary classes**
+(`data/datasets/docclass_merged.jsonl`, `DOCCLASS_SCHEMA`). The **pilot**
+surface is the 5-class docclass-pilot subset (138 stratified rows,
+`DOCCLASS_PILOT_SCHEMA`) with four second-level dimensions taught by
+`sorter_docclass_pilot_v3` and downstream `*_docclass_pilot_v0` keys.
+
+Contract rows on the extended surface carry `contract_subtype` (the CUAD
+folder key) as a separate output field; docclass eval does **not** apply
+`SUBTYPE_EQUIVALENCES` to contract rows — strict folder-key match only
+(by design; family-level routing belongs on the subtype eval surface).
 
 | Tracker | Definition |
 |---|---|
@@ -354,6 +364,36 @@ rows (`docclass_merged.jsonl`, 7-class `DOCCLASS_SCHEMA`).
 
 Per-row flags carried in the record: `doc_type_ok`, `subclass_ok`,
 `subclass_ok_equiv`, `failure_mode`, `input_mode`, `fallback_reason`.
+
+### Correspondence-only surface (`run_correspondence_eval.py`)
+
+KANBAN-103 adds a correspondence-only sibling on Hugging Face
+`Lucius-Morningstar/enron-correspondence-dedup` (agent-blind `default` joined
+to `ground_truth` on `filename`; rows with `expected != correspondence` are
+dropped). Predicted fields lock to the Hub GT assortment:
+
+| Predicted | Ground truth |
+|---|---|
+| `doc_type` | `expected` (always `correspondence`) |
+| `doc_subclass` | `expected_subclass` (8 communication types) |
+| `sentiment_label` | `sentiment_label` (`negative` / `neutral` / `positive`) |
+| `sentiment_score` | `sentiment_score` (lexicon polarity in `[-1, 1]`) |
+
+Default draw: **200 subclass-stratified** rows, seed 42 (tiny class
+`attorney_demand` has 3 rows on the Hub dump — all 3 are taken; leftover
+slots redistribute). Schema `CORRESPONDENCE_EVAL_SCHEMA` (does not mutate
+`DOCCLASS_SCHEMA`). Prompt `sorter_docclass_correspondence_v0`.
+
+| Tracker | Definition |
+|---|---|
+| `doc_type_accuracy` / `subclass_accuracy` / `exact_match` | same as the mixed docclass surface above. |
+| `sentiment_label_accuracy` (+ CI) | exact match on the three-way polarity label. |
+| `sentiment_score_ok` | share of rows with `\|pred − gt\| ≤ 0.25` (`SENTIMENT_SCORE_BAND`). |
+| `sentiment_score_mae` | mean absolute residual on parseable score pairs. |
+| `correspondence_exact` (+ CI) | `doc_type` AND subclass AND sentiment label all exact. |
+| `per_sentiment_accuracy` / `per_sentiment_support` | per-label accuracy with support. |
+| `sentiment_confusion` | expected × predicted sentiment-label counts. |
+| `failure_insights` | mixed-surface modes plus `sentiment_miss` (class pair right, label wrong). |
 
 ## 8. Task-aware scoring dispatcher (`llm_dojo_scoring.tasks`)
 
