@@ -225,3 +225,15 @@ def test_subtype_loop_no_braintrust_logging(monkeypatch, tmp_path):
     assert rec["parameters"]["tracing_backend"] == "none"
     assert rec["parameters"]["tracing"]["braintrust_logging"] is False
     assert rec["parameters"]["tracing"]["langsmith"] is False
+
+    # The serving metadata block (KANBAN-106) rides on every record.
+    from src.prompts import get_prompt
+    from src.serving_meta import prompt_fingerprint
+
+    serving = rec["serving"]
+    assert serving["provider"] == "openrouter"
+    assert serving["endpoint"] == "https://openrouter.ai/api/v1"
+    assert serving["prompt_fingerprints"]["sorter"] == {
+        "version": "sorter_v3", "sha256": prompt_fingerprint(get_prompt("sorter_v3"))}
+    assert serving["dataset_fingerprint"] == rec["data_source"]["dataset_fingerprint"]
+    assert serving["phase"] in ("cold", "warm", "unknown")

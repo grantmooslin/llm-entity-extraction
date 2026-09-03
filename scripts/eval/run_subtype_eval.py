@@ -36,6 +36,7 @@ import argparse
 import json
 import random
 import sys
+import time
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -63,7 +64,7 @@ from src.env_utils import (  # noqa: E402
     require_env,
     resolve_openrouter_key,
 )
-from src.evaluation import ManifestStore, dataset_fingerprint, validate_dataset  # noqa: E402
+from src.evaluation import ManifestStore, dataset_fingerprint, utc_now, validate_dataset  # noqa: E402
 from src.eval_shims import run_local_eval  # noqa: E402
 from src.experiment_log import (  # noqa: E402
     append_experiment,
@@ -75,6 +76,10 @@ from src.experiment_log import (  # noqa: E402
     tokens_summary,
 )
 from src.prompts import list_prompts  # noqa: E402
+from src.serving_meta import (  # noqa: E402
+    build_serving_block,
+    call_latency_stats,
+)
 
 _CONFIG = load_braintrust_config()
 DEFAULT_DATASET = "mailroom-cuad-contracts"
@@ -251,7 +256,12 @@ def main_with_args(argv: list[str]) -> int:
               + (" and LangSmith (LANGSMITH_TRACING=true)" if langsmith_enabled() else "")
               + "; use the run_langfuse_*_eval.py runner for Langfuse traces.")
 
+    # Run-window clock for the record's serving.timing block (KANBAN-106).
+    started_at = utc_now()
+    run_started_monotonic = time.monotonic()
+
     usage_by_index: dict[int, dict] = {}
+    elapsed_by_index: dict[int, float] = {}
 
     @braintrust.traced
     def classify(input_data: dict) -> dict:
@@ -271,11 +281,13 @@ def main_with_args(argv: list[str]) -> int:
         sorter._max_input_chars = args.max_input_chars
         sorter._max_tokens = args.max_tokens
         sorter._reasoning_effort = args.reasoning_effort
+        row_started = time.monotonic()
         try:
             result = sorter.classify_json(input_data["doc_text"])
         except Exception as exc:  # noqa: BLE001 - one bad row must not abort
             result = {"doc_type": "correspondence", "contract_subtype": SUBTYPE_UNKNOWN,
                       "confidence": 0.0, "reasoning": f"error: {exc}"}
+        elapsed_by_index[input_data["index"]] = time.monotonic() - row_started
         usage_by_index[input_data["index"]] = sorter._last_usage or {}
 
         doc_type = str(result.get("doc_type", "correspondence")).strip().lower()
@@ -420,7 +432,10 @@ def main_with_args(argv: list[str]) -> int:
                                "braintrust_logging": False,
                                "langsmith": langsmith_enabled(),
                                "hint": "run_langfuse_*_eval.py for Langfuse traces",
-                           })
+                           },
+                           started_at=started_at,
+                           run_duration_s=time.monotonic() - run_started_monotonic,
+                           elapsed_by_index=elapsed_by_index)
     if bt_enabled:
         braintrust.flush()
     return 0
@@ -429,12 +444,20 @@ def main_with_args(argv: list[str]) -> int:
 def log_experiment_to_repo(result, dataset, args, experiment_name,
                            usage, log_path, md_log_path,
                            tracing_backend: str = "braintrust",
-                           tracing_meta: dict | None = None) -> None:
+                           tracing_meta: dict | None = None,
+                           *, started_at: str | None = None,
+                           run_duration_s: float | None = None,
+                           elapsed_by_index: dict | None = None) -> None:
     """Append ONE experiment-log record for the subtype-only run.
 
     ``tracing_backend`` names where the run was traced (``braintrust`` default,
     ``langfuse`` for the mirror runner); ``tracing_meta`` carries backend
     specifics (project/environment) into the record's parameters.
+
+    ``started_at`` / ``run_duration_s`` / ``elapsed_by_index`` feed the
+    record's ``serving.timing`` block (KANBAN-106): the wall-clock run window
+    plus per-call latencies for the cost-comparison lens (OpenRouter vs a
+    Modal-hosted vLLM Qwen3-8B deployment).
     """
     rows = [r for r in result.results if r.error is None and isinstance(r.output, dict)]
     ok = [r.output for r in rows if isinstance(r.output, dict)]
@@ -497,6 +520,8 @@ def log_experiment_to_repo(result, dataset, args, experiment_name,
             "reasoning": sorter.get("reasoning") or "",
         })
 
+    _tokens = tokens_summary(list(usage.values()), model=args.model)
+
     record = {
         "type": "experiment",
         "task": "subtype_classification",
@@ -504,6 +529,16 @@ def log_experiment_to_repo(result, dataset, args, experiment_name,
         "git": git_snapshot(),
         "model": args.model,
         "prompt_versions": {"sorter": args.sorter_prompt_version},
+        "serving": build_serving_block(
+            model=args.model,
+            prompt_versions={"sorter": args.sorter_prompt_version},
+            dataset_fingerprint=dataset_fingerprint(dataset),
+            tokens=_tokens,
+            started_at=started_at,
+            finished_at=utc_now() if started_at else None,
+            duration_s=run_duration_s,
+            call_latency=call_latency_stats(elapsed_by_index),
+        ),
         "data_source": {
             "project": f"{args.dataset_project}/{args.dataset}",
             "ground_truth": "cuad_folder",
@@ -526,8 +561,7 @@ def log_experiment_to_repo(result, dataset, args, experiment_name,
             "tracing_backend": tracing_backend,
             **({"tracing": tracing_meta} if tracing_meta else {}),
         },
-        "tokens": {"sorter": tokens_summary(list(usage.values()), model=args.model),
-                   "total": tokens_summary(list(usage.values()), model=args.model)},
+        "tokens": {"sorter": _tokens, "total": _tokens},
         "scores": {
             "sorter": {
                 "exact_match": _mean("doc_type_ok"),

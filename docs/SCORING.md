@@ -528,6 +528,34 @@ predicted-subtype handoff vs the ground-truth-subtype handoff:
   activity CSV is ingested (`build_site.py --openrouter-csv`), and the
   estimate otherwise.
 
+### 13.1 The `serving` metadata block — comparing OpenRouter vs Modal (KANBAN-106)
+
+Every completed-run experiment-log record carries a `serving` block
+(`src/serving_meta.py::build_serving_block`) — the standardized lens for
+comparing a completed OpenRouter run against a completed Modal-hosted vLLM
+(Qwen3-8B) run from the record alone. It is network-free and deterministic
+(env knobs + taxonomy + resolved prompt text), and it never touches the
+manifest/resume contract:
+
+| Field | Meaning |
+|---|---|
+| `provider` | `openrouter` / `modal` / `ollama` / `local` / `other` — classified from the `OPENROUTER_BASE_URL` seam at record time |
+| `endpoint` | the resolved OpenAI-compatible base URL |
+| `model` | `{slug}` (the slug used in calls) + `hf_model_id` (the `MODAL_VLLM_MODEL` checkpoint) when the provider is Modal |
+| `prompt_fingerprints` | per-role `{version, sha256}` — sha256 over each prompt version's literal text, so a mutation under a reused version key is detectable |
+| `dataset_fingerprint` | the same sha256 row identity as `data_source.dataset_fingerprint` |
+| `tokens` | `prompt_tokens` / `completion_tokens` / `total_tokens` totals |
+| `timing` | `started_at` / `finished_at` / `duration_s` (wall-clock run window) + `call_latency_s` (`n` / `first_s` / `median_s` / `mean_s` / `max_s`) — the first-vs-mean/max split is the honest cold-start signal |
+| `gpu` | Modal deployment knobs (`gpu`, `quantization`, `max_model_len`, `hf_model_id`, `image_tag`) + the taxonomy `gpu_hourly_usd` price; OpenRouter reports `reported: false` (server-side, never guessed) |
+| `price_basis` | what the run was priced against: per-1M-token prices (`taxonomy:cost_models`), and/or `gpu_hourly_usd` for Modal with `estimated_gpu_cost_usd` over the run window (a labeled lower bound — Modal bills container lifetime, not run time) |
+| `phase` | `cold` / `warm` / `unknown` — from the `SERVING_PHASE` env knob (`cold`\|`warm`); the runner cannot probe the server, so unset = `unknown`, never guessed |
+
+Wired into the subtype runners today (`run_subtype_eval.py` +
+`run_langfuse_subtype_eval.py` via the shared `log_experiment_to_repo`); the
+block builder is the single adoption seam for the remaining runner families.
+Per-call latencies exclude manifest-replayed rows (they carry no call) — the
+same honesty rule as `rows_with_usage`.
+
 ## 14. Monte Carlo robustness metrics (`src/monte_carlo.py`, KANBAN-048)
 
 Zero-spend what-if analysis over the joint reasoning corpus (`reports/

@@ -9,6 +9,25 @@ history of the repository's tags. Format follows
 ## [Unreleased]
 
 ### Added
+- **Serving / cost-comparison metadata on completed-run records (KANBAN-106).**
+  Every completed subtype-run experiment-log record now carries a `serving`
+  block (`src/serving_meta.py::build_serving_block`) so a completed OpenRouter
+  run and a completed Modal-hosted vLLM Qwen3-8B run compare faithfully from
+  the append-only log alone: `provider`/`endpoint` (classified from the
+  `OPENROUTER_BASE_URL` seam), `model` identity (+ HF checkpoint id for Modal),
+  sha256 `prompt_fingerprints` over each prompt version's literal text,
+  `dataset_fingerprint`, prompt/completion/total `tokens`, `timing`
+  (wall-clock window + per-call latency `first_s`/`median_s`/`mean_s`/`max_s`,
+  excluding manifest-replayed rows), `gpu` metadata from the `MODAL_VLLM_*`
+  deploy knobs (GPU/quantization/max-model-len + taxonomy `gpu_hourly_usd`),
+  `price_basis` (taxonomy per-1M-token prices and/or GPU-hourly with a labeled
+  `estimated_gpu_cost_usd` lower bound), and `phase` (`SERVING_PHASE=cold|warm`,
+  else `unknown` — never guessed). Wired into `run_subtype_eval.py` +
+  `run_langfuse_subtype_eval.py` via the shared `log_experiment_to_repo`;
+  append-only log + manifest/resume semantics unchanged. Network-free pins:
+  `tests/test_serving_meta.py` (14) + record asserts in
+  `tests/test_subtype_eval_smoke.py`. Docs: `docs/SCORING.md` §13.1 +
+  `config/environments/.env.example` deploy block.
 - **Docclass-merged v6 rev1 — correspondence rebalance + original files +
   blind-surface repair (KANBAN-105).** Human directive 2026-08-30; the merged
   corpus was contracts-concentrated (contract 509 + merger_agreement 152 =

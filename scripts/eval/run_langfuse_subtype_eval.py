@@ -28,6 +28,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from pathlib import Path
@@ -59,6 +60,7 @@ from src.evaluation import (  # noqa: E402
     call_with_rate_limit_retry,
     dataset_fingerprint,
     resolve_concurrency,
+    utc_now,
     validate_dataset,
 )
 from src.experiment_log import default_jsonl_path, default_md_path  # noqa: E402
@@ -185,6 +187,11 @@ def main_with_args(argv: list[str]) -> int:
         print(f"  tracing=langfuse-primary (phoenix fallback) session={experiment_name} trace_name={args.lf_trace_name}")
         return 0
 
+    # Run-window clock for the record's serving.timing block (KANBAN-106).
+    started_at = utc_now()
+    run_started_monotonic = time.monotonic()
+    elapsed_by_index: dict[int, float] = {}
+
     # ------------------------------------------------------------------
     # Tracer — Langfuse PRIMARY, local Arize Phoenix server as fallback
     # (human directive 2026-08-16; resolver in src/tracing.py). Resolved
@@ -258,11 +265,13 @@ def main_with_args(argv: list[str]) -> int:
             sorter._max_input_chars = args.max_input_chars
             sorter._max_tokens = args.max_tokens
             sorter._reasoning_effort = args.reasoning_effort
+            row_started = time.monotonic()
             try:
                 result = sorter.classify_json(input_data["doc_text"])
             except Exception as exc:  # noqa: BLE001 - one bad row must not abort
                 result = {"doc_type": "correspondence", "contract_subtype": SUBTYPE_UNKNOWN,
                           "confidence": 0.0, "reasoning": f"error: {exc}"}
+            elapsed_by_index[index] = time.monotonic() - row_started
             usage_by_index[index] = sorter._last_usage or {}
 
             doc_type = str(result.get("doc_type", "correspondence")).strip().lower()
@@ -347,6 +356,9 @@ def main_with_args(argv: list[str]) -> int:
         usage_by_index, log_path, md_log_path,
         tracing_backend=tracing_backend,
         tracing_meta=tracing_meta,
+        started_at=started_at,
+        run_duration_s=time.monotonic() - run_started_monotonic,
+        elapsed_by_index=elapsed_by_index,
     )
     print(f"\nExperiment logged to {log_path}")
     return 0
