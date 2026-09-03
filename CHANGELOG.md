@@ -9,7 +9,35 @@ history of the repository's tags. Format follows
 ## [Unreleased]
 
 ### Added
-- **Direct Hugging Face data pipe into the docclass eval runner (KANBAN-107).**
+- **Human-in-the-loop Modal vLLM throughput benchmark CLI (KANBAN-108).**
+  Incorporates the guided HITL benchmark tooling on branch
+  `cost-comparison-runner` so the OpenRouter-vs-Modal cost comparison has a
+  gated, unique-identity run surface. `scripts/eval/guided_vllm_benchmark.py`
+  is the operator-facing controller (stdlib-only — shells out to the `modal`
+  CLI): profiles `validate` (free preflight, launches nothing) / `smoke` /
+  `pilot` / `benchmark`; every paid profile requires `--enable-paid-run` PLUS
+  a run-specific typed approval phrase (`RUN <run_id> MAX $<ceiling>`); one
+  unique Modal app name per run (`llm-mailroom-benchmark-<run_id>` via
+  `MODAL_APP_NAME`); exactly ONE `modal run -n <app>` child with zero retries;
+  Ctrl+C emergency stop confirmed with `STOP <run_id>` and scoped to the exact
+  app ID/unique name only; failure classification with one recommended next
+  step; log tee/stream into `reports/modal_runs/<run_id>/`. Controller drives
+  `modal/benchmark_throughput.py` through env knobs baked at import
+  (`MODAL_APP_NAME`/`MODAL_RUN_ID`/`BENCH_GPU`/`BENCH_GPU_HOURLY_USD`/
+  `MODAL_FUNCTION_TIMEOUT`/`MODAL_STARTUP_TIMEOUT`) plus explicit CLI flags
+  (`--run-id`, workload config, `--result-path`); the runner starts
+  `vllm serve` on the selected Modal GPU (bounded lifecycle, retries=0,
+  `--enforce-eager` fast boot, GPU telemetry, redacted log tails), runs
+  `vllm bench serve` (random-dataset mode), and returns a JSON report with
+  throughput/latency + estimated GPU cost. `modal/vllm_server.py` provides the
+  shared `vllm_image` (packages the `modal/` dir into the remote image at
+  `/root/modal` — the KANBAN-095 hydration fix) + `hf_cache` volume; it uses
+  NO `modal.Secret` (the SDK 1.5.4 `Secret.from_local` removal does not affect
+  it — verified against the installed modal 1.5.4, byte-identical source).
+  Network-free pins: `tests/test_hitl_cli_static.py` (15 — stubbed modal
+  module; no `from_local` anywhere in the three files; sibling-import +
+  image-packaging regression; env-knob contract; `vllm bench serve` argv
+  shape; controller stdlib-only + approval/stage/cost-ceiling logic).
   `run_langfuse_docclass_eval.py` gains `--dataset-source {braintrust,local,hf}`
   (default `braintrust`; an explicit `--local-dumps` keeps the legacy local
   default) plus `--hf-dataset` (default `Lucius-Morningstar/mailroom-corpus`),
