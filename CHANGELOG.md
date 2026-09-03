@@ -9,6 +9,35 @@ history of the repository's tags. Format follows
 ## [Unreleased]
 
 ### Added
+- **Interactive asks-questions experiment-flow wizard for the OpenRouter vs
+  Modal Qwen3-8B cost comparison (KANBAN-109).** New
+  `scripts/eval/experiment_flow.py` — a human-in-the-loop controller that
+  orchestrates EXISTING machinery only (`scripts/eval/guided_vllm_benchmark.py`
+  + `scripts/eval/run_langfuse_docclass_eval.py`, both untouched): **ASK**
+  (legs `openrouter|modal|both`; keys via `getpass`, never echoed; model ids
+  `qwen/qwen3-8b` / `Qwen/Qwen3-8B`; prompt default `sorter_v3`; dataset
+  source `braintrust|local|hf` with HF knobs defaulting to
+  `Lucius-Morningstar/mailroom-corpus`; sample/seed/max-concurrency; GPU
+  default L4 + live hourly rate; spend cap; experiment names — every answer
+  validated and re-prompted on invalid input), **PREVIEW** (exact per-phase
+  commands — cold smoke, warm-up, warm sample, OpenRouter baseline — with
+  their env knobs and an estimated maximum spend; explicit y/N before every
+  paid step), **RUN** (subprocess streaming with per-phase env switching
+  `OPENROUTER_BASE_URL` / `OPENROUTER_API_KEY` / `SERVING_PHASE` cold|warm|
+  unset / `BENCH_*` GPU knobs; spend-cap enforcement; clean stop between
+  phases), **COMPARE** (pairs openrouter+modal records from
+  `reports/experiment_log.jsonl`, rejects mismatched dataset/prompt
+  fingerprints, prints per-input/output/total-token cost, a cold-start
+  amortization line, and a break-even sketch). All scoring math goes through
+  the `llm-dojo-scoring` package (63d73d3) via a runtime subprocess shim
+  (`PYTHONPATH` prepend; never imported, never read) — signatures introspected
+  inside the shim and adapted with keyword args in try/except, so a drift
+  surfaces as an unknown marker with its reason, never a fabricated number.
+  Pure logic extracted and testable (config schema + validation, plan
+  building, env-per-phase maps, record pairing, redaction, spend-cap math,
+  dojo client). Network-free pins: `tests/test_experiment_flow.py` (43) —
+  config validation, command building, env maps, pairing rejection, redaction,
+  spend-cap gating, stubbed dojo subprocess.
 - **Direct Hugging Face data pipe into the docclass eval runner (KANBAN-107).**
   `run_langfuse_docclass_eval.py` gains `--dataset-source {braintrust,local,hf}`
   (default `braintrust`; an explicit `--local-dumps` keeps the legacy local
