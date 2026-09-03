@@ -41,8 +41,8 @@ def _install_modal_stub() -> None:
 
     class _Secret:
         @staticmethod
-        def from_local(*names):
-            return ("secret", names)
+        def from_dict(mapping):
+            return ("secret", mapping)
 
     class _Volume:
         @staticmethod
@@ -154,6 +154,49 @@ class TestModalVllmApp:
         mod = _load_app_module()
         assert mod.APP_NAME != "mailroom-vllm"
         assert mod.HF_CACHE_VOLUME_NAME != "mailroom-hf-cache"
+
+
+# -------------------------------------------------- config secret (1.5.4)
+class TestConfigSecretDict:
+    """modal SDK 1.5.4 removed ``Secret.from_local``; the app now builds the
+    deploy-time secret from ``Secret.from_dict(build_config_secret_dict())``.
+    These pin the pure helper (no modal import) and its filtered behavior."""
+
+    def test_set_token_is_included(self, monkeypatch):
+        mod = _load_app_module()
+        monkeypatch.setenv("MODAL_VLLM_MODEL", "Qwen/Qwen3-8B")
+        monkeypatch.setenv("MODAL_VLLM_API_TOKEN", "tok-abc123")
+        monkeypatch.setenv("HF_TOKEN", "hf_xxx")
+        secret = mod.build_config_secret_dict()
+        assert secret == {
+            "MODAL_VLLM_MODEL": "Qwen/Qwen3-8B",
+            "MODAL_VLLM_API_TOKEN": "tok-abc123",
+            "HF_TOKEN": "hf_xxx",
+        }
+
+    def test_unset_token_is_excluded(self, monkeypatch):
+        mod = _load_app_module()
+        monkeypatch.setenv("MODAL_VLLM_MODEL", "Qwen/Qwen3-8B")
+        monkeypatch.delenv("MODAL_VLLM_API_TOKEN", raising=False)
+        monkeypatch.delenv("HF_TOKEN", raising=False)
+        secret = mod.build_config_secret_dict()
+        assert secret == {"MODAL_VLLM_MODEL": "Qwen/Qwen3-8B"}
+        assert "MODAL_VLLM_API_TOKEN" not in secret
+        assert "HF_TOKEN" not in secret
+
+    def test_empty_token_is_excluded(self, monkeypatch):
+        mod = _load_app_module()
+        monkeypatch.setenv("MODAL_VLLM_API_TOKEN", "   ")
+        monkeypatch.setenv("HF_TOKEN", "")
+        secret = mod.build_config_secret_dict()
+        assert "MODAL_VLLM_API_TOKEN" not in secret
+        assert "HF_TOKEN" not in secret
+
+    def test_secret_wired_through_from_dict(self, monkeypatch):
+        monkeypatch.setenv("MODAL_VLLM_API_TOKEN", "tok-abc123")
+        mod = _load_app_module()
+        assert mod._config_secret == ("secret", mod.build_config_secret_dict())
+        assert mod._config_secret[1]["MODAL_VLLM_API_TOKEN"] == "tok-abc123"
 
 
 # ------------------------------------------------------------- provider seam

@@ -24,8 +24,8 @@ Dev smoke test without deploying (temporary URL while the command runs):
     modal serve modal_vllm.py
 
 All knobs come from environment variables at DEPLOY time (baked into the
-app via modal.Secret.from_local), so no code edits are needed to change
-model, GPU size, or quantization:
+app via modal.Secret.from_dict — modal SDK 1.5.4 removed Secret.from_local),
+so no code edits are needed to change model, GPU size, or quantization:
 
     MODAL_VLLM_MODEL           HF repo id            (default Qwen/Qwen3-8B)
     MODAL_VLLM_GPU             Modal GPU string      (default L4)
@@ -65,13 +65,32 @@ MAX_MODEL_LEN = os.environ.get("MODAL_VLLM_MAX_MODEL_LEN", "32768")
 # Pinned for reproducible deploys; bump deliberately (driver/CUDA compat).
 VLLM_IMAGE_TAG = os.environ.get("MODAL_VLLM_IMAGE_TAG", "latest")
 
-_config_secret = modal.Secret.from_local(
+# Deploy-time secret env contract. modal SDK 1.5.4 removed
+# ``modal.Secret.from_local``; the app builds the equivalent secret from a
+# dict, filtered to names that are actually set so a missing token never
+# bakes an empty value into the deployment.
+CONFIG_SECRET_ENV_NAMES = (
     "MODAL_VLLM_MODEL",
     "MODAL_VLLM_QUANTIZATION",
     "MODAL_VLLM_MAX_MODEL_LEN",
     "MODAL_VLLM_API_TOKEN",
     "HF_TOKEN",
 )
+
+
+def build_config_secret_dict() -> dict[str, str]:
+    """Env-name -> value dict for the app's deploy-time secret, filtered to
+    names set (and non-empty) in ``os.environ``. Pure — reads only the
+    environment, never imports the ``modal`` package, so network-free tests
+    pin the filtered behavior directly."""
+    return {
+        name: os.environ[name]
+        for name in CONFIG_SECRET_ENV_NAMES
+        if os.environ.get(name, "").strip()
+    }
+
+
+_config_secret = modal.Secret.from_dict(build_config_secret_dict())
 
 hf_cache = modal.Volume.from_name(HF_CACHE_VOLUME_NAME, create_if_missing=True)
 
