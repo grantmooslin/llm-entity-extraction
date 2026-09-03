@@ -9,6 +9,30 @@ history of the repository's tags. Format follows
 ## [Unreleased]
 
 ### Added
+- **Direct Hugging Face data pipe into the docclass eval runner (KANBAN-107).**
+  `run_langfuse_docclass_eval.py` gains `--dataset-source {braintrust,local,hf}`
+  (default `braintrust`; an explicit `--local-dumps` keeps the legacy local
+  default) plus `--hf-dataset` (default `Lucius-Morningstar/mailroom-corpus`),
+  `--hf-config` (default `ground_truth`) and `--hf-revision` (default None =
+  repo default) so the OpenRouter-vs-Modal comparison can run on the mailroom
+  EDA corpus directly from HF — no intermediate JSONL export hop. New
+  `src/hf_docclass_corpus.py::load_hf_docclass_corpus(repo, config, revision,
+  valid_classes)` is a pure loader joining the `default` blind config
+  (doc_text/prompt/filename/metadata) with the ground-truth config (labels +
+  GT fields) on filename (mirror of `export_hf_docclass_merged.py`); rows match
+  the runner shape (`expected` from doc_type/expected_doc_class,
+  `expected_subclass`, `metadata`, `expected_fields`/`expected_output` when
+  present, `gt_fields`, `split`) and the honesty rules mirror
+  `load_braintrust_dataset` (invalid classes / empty text skipped, never
+  fabricated); `meta` carries repo/config/revision/num_rows + a content sha
+  when the datasets lib exposes per-shard checksums (else None); `datasets` is
+  imported inside the function for stubbing. The HF source reuses the existing
+  valid-class filter + sampling/limit logic and attaches the HF identity
+  (repo/config/revision/rows/sha) to the run record `data_source` block;
+  braintrust/local paths untouched, `src/serving_meta.py` untouched. Network-free
+  pins: `tests/test_hf_docclass_corpus.py` (7 — fake `datasets` module in
+  `sys.modules`; join/class-filter/empty-skip/stable-filename/
+  revision-passthrough/sha-when-obtainable + two runner dry-run smokes).
 - **Serving / cost-comparison metadata on completed-run records (KANBAN-106).**
   Every completed subtype-run experiment-log record now carries a `serving`
   block (`src/serving_meta.py::build_serving_block`) so a completed OpenRouter

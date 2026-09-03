@@ -32,6 +32,8 @@ Usage:
     python scripts/eval/run_langfuse_docclass_eval.py \\
         --local-dumps data/maud/contracts.jsonl,data/s1_corporate_records/corporate-records.jsonl
     python scripts/eval/run_langfuse_docclass_eval.py --sample 5 --seed 42
+    python scripts/eval/run_langfuse_docclass_eval.py --dataset-source hf \\
+        --sample 20 --seed 42          # direct HF load — no JSONL export hop
 
 Vision-primary mode (KANBAN-033 vision arm): ``--input-mode vision-primary``
 classifies each document from its page images FIRST (the
@@ -90,6 +92,10 @@ from src.evaluation import (  # noqa: E402
     validate_dataset,
 )
 from src.experiment_log import default_jsonl_path, default_md_path  # noqa: E402
+from src.hf_docclass_corpus import (  # noqa: E402
+    DEFAULT_GT_CONFIG,
+    DEFAULT_HF_DATASET,
+)
 from src.tracing import resolve_tracer  # noqa: E402
 from src.prompts import list_prompts  # noqa: E402
 
@@ -295,10 +301,27 @@ def main_with_args(argv: list[str]) -> int:
     parser.add_argument("--dataset-project", default=_CONFIG.dataset_project, help="Project holding the datasets")
     parser.add_argument("--datasets", default=DEFAULT_DATASETS,
                         help="Comma-separated Braintrust datasets to evaluate")
-    parser.add_argument("--local-dumps", default=DEFAULT_LOCAL_DUMP,
-                        help="Comma-separated local JSONL dumps (default: "
-                             f"{DEFAULT_LOCAL_DUMP} — schema v5 merged corpus, 1,210 rows; "
-                             "replaces Braintrust loading when set)")
+    parser.add_argument("--local-dumps", default=None,
+                        help="Comma-separated local JSONL dumps (implicitly "
+                             "--dataset-source local when set; the path used "
+                             "when --dataset-source local has no explicit dump: "
+                             f"{DEFAULT_LOCAL_DUMP} — schema v5 merged corpus, 1,210 rows)")
+    parser.add_argument("--dataset-source", choices=["braintrust", "local", "hf"],
+                        default=None,
+                        help="Where to load rows from: braintrust (default) | local "
+                             "(the existing --local-dumps JSONL path) | hf (direct "
+                             "Hugging Face load of the merged mailroom corpus — no "
+                             "JSONL export hop). --local-dumps set without this flag "
+                             "keeps the legacy local default.")
+    parser.add_argument("--hf-dataset", default=DEFAULT_HF_DATASET,
+                        help="Hugging Face dataset id (default: "
+                             f"{DEFAULT_HF_DATASET} — formerly docclass-merged)")
+    parser.add_argument("--hf-config", default=DEFAULT_GT_CONFIG,
+                        help="HF ground-truth config joined with the 'default' "
+                             f"blind config (default: {DEFAULT_GT_CONFIG})")
+    parser.add_argument("--hf-revision", default=None,
+                        help="HF dataset revision to pin (default: the repo's "
+                             "default branch)")
     parser.add_argument("--input-mode", choices=["text", "vision", "vision-primary"],
                         default="text",
                         help="text: classify doc_text (default); vision: classify page "
@@ -355,8 +378,12 @@ def main_with_args(argv: list[str]) -> int:
                         help="Resolve config, load dataset, print the plan without running")
     args = parser.parse_args(argv)
 
+    if args.dataset_source is None:
+        args.dataset_source = "local" if args.local_dumps else "braintrust"
+
     (openrouter_key,) = require_env("OPENROUTER_API_KEY")
-    require_env("BRAINTRUST_API_KEY")  # still needed to load Braintrust datasets
+    if args.dataset_source == "braintrust":
+        require_env("BRAINTRUST_API_KEY")  # only the braintrust path touches Braintrust
 
     available = list_prompts()
     if args.prompt_version not in available:
@@ -377,13 +404,28 @@ def main_with_args(argv: list[str]) -> int:
 
     dataset_names = [n.strip() for n in args.datasets.split(",") if n.strip()]
     local_dumps = None
-    if args.local_dumps:
-        local_dumps = [Path(p.strip()) for p in args.local_dumps.split(",") if p.strip()]
+    if args.dataset_source == "local":
+        dump_arg = args.local_dumps or DEFAULT_LOCAL_DUMP
+        local_dumps = [Path(p.strip()) for p in dump_arg.split(",") if p.strip()]
         dataset_names = []
 
-    print(f"Loading datasets: {dataset_names or local_dumps}")
-    dataset = load_docclass_dataset(dataset_names, args.dataset_project or args.project,
-                                    project_id=_CONFIG.project_id, local_dumps=local_dumps)
+    hf_meta = None
+    if args.dataset_source == "hf":
+        from src.hf_docclass_corpus import load_hf_docclass_corpus
+
+        print(f"Loading HF corpus: {args.hf_dataset} "
+              f"(config {args.hf_config}, revision {args.hf_revision or 'default branch'})")
+        dataset, hf_meta = load_hf_docclass_corpus(
+            repo=args.hf_dataset, config=args.hf_config, revision=args.hf_revision,
+            valid_classes=set(DOCCLASS_CLASS_KEYS) | set(DOCCLASS_PILOT_CLASS_KEYS))
+        for d in dataset:
+            d["source_dataset"] = f"hf:{args.hf_dataset}"
+        print(f"  {len(dataset)} rows from HF {args.hf_dataset} "
+              f"(config {args.hf_config}, revision {args.hf_revision or 'default'})")
+    else:
+        print(f"Loading datasets: {dataset_names or local_dumps}")
+        dataset = load_docclass_dataset(dataset_names, args.dataset_project or args.project,
+                                        project_id=_CONFIG.project_id, local_dumps=local_dumps)
     if args.input_mode in ("vision", "vision-primary"):
         if not args.pdf_dir:
             parser.error("--input-mode vision|vision-primary requires --pdf-dir "
@@ -440,6 +482,10 @@ def main_with_args(argv: list[str]) -> int:
         print(f"Dry run: {len(dataset)} rows ({how}) -> experiment '{experiment_name}'")
         print(f"  sorter={args.prompt_version} model={args.model} class_set={args.class_set} "
               f"classes={_classes}")
+        print(f"  source={args.dataset_source}"
+              + (f" hf_dataset={args.hf_dataset} hf_config={args.hf_config} "
+                 f"hf_revision={args.hf_revision or 'default'}"
+                 if args.dataset_source == "hf" else ""))
         print(f"  input_mode={args.input_mode} vision_pages={args.vision_pages} "
               f"tracing=langfuse-primary (phoenix fallback) "
               f"session={experiment_name} trace_name={args.lf_trace_name}")
@@ -708,6 +754,7 @@ def main_with_args(argv: list[str]) -> int:
         usage_by_index, log_path, md_log_path,
         tracing_backend=tracing_backend,
         tracing_meta=tracing_meta,
+        hf_meta=hf_meta,
         extra_params={"rate_limit_retries": retry_stats.get("rate_limit_retries", 0)},
     )
     print(f"\nExperiment logged to {log_path}")
@@ -718,6 +765,7 @@ def log_experiment_to_repo(result, dataset, args, experiment_name,
                            usage, log_path, md_log_path,
                            tracing_backend: str = "langfuse",
                            tracing_meta: dict | None = None,
+                           hf_meta: dict | None = None,
                            extra_params: dict | None = None) -> None:
     """Append ONE experiment-log record for the docclass run."""
     from statistics import mean
@@ -839,7 +887,7 @@ def log_experiment_to_repo(result, dataset, args, experiment_name,
         "model": args.model,
         "prompt_versions": {"sorter": args.prompt_version},
         "data_source": {
-            "datasets": args.datasets,
+            "datasets": (f"hf:{hf_meta['repo']}" if hf_meta else args.datasets),
             "ground_truth": "doc_type + doc_subclass",
             "ground_truth_mode": "maud_consideration_gt / s1_record_type / cuad_subtype",
             "dataset_fingerprint": dataset_fingerprint(dataset),
@@ -848,6 +896,13 @@ def log_experiment_to_repo(result, dataset, args, experiment_name,
             "stratified": args.stratified,
             "limit": args.limit,
             "seed": args.seed,
+            **({"hf": {
+                "repo": hf_meta["repo"],
+                "config": hf_meta["config"],
+                "revision": hf_meta["revision"],
+                "num_rows": hf_meta["num_rows"],
+                "sha": hf_meta.get("sha"),
+            }} if hf_meta else {}),
         },
         "parameters": {
             "datasets": args.datasets,
