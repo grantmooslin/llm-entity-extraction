@@ -67,17 +67,36 @@ def test_champion_and_pilot_prompts_list_all_schema_subclass_keys():
     pilot_enum = set(DOCCLASS_PILOT_SCHEMA["properties"]["doc_subclass"]["enum"])
     assert enum == set(DOC_SUBCLASS_KEYS)
 
+    # HUB-041 lineage split: the mailroom-named v8 lineages teach the full
+    # enum incl. the LOB tokens (property/auto); every docclass version
+    # frozen BEFORE the v8 corpus (v7 champion, pilot v3) predates them,
+    # is never mutated, and is expected to carry the pre-v8 key set only.
+    lob_tokens = {"property", "auto"}
+    pre_v8_keys = [k for k in DOC_SUBCLASS_KEYS if k not in lob_tokens]
+
     champion = SorterAgent(
         prompt_version="sorter_docclass_v7",
         doc_classes=DOCCLASS_CLASSES,
         schema=DOCCLASS_SCHEMA,
     ).system_prompt()
-    for key in DOC_SUBCLASS_KEYS:
+    for key in pre_v8_keys:
         assert key in champion, f"sorter_docclass_v7 missing {key!r}"
 
     pilot = get_prompt("sorter_docclass_pilot_v3")
-    for key in pilot_enum:
+    for key in (k for k in pilot_enum if k not in lob_tokens):
         assert key in pilot, f"sorter_docclass_pilot_v3 missing {key!r}"
+
+    mailroom_champion = SorterAgent(
+        prompt_version="sorter_mailroom_v0",
+        doc_classes=DOCCLASS_CLASSES,
+        schema=DOCCLASS_SCHEMA,
+    ).system_prompt()
+    for key in DOC_SUBCLASS_KEYS:
+        assert key in mailroom_champion, f"sorter_mailroom_v0 missing {key!r}"
+
+    mailroom_pilot = get_prompt("sorter_mailroom_pilot_v0")
+    for key in pilot_enum:
+        assert key in mailroom_pilot, f"sorter_mailroom_pilot_v0 missing {key!r}"
 
 
 def test_scoring_md_documents_docclass_metric_names():

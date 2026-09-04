@@ -1,74 +1,29 @@
-# Scoring Methods — Slides
+<div align="center">
 
-Example inputs, outputs, and concise scientific explanations of every method
-used to score the entity-extraction runs in this project — written for
-research scientists working in parallel who do **not** have time to read the
-full documentation set (`SCORING.md` → now [`docs/SCORING.md`](../SCORING.md), README, AGENTS.md).
+# 🎴 Scoring Method Decks
 
-Each deck is standalone: a ~5–8 slide markdown file with the method, a
-worked example (input → output → calculation), interpretation, and common
-pitfalls. Read them in order, or jump to what you need. Decks 01–07
-explain the scoring methods; **decks 08–11 are the prompt-iteration
-post-mortems** — the problems encountered while tuning the sorter and the
-contracts specialist, and the fixes each version applied, with the A/B
-numbers that validated them (sorter problems → sorter fixes, specialist
-problems → specialist fixes); **deck 12 covers the metrics beyond the CUAD
-extraction surface** (subtype, docclass hierarchical, task-aware MAUD /
-LegalBench / multiclass / chained, and the Monte Carlo robustness suite).
+**Scoring method presentation decks for the llm-entity-extraction package.**
 
-## The decks
+</div>
 
-| Deck | Topic | Read when… |
-|---|---|---|
-| [01-overview](01-overview.md) | The pipeline, a run's anatomy, and what "success" means | You are new to the project and want the 5-minute map |
-| [02-field-scoring](02-field-scoring.md) | Type-aware field scoring (date / money / name / free_text / containment) with worked examples | You want to know how a single extracted value becomes a score |
-| [03-entity-lists](03-entity-lists.md) | List fields: bipartite matching, precision / recall / F1, macro vs micro | You are comparing list extractions (parties, obligations) across runs |
-| [04-regression-diagnostics](04-regression-diagnostics.md) | MAE, median AE, R² (dates / durations / money) + span-count drift, vs the master-labels ground truth | You need to know HOW WRONG the near-misses are, not just how often |
-| [05-factuality-audit](05-factuality-audit.md) | Verified precision, hallucination rate, document grounding | You care about fabrication, not just coverage |
-| [06-failure-analysis](06-failure-analysis.md) | Error decomposition, confusion matrices, failure insights → prompt iteration | You are diagnosing WHY a run scored what it did |
-| [07-reading-the-log](07-reading-the-log.md) | How to read `reports/experiment_log.md` / `.jsonl` and the GH Pages site (CIs, same-surface rule) | You want to compare runs without being misled by sample size |
-| [08-problems-sorter](08-problems-sorter.md) | Problems encountered across the sorter prompt iterations (v5→v9): near-synonymous families, title-vs-machinery, development/IP confusions, plateau & revision confounds | You want to know WHY the sorter misroutes documents |
-| [09-fixes-sorter](09-fixes-sorter.md) | Fixes applied to the sorter across versions (v7→v9 rule sets, reasoning effort, equivalence framework) with A/B numbers | You want to see what fixed each sorter confusion and by how much |
-| [10-problems-contracts-specialist](10-problems-contracts-specialist.md) | Problems encountered across the specialist prompt iterations (v15→v26): scope/grain divergence, over-extraction, ellipsis/dedupe losses, the reasoning confound, the self-inflicted v24/v25 format regressions | You want to know WHY the extractor misses or breaks spans |
-| [11-fixes-contracts-specialist](11-fixes-contracts-specialist.md) | Fixes applied to the specialist across versions (v18 family-fidelity catalog → v26 containment fix) with A/B numbers | You want the full fix history, wave by wave, with the numbers that validated each version |
-| [12-task-aware-and-robustness-metrics](12-task-aware-and-robustness-metrics.md) | Subtype strict/equiv metrics, docclass hierarchical scoring, the task-aware dispatcher (MAUD / LegalBench / multiclass / chained 0.25-0.75), and the Monte Carlo robustness suite | You are scoring runs beyond the CUAD extraction surface, or reading the sorter/docclass/ablation/Monte Carlo reports |
+---
 
-## One-paragraph summary (the whole project's scoring in 90 seconds)
+## Contents
 
-Every run sends real documents through LangChain agents (sorter → specialist
-extractor) via OpenRouter, then scores the outputs **deterministically**
-locally: each extracted field is scored by its declared type (`date`, `money`,
-`name`, `free_text`, `id`, `entity_list`) against the CUAD ground truth —
-never by exact-match-on-extraction. The headline `overall_extraction_score`
-is the mean of per-field content scores. On top of that, every run carries
-**run-level diagnostics** (`scores.diagnostics`): raw list precision/recall/F1
-(macro + micro), **MAE + R²** regression errors for dates, durations, and
-money amounts vs the curated master-labels CSV, **span-count drift** (over-
-vs under-extraction), and a per-field **exact / partial / miss**
-decomposition. Braintrust is only ever a lookup on these locally computed
-composites, so the UI, the manifests, and the experiment log never disagree.
-The scoring definitions all live in the shared **`llm-dojo-scoring` package**
-(`@v0.2.0`; the repo's `src/*.py` are thin re-export shims), and the
-**task-aware dispatcher** (`score_task`) extends the same deterministic
-scoring to the sorter **subtype** eval, the hierarchical **docclass** eval
-(doc_type + subclass with equivalence-aware scoring), **MAUD** (consideration
-strict/equiv), **LegalBench** (binary P/R/F1), **multiclass**, **court
-opinions**, and **chained** sorter→extractor composites (0.25/0.75). The
-**Monte Carlo robustness suite** adds zero-spend committee-voting, escalation,
-paired-bootstrap ablation, failure-pipeline, and exemplar metrics over the
-stored reasoning corpus.
+Hand-written markdown decks explaining scoring methods:
+- Field-type scoring
+- Entity list scoring (bipartite matching)
+- MAE/R² regression diagnostics
+- Factuality audit
+- Failure analysis
+- How to read the experiment log
 
-## How to verify a number yourself
+## Usage
 
-Everything is reproducible offline:
+Decks are rendered in the experiment log viewer under `#/slides`.
 
-```bash
-# All metrics in one place (formulas + definitions)
-less ../SCORING.md
+## Related Files
 
-# Unit tests for every metric (network-free)
-python -m pytest tests/test_metrics.py -q
-
-# The master ground-truth CSV the MAE diagnostics prefer
-less ../llm-mailroom/data/cuad/master_clauses.csv
-```
+- `../` — Documentation root
+- `../memos/` — Research memoranda
+- `../../reports/` — Evaluation reports

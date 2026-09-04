@@ -1,30 +1,26 @@
-# Research Memos
+<div align="center">
 
-Individual research memoranda capturing the key findings from experimental
-runs and prompt iterations — archived for collaborators and for presenting
-the evidence trail. Format: research question → answer + results summary →
-remaining uncertainties.
+# 📝 Research Memoranda
 
-| Memo | Topic |
-|---|---|
-| [`subtype_classification_improvements.md`](subtype_classification_improvements.md) | Sorter v3→v6: corpus-convention rules lift strict subtype accuracy +9.8 pp on the same-surface A/B and +7.3 pp on the full corpus |
-| [`entity_extraction_improvements.md`](entity_extraction_improvements.md) | Contracts-specialist v2→v15: schema specialization, date/containment fidelity, truncation honesty, and the chunking enhancement |
-| [`contracts_specialist_v17_v18_enhancements.md`](contracts_specialist_v17_v18_enhancements.md) | Contracts-specialist v17→v18: segmentation grain is exhausted at the prompt layer; the CUAD-mirror family-fidelity catalog lifts key_obligations +7.8 pp (0.7755→0.8535), overall 0.9230 (champion) |
-| [`model_sweep_v18.md`](model_sweep_v18.md) | v18 × {qwen3.7-flash, deepseek-v4-flash, deepseek-v4-pro} on the same 50 docs: the catalog is model-agnostic (+6.0 to +11.5 pp ko); deepseek-v4-pro × v18 is the series champion (ko 0.8907, overall 0.9289, verified_precision 1.000) — segmentation capability is the model-bound separator |
-| [`contracts_specialist_v19.md`](contracts_specialist_v19.md) | v19 (worked span examples + span discipline, qwen3.7-flash × max reasoning): ko 0.8535→0.8840 (+3.0 pp, flash-line champion), alignment precision 0.619→0.662, items −29% — with a 1/50 max-reasoning parse-error caveat and the prompt-vs-reasoning confound unresolved |
-| [`contracts_specialist_v20.md`](contracts_specialist_v20.md) | v20 (non-obligation field fidelity): the v19 zero-doc failures split into scorer/GT artifacts (3 scorer fixes adopted — null-expectation dates, contained party labels, contained titles) and genuine model errors (4 prompt rules validated: renewal +4.5 pp, termination_clauses +5.4 pp same-scorer); overall 0.9142 (tie) as ko drifted −7.3 pp in diffuse max-reasoning variance |
-| [`contracts_specialist_v21.md`](contracts_specialist_v21.md) | v21 (the merge arm @ reasoning=none): overall 0.9396 (+1.7 pp — flash-line best), 50/50 rows (the Ediets parse error is a max-reasoning budget failure, gone at none), ko confound resolved (the v19 gain was the reasoning setting), + two date-scorer bug fixes (effective_date 0.806→0.945); all experiments now in llm-dojo with prompts synced between projects |
-| [`contracts_specialist_v22.md`](contracts_specialist_v22.md) | v22 (ko-recovery: verbatim completeness + disciplined dedupe): the ko regression decomposes into ellipsis abbreviation (23.6% of items) + over-dedupe; fixed — overall 0.9512 (series best) at none, ko 0.8294 none / 0.8442 max, zero parse errors on both; the v19 0.8840 was the favorable max roll |
-| [`contracts_specialist_v23.md`](contracts_specialist_v23.md) | v23 (worked-example set v2): the v19 trademark negative was over-broad (suppressed GT mark-ownership/non-tarnishment clauses); fixed + 11 verbatim positives for the residual-34 shapes — ko 0.8374 (best @none), 42 spans recovered at token level; v22 keeps the overall crown 0.9512 |
-| [`contracts_specialist_v28.md`](contracts_specialist_v28.md) | v27/v28 (multi-item family-section rule): why `key_obligations` plateaus ~0.76–0.83 on the 50-doc chunked surface while other fields score ≥0.85 — sim-matrix diagnosis (wrong-span at sentence level in multi-requirement family sections), v28 wins the 50-doc A/B 0.9228 vs v26 0.8780 (+4.48 pp, CI [+0.0094, +0.0907], P=0.004) |
-| [`contracts_specialist_v30.md`](contracts_specialist_v30.md) | v29/v30 (follow-up arm: the noise floor): the KANBAN-004 close-out leftovers (renewal_terms dip, chunked×term_length, Gridiron degenerate output) — identical-prompt rerun band ±0.03 overall @50 docs, so v29/v30 ship as unmeasured logic repairs inside the band; v28 stays champion |
-| [`contracts_specialist_v31.md`](contracts_specialist_v31.md) | v31 (token-efficiency refactor, full-corpus A/B complete): 8,377→7,700 system tokens (−5.7%) with every operative rule preserved; **full-509 chunked A/B: v31 0.8737 vs v28 0.8622 (+0.0116, CI [+0.0005, +0.0236], P=0.021) — Pareto win**; 50-doc surface overstates the champion ~6pp |
-| [`contracts_specialist_v32.md`](contracts_specialist_v32.md) | v32 (effective_date rule_contradiction repair): the v12-era "defined term wins" tie-break contradicts CUAD GT (Agreement Date = answers[0] in 493/493); corrected rule fires on the target cluster (16/23 recoveries are the diagnosed differing-date/null docs) but the CLEAN full-510 rerun lands **inside the noise band (paired +0.0053, CI [−0.0052, +0.0159], P=0.1715) → logic repair, NOT a claimed win; the degraded first run's +0.0115 was survivorship bias**. effective_date field +0.0171 (v32 = field specialist); never-null over-fire cluster deterministic (4/6 regressions reproduce) → banked as the v33 carve-out |
-| [`sorter_v10_v11.md`](sorter_v10_v11.md) | Sorter v10/v11 (marketing title-wins): the "0.93 plateau" was a cluster, not a long tail — marketing cell 0.5/10 (243) & 7/17 (509), worst family on both surfaces since v6; v10 (rule 26) + v11 (rule 27) land INSIDE the ±1-doc noise band (0.9342 vs champion 0.9300) → logic repair, v9 stays champion |
-| [`sorter_v12.md`](sorter_v12.md) | Sorter v12 (strategic_alliance title-wins, rule 28): the first banked KANBAN-013 cluster — full-509 A/B v12 0.9234 vs the clean v9 rerun 0.9175 = +0.0059, paired CI [−0.0098, +0.0216], P(Δ≤0)=0.251 → INSIDE the noise band → logic repair; strategic_alliance cell deterministically fixed 28/32 → 31/32 (Iovance/Giggles/Adaptimmune, rule-28 reasoning pinned; Intricon remains); v9 stays champion, v12 = field specialist |
-| [`sorter_v13.md`](sorter_v13.md) | Sorter v13 (maintenance title-wins, rule 29): the rule-13 INVERSION cluster (model quotes "financial-sense maintenance → other" backwards) — **full-509 A/B v13 0.9430 vs v12 rerun 0.9293 = +0.0137, paired CI [+0.0020, +0.0255], P(Δ≤0)=0.0090 → OUTSIDE the ±0.006 noise band → AGGREGATE WIN, new champion**; maintenance cell 30/34 → 34/34 (all 4 target docs recovered, rule-29 reasoning pinned); 8 recovered / 1 regressed (ImperialGarden = pre-existing rule-24 outsourcing variance flip, NOT rule 29); the first v13 run was degraded (93/509 connection-error defaults) and replaced by a clean rerun; runner now selects Phoenix tracing by default (`tracing_backend="phoenix"`) |
-| [`sorter_v14.md`](sorter_v14.md) | Sorter v14 (marketing title-wins strengthening, rule 30): the rule-26 NARROWING cluster (Zounds/PACIRA/Audible deterministic since v9) — **full-509 A/B v14 0.9371 vs v13-clean 0.9430 = −0.0059, paired CI [−0.0177, +0.0059], P(Δ≤0)=0.8765 → INSIDE the ±0.006 noise band, NEGATIVE → LOGIC REPAIR, NOT a win; v13 stays champion**. Rule 30 recovered Audible + PACIRA (marketing cell 14/17 → 16/17, reasoning pinned) but the flagged license-primary counterfactual FIRED (Playboy "CONTENT LICENSE, MARKETING AND SALES" → marketing; carve-out too narrow → v15 lesson: widen to any license-PRIMARY title); Zounds resists even its own literal example (model-bound ceiling); 4/6 other regressions are untouched-family noise |
-| [`legalbench_task_v4.md`](legalbench_task_v4.md) | LegalBench CUAD subtask prompts v4: the 7 `v3_<subtask>` keys were generic hearsay-doctrine aliases — V4 = hygiene base (stray quote + rule-6 numbering collision fixed), V4_CRE = conditional-permission-carveout rule, V4_CNTS = conduct-restriction-covenant rule; **7 same-surface 6-row A/Bs (fp-matched): CRE 0.8333→1.0 (deterministic row recovered), CNTS →1.0 (logic-repair grade), five subtasks unchanged at ceiling** |
+**Archived research memoranda for the llm-entity-extraction package.**
 
-Rendered on the experiment-log site under the **memos** tab
-(https://exios66.github.io/llm-entity-extraction/).
+</div>
+
+---
+
+## Contents
+
+Research memoranda documenting:
+- Subtype classification improvements
+- Entity extraction v2→v15
+- Contracts specialist v17→v18
+
+## Usage
+
+Memoranda are rendered in the experiment log viewer under `#/memos`.
+
+## Related Files
+
+- `../` — Documentation root
+- `../slides/` — Scoring method decks
+- `../../reports/` — Evaluation reports

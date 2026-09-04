@@ -43,7 +43,7 @@ from scripts.datasets.build_docclass_merged import normalize_metadata_rows  # no
 from scripts.datasets.build_docclass_pilot import GT_SCALAR_KEYS  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-REPO_ID = "Lucius-Morningstar/docclass-merged"
+REPO_ID = "Lucius-Morningstar/mailroom-corpus"
 LEGACY_JSONL = "docclass_merged.jsonl"
 V5_BASE_REVISION = "1d4753578d91aae09033b359bc32dc1b431e4c20"
 PARENT_ROWS = 1210
@@ -397,7 +397,7 @@ Hub-relative path on EVERY row):
 | `correspondence` | {file_stats.get('by_class', {}).get('correspondence', 0)} | CMU maildir raw RFC822 messages (full headers — `doc_text` is the composed Subject+body) | [Enron-Evaluation-Environment](https://github.com/Exios66/Enron-Evaluation-Environment) `acquire_enron.py` (CMU `enron_mail_20150507`) |
 | `insurance_claim` | {file_stats.get('by_class', {}).get('insurance_claim', 0)} | rendered EOB documents (.txt — the render IS the original) | [claims-data-eda](https://github.com/Exios66/claims-data-eda) `render_eob` |
 
-Fetch one: `hf_hub_download("Lucius-Morningstar/docclass-merged",
+Fetch one: `hf_hub_download("Lucius-Morningstar/mailroom-corpus",
 "files/contract/Part_I/License_Agreements/<file>.pdf", repo_type="dataset")`.
 Per-file sha256 + sizes: `original_files_mapping.jsonl` sidecar.
 

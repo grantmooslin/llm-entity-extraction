@@ -889,6 +889,47 @@ SORTER_DOCCLASS_PROMPT_V7 = SORTER_DOCCLASS_PROMPT_V6.replace(
 )
 
 # =============================================================================
+# SORTER AGENT — mailroom naming convention (HUB-041, human directive
+# 2026-09-03): NEW classification-chain versions register under
+# ``sorter_mailroom_*`` keys, replacing the retired ``sorter_docclass_*``
+# coinage in line with the docclass-merged -> mailroom-corpus dataset rename
+# (HUB-023). The existing docclass keys are FROZEN experiment identity —
+# never renamed, never mutated.
+#
+# sorter_mailroom_v0 — v8 insurance LOB subclass coverage (HUB-041). Derived
+# from sorter_docclass_v7 (the extended-arm default): rule 40 still teaches
+# ONLY the four CMS file types (carrier/pde/outpatient/inpatient) while the
+# mailroom-corpus v8 ground truth carries SIX insurance subclasses — property
+# (200 GNOTHEIA FNOL bundles) and auto (150 BDR motor decision letters) join
+# the CMS types — so 350/950 insurance rows were structurally ungradeable on
+# the subclass dimension. This version extends rule 40 (and ONLY rule 40)
+# with the two LOB lines; everything else is byte-identical v7. Defaults
+# unchanged: ``sorter_docclass_v7`` stays the runner default until this
+# version wins a same-surface A/B on the v8 corpus.
+# =============================================================================
+_SORTER_MRMSS_ANCHOR = (
+    "Crucially, a Medicare Summary Notice whose heading reads 'MEDICARE SUMMARY "
+    "NOTICE -- PHYSICIAN/SUPPLIER CLAIM (Part B)' is a physician/supplier notice "
+    "and therefore carrier, not outpatient, regardless of the mention of Part B."
+)
+assert _SORTER_DOCCONTEXT_V7_RULES.count(_SORTER_MRMSS_ANCHOR) == 1, \
+    "anchor drift: sorter rule 40 MSN tail"
+_SORTER_MAILROOM_V0_RULE40_TAIL = (
+    _SORTER_MRMSS_ANCHOR
+    + " The v8 corpus adds two LINE-OF-BUSINESS subclasses beyond the CMS file"
+      " types: property (property-line claim documentation — FNOL bundles naming"
+      " a loss event, adjuster estimates, coverage positions on buildings or"
+      " personal property) and auto (motor-line claim documentation — accident"
+      " FNOL, adjuster reports, coverage decision letters for a vehicle loss). A"
+      " property or vehicle loss document subclasses as property or auto —"
+      " 'carrier' stays reserved for payer/insurer-issued adjudication documents."
+)
+SORTER_MAILROOM_PROMPT_V0 = SORTER_DOCCLASS_PROMPT_V7.replace(
+    _SORTER_MRMSS_ANCHOR,
+    _SORTER_MAILROOM_V0_RULE40_TAIL,
+)
+
+# =============================================================================
 # SORTER AGENT — Correspondence-only eval (KANBAN-103): v7 + sentiment
 # -----------------------------------------------------------------------------
 # All rows are Enron correspondence. The sorter still emits the hierarchical
@@ -3501,6 +3542,7 @@ PROMPT_VERSIONS = {
     "sorter_docclass_v5": SORTER_DOCCLASS_PROMPT_V5,
     "sorter_docclass_v6": SORTER_DOCCLASS_PROMPT_V6,
     "sorter_docclass_v7": SORTER_DOCCLASS_PROMPT_V7,
+    "sorter_mailroom_v0": SORTER_MAILROOM_PROMPT_V0,
     "sorter_docclass_correspondence_v0": SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V0,
     "sorter_docclass_correspondence_v1": SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V1,
     "sorter_docclass_correspondence_v2": SORTER_DOCCLASS_CORRESPONDENCE_PROMPT_V2,
@@ -3722,3 +3764,39 @@ INSURANCE_CLAIMS_SPECIALIST_PROMPT_V1 = INSURANCE_CLAIMS_SPECIALIST_PROMPT_V0.re
     + _INS_V0_ANCHOR,
 )
 PROMPT_VERSIONS["insurance_claims_specialist_v1"] = INSURANCE_CLAIMS_SPECIALIST_PROMPT_V1
+
+# -----------------------------------------------------------------------------
+# insurance_claims_specialist_v2 — PURPOSE/GIST EXTRACTION (HUB-028 v8 LOB docs)
+# -----------------------------------------------------------------------------
+# The v8 LOB expansion (HUB-028: GNOTHEIA property FNOL bundles + BDR auto
+# decision letters) carries a purpose/gist GT trio on every row (intent /
+# subject_matter / keywords — §20–§21: intent is a separate dimension, never a
+# subclass). v0/v1 have no rules for subject_matter/keywords, so the schema
+# fields land null and the eval surface cannot score them. v2 adds two rules
+# (9b/9c) inside the evidence-only visibility discipline: both fields are
+# populated ONLY from visible document content — subject_matter is a one-line
+# gist grounded in the text, keywords are 5-7 short cover terms from the
+# document's own vocabulary (loss event per the source's taxonomy, document
+# kind, line of business, identifiers as printed). Derivation: .replace() off
+# the REAL v1 constant (contiguous anchor asserted single-occurrence).
+_INS_V1_ANCHOR = "9a. EVIDENCE-ONLY VISIBILITY (mandatory, overrides every other rule):"
+assert INSURANCE_CLAIMS_SPECIALIST_PROMPT_V1.count(_INS_V1_ANCHOR) == 1, \
+    "anchor drift: insurance specialist v1 rule 9a"
+_INS_V2_RULES = (
+    "9b. SUBJECT MATTER (the one-line gist): write ONE sentence naming what the\n"
+    "    document is about — the claim's purpose, the loss event, and the key\n"
+    "    facts (e.g. 'First notice of loss for water damage claim 261873769').\n"
+    "    Every element must be visible in the document; where the document is\n"
+    "    silent, say what is stated and nothing more. Never diagnose, never\n"
+    "    speculate about cause, never state a determination that is not written.\n"
+    "9c. KEYWORDS (5-7 short cover terms): emit short, grounded cover terms —\n"
+    "    the loss event/peril exactly as the document names it, the document\n"
+    "    kind, the line of business, and any identifiers as printed (claim no.).\n"
+    "    Every keyword must appear verbatim or near-verbatim in the document;\n"
+    "    never invent a term, never use generic filler ('insurance', 'claim').\n"
+)
+INSURANCE_CLAIMS_SPECIALIST_PROMPT_V2 = INSURANCE_CLAIMS_SPECIALIST_PROMPT_V1.replace(
+    _INS_V1_ANCHOR,
+    _INS_V1_ANCHOR + "\n" + _INS_V2_RULES,
+)
+PROMPT_VERSIONS["insurance_claims_specialist_v2"] = INSURANCE_CLAIMS_SPECIALIST_PROMPT_V2

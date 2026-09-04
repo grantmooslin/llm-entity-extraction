@@ -162,7 +162,7 @@ doc_classes:
     label: "Insurance Claim Documentation"
     schema: InsuranceClaimExtraction
     specialist: insurance_claims_specialist
-    description: "FNOL forms, adjuster reports, EOBs, Medicare claim tables, coverage determinations"
+    description: "FNOL forms, adjuster reports, EOBs, Medicare claim tables, coverage determinations, property FNOL bundles, auto decision letters"
     field_types:
       claim_number: id
       policy_number: id
@@ -177,11 +177,17 @@ doc_classes:
       coverage_determination: name
       denial_reasons: entity_list:free_text
       supporting_documents: entity_list:free_text
+      # purpose/gist trio (§20–§21: intent is a separate dimension, never a
+      # subclass) — carried on every v8 insurance row (HUB-028 conformance)
+      subject_matter: free_text
+      keywords: entity_list:name
     subclasses:
       - {key: carrier, label: "Carrier / Payer Issued"}
       - {key: pde, label: "Prescription Drug Event (Part D)"}
       - {key: outpatient, label: "Outpatient Facility Claim"}
       - {key: inpatient, label: "Inpatient Facility Claim"}
+      - {key: property, label: "Property Claim (v8 LOB expansion)"}
+      - {key: auto, label: "Automobile Claim (v8 LOB expansion)"}
 
   - key: compliance_filing
     label: "Compliance Filing"

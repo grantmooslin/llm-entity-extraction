@@ -53,7 +53,7 @@ shape is superseded.
 | Path | What it holds | Published to |
 |---|---|---|
 | `legalbench_full/` | 162 task dirs (verbatim TSVs/prompts/READMEs + `*.enriched.jsonl` for cuad_*), `index.jsonl`, `ENRICHMENT_REPORT.json`, generated card | [legalbench-full](https://huggingface.co/datasets/Lucius-Morningstar/legalbench-full) |
-| `docclass_merged.jsonl` (+ `docclass_merged.manifest.json`) | 700-row merged docclass corpus (CUAD 509 + MAUD 152 + S-1 39) | [docclass-merged](https://huggingface.co/datasets/Lucius-Morningstar/docclass-merged) |
+| `docclass_merged.jsonl` (+ `docclass_merged.manifest.json`) | 700-row merged docclass corpus (CUAD 509 + MAUD 152 + S-1 39) | [docclass-merged](https://huggingface.co/datasets/Lucius-Morningstar/mailroom-corpus) |
 | `KANBAN071_PUBLISH_SUMMARY.json` | per-repo verification record (blob-OID counts, LFS sha256, round-trip verdicts) | — (evidence only) |
 
 Verification record 2026-08-22, GREEN twice: legalbench-full 379/379 local

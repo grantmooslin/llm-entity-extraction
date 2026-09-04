@@ -46,7 +46,7 @@ visualizer:       The-Mailroom (pixel-art UI over llm-mailroom's Langfuse traces
 Eval datasets published from this repo live under the
 [`Lucius-Morningstar`](https://huggingface.co/datasets/Lucius-Morningstar)
 org: `legalbench-full`, `cuad-contracts(+full)`, `lb-hearsay`,
-`docclass-merged`, `enron-correspondence`, `enron-correspondence-dedup`.
+`mailroom-corpus`, `enron-correspondence`, `enron-correspondence-dedup`.
 One split rule for the whole family (`md5(filename) % 10 == 0 → test`,
 single-source `assign_split()`); Braintrust mirrors stay read-only per
 `AGENTS.md`. See `scripts/datasets/` and the board cards (KANBAN-069,

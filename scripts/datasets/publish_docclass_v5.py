@@ -37,7 +37,7 @@ from scripts.datasets.build_docclass_pilot import GT_SCALAR_KEYS  # noqa: E402
 from scripts.datasets.build_docclass_v5 import CLAIM_GT_KEYS  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-REPO_ID = "Lucius-Morningstar/docclass-merged"
+REPO_ID = "Lucius-Morningstar/mailroom-corpus"
 LEGACY_JSONL = "docclass_merged.jsonl"
 
 GT_COLUMNS: list[str] = (

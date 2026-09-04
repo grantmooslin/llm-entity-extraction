@@ -6,7 +6,7 @@ KANBAN-084 (2026-08-23 human directive): the pilot sample for the Mailroom
 visualizer needs every doc type present in the family, and the family gains
 its fifth class here. Sources:
 
-* v4 base  : ``Lucius-Morningstar/docclass-merged`` @ ``407bf55c993a006689aa1b6e03e57c428c852e98``
+* v4 base  : ``Lucius-Morningstar/mailroom-corpus`` @ ``407bf55c993a006689aa1b6e03e57c428c852e98``
              (datasets-server parquet shards, sha256-pinned below)
 * claims   : ``Lucius-Morningstar/cms-desynpuf-insurance-claims``
              (produced by Exios66/claims-data-eda; rendered EOBs with a
@@ -61,7 +61,7 @@ from scripts.datasets.build_docclass_merged import (  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
-PARENT_REPO = "Lucius-Morningstar/docclass-merged"
+PARENT_REPO = "Lucius-Morningstar/mailroom-corpus"
 CLAIMS_REPO = "Lucius-Morningstar/cms-desynpuf-insurance-claims"
 PARENT_SHA = "407bf55c993a006689aa1b6e03e57c428c852e98"
 

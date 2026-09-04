@@ -14,6 +14,10 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
+# Standalone convention: tests resolve data/fixture paths relative to the
+# package root ("runnable from the repo root"). In the monorepo pytest starts
+# at the hub root, so anchor CWD here exactly as the standalone suite expects.
+os.chdir(REPO_ROOT)
 
 FAKE_BT_KEY = "sk-test-braintrust-fake-key"
 FAKE_OR_KEY = "sk-or-test-fake-key"

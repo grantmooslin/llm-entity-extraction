@@ -222,6 +222,14 @@ INSURANCE_CLAIMS_SCHEMA = build_structured_schema({
     "coverage_determination": _nullable_string("approved | denied | partial | pending — only what is WRITTEN"),
     "denial_reasons": _string_array("Stated denial/limitation grounds; empty when approved"),
     "supporting_documents": _string_array("Documents the package references"),
+    "subject_matter": _nullable_string(
+        "One sentence naming what the document is about — the claim's purpose, "
+        "loss event, and key facts (e.g. 'First notice of loss for water damage "
+        "claim 261873769'); grounded in the document, never a diagnosis"),
+    "keywords": _string_array(
+        "5-7 short cover terms: loss event/peril, document kind, line of "
+        "business, key parties or identifiers as printed; grounded in the "
+        "document, never inferred"),
     "confidence": {
         "type": "number", "minimum": 0.0, "maximum": 1.0,
         "description": "Evidence-grounded extraction confidence",

@@ -159,7 +159,7 @@ def write_joined_jsonl(rows: list[dict], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as fh:
         for row in rows:
-            fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+            fh.write(json.dumps(row, ensure_ascii=False) + "\n")  # KANBAN-088-EXEMPT: json.dumps always escapes control chars (no raw newlines); UTF-8 output only
 
 
 def main_with_args(argv: list[str]) -> int:

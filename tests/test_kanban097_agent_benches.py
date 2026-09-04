@@ -71,6 +71,28 @@ def test_insurance_specialist_v1_mutation_is_real_and_derived():
     assert v1.count("11. The `confidence` score") == 1
 
 
+def test_insurance_specialist_v2_purpose_gist_mutation():
+    """v2 (HUB-028 v8 LOB): adds the subject_matter/keywords extraction rules.
+
+    Derived off v1 (anchor 9a, single occurrence); v0/v1 byte-stable.
+    """
+    from src.prompts import PROMPT_VERSIONS
+
+    v0 = PROMPT_VERSIONS["insurance_claims_specialist_v0"]
+    v1 = PROMPT_VERSIONS["insurance_claims_specialist_v1"]
+    v2 = PROMPT_VERSIONS["insurance_claims_specialist_v2"]
+    assert v2 != v1 and v2 != v0
+    assert v2.startswith(v0[:400]), "head drift vs v0"
+    assert v1.count("EVIDENCE-ONLY VISIBILITY") == 1
+    assert v2.count("EVIDENCE-ONLY VISIBILITY") == 1
+    assert "9b. SUBJECT MATTER" in v2
+    assert "9c. KEYWORDS" in v2
+    # v0/v1 untouched by the derivation
+    with open(__file__) as _fh:
+        pass
+    assert "9b." not in v1 and "9c." not in v1
+
+
 def test_all_bench_referenced_prompt_versions_registered():
     """Every default --prompt-version the bench can select MUST resolve."""
     from src.prompts import get_prompt
@@ -105,7 +127,8 @@ def test_insurance_specialist_schema_and_prompt_wiring():
     for field in ("claim_number", "policy_number", "insurer", "insured_party",
                   "claim_type", "date_of_loss", "date_filed", "claimed_amount",
                   "adjuster", "damages_description", "coverage_determination",
-                  "denial_reasons", "supporting_documents"):
+                  "denial_reasons", "supporting_documents",
+                  "subject_matter", "keywords"):
         assert field in props, field
     prompt = get_prompt("insurance_claims_specialist_v0")
     # The vendored base is prose-style rules; pin its load-bearing doctrine.

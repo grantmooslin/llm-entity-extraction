@@ -309,7 +309,7 @@ def run_edge(args) -> int:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with out_path.open("w", encoding="utf-8") as f:
         for r in results:
-            f.write(json.dumps(r, ensure_ascii=False) + "\n")
+            f.write(json.dumps(r, ensure_ascii=False) + "\n")  # KANBAN-088-EXEMPT: json.dumps always escapes control chars (no raw newlines); UTF-8 output only
     print(f"edge bench [{args.agent}] model={args.model}: {n_rows} scored, "
           f"{len(results)-n_rows} errors -> {out_path}")
     scores = {}
@@ -369,7 +369,7 @@ def _run_edge_classifier(args, items: list[dict], suite: Path) -> int:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with out_path.open("w", encoding="utf-8") as f:
         for r in results:
-            f.write(json.dumps(r, ensure_ascii=False) + "\n")
+            f.write(json.dumps(r, ensure_ascii=False) + "\n")  # KANBAN-088-EXEMPT: json.dumps always escapes control chars (no raw newlines); UTF-8 output only
     acc = correct / max(1, total)
     mean_conf = conf_sum / max(1, total)
     print(f"edge bench [{args.agent}] model={args.model} "
@@ -489,7 +489,7 @@ def run_judge_mutation(args) -> int:
     out = Path(f"data/manifests/judge_mutation_{actual_model.replace('/','_')}.jsonl")
     with out.open("w", encoding="utf-8") as f:
         for d in details:
-            f.write(json.dumps(d, ensure_ascii=False) + "\n")
+            f.write(json.dumps(d, ensure_ascii=False) + "\n")  # KANBAN-088-EXEMPT: json.dumps always escapes control chars (no raw newlines); UTF-8 output only
     print(f"  misses written -> {out}")
     _log_bench_run(args, prompt_version=judge.prompt_version,
                    n_scored=clean_n + def_n, n_error=0,

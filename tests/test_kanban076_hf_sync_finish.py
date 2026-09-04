@@ -175,9 +175,11 @@ def test_dedup_keeps_schema_guard():
 
 def test_dedup_verifies_hub_lfs_sha_after_upload():
     src = _src(DEDUP_PUBLISHER)
-    # KANBAN-079: PER-FILE LFS sha verification across both config views
+    # KANBAN-079: PER-FILE LFS sha verification across both config views.
+    # (LFS blobs compare the pointer's sha256; smaller files re-hash bytes.)
     assert "file_sha256" in src
-    assert "hub_sha == sha" in src
+    assert "lfs.sha256 == sha" in src
+    assert "hexdigest() == sha" in src
     assert '"verified"' in src
 
 

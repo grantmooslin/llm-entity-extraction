@@ -63,6 +63,11 @@ def test_headless_execution_produces_honest_gap_summary(tmp_path):
     """Execute against real reports/experiment_log.jsonl: contract must show
     real benchmark rows; court_opinion and insurance_claim must be
     declared-pending (the family's documented honest gap)."""
+    if not (REPO_ROOT / "reports" / "experiment_log.jsonl").is_file():
+        pytest.skip(
+            "reports/experiment_log.jsonl absent (pruned heavy asset in monorepo; "
+            "see upstream llm-entity-extraction repo)"
+        )
     nb = _execute_nb(tmp_path)
     streams = [
         o["text"]

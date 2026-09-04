@@ -131,6 +131,14 @@ INSURANCE_CLAIM_SUBCLASSES = [
      "description": "Outpatient medical claim/EOB documentation"},
     {"key": "inpatient", "label": "Inpatient Claim",
      "description": "Inpatient medical claim/EOB documentation"},
+    {"key": "property", "label": "Property Claim",
+     "description": "Property-line claim documentation: FNOL bundles, loss "
+                    "events, adjuster estimates (v8 LOB expansion; "
+                    "GNOTHEIA-shaped)"},
+    {"key": "auto", "label": "Automobile Claim",
+     "description": "Motor/auto-line claim documentation: FNOL, adjuster "
+                    "reports, coverage decision letters (v8 LOB expansion; "
+                    "BDR-shaped)"},
 ]
 DOC_SUBCLASSES = (MERGER_SUBCLASSES + CORPORATE_RECORD_SUBCLASSES
                   + CORRESPONDENCE_SUBCLASSES + INSURANCE_CLAIM_SUBCLASSES + [
@@ -316,7 +324,8 @@ DOCCLASS_SCHEMA = build_structured_schema(
                            "correspondence type when doc_type is correspondence (demand, "
                            "attorney_demand, meeting_request, press_release, memo, email, "
                            "letter, notice), claim-document type when doc_type is "
-                           "insurance_claim (carrier, pde, outpatient, inpatient), "
+                           "insurance_claim (carrier, pde, outpatient, inpatient, "
+                           "property, auto), "
                            "null otherwise. See the subclass list in the prompt.",
         },
         "confidence": {"type": "number", "minimum": 0.0, "maximum": 1.0},

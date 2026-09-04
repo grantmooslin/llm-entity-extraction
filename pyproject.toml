@@ -88,3 +88,9 @@ packages = ["agents", "src", "config"]
 
 [tool.setuptools.package-data]
 config = ["*.yaml"]
+
+# Monorepo dev: resolve the shared scoring engine from the workspace instead
+# of the release git pin above (bumped 0.10.0 -> workspace 0.13.0 in dev).
+# Plain `pip install .` keeps using the pin.
+[tool.uv.sources]
+llm-dojo-scoring = { workspace = true }

@@ -36,6 +36,7 @@ ADOPTERS = [
     "scripts/datasets/stream_legalbench_tasks_to_bt.py",
     "scripts/datasets/publish_enron_correspondence.py",
     "scripts/datasets/build_docclass_v5.py",
+    "scripts/datasets/build_mailroom_corpus_dumps.py",
 ]
 
 

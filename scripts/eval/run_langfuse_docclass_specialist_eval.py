@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-"""LANGFUSE/PHOENIX docclass specialist extraction — contracts + insurance arms.
+"""LANGFUSE/PHOENIX docclass specialist extraction — all four canonical arms.
 
-Runs ``ContractsSpecialist`` or ``InsuranceClaimsSpecialist`` over the
-docclass-merged v5 local JSONL (``gt_fields`` from HF ground_truth config),
-scores against CUAD clause labels (contracts) or insurance scalar GT
-(insurance_claim rows), and appends ONE record to the repo experiment log.
+Canonical v7 families (HUB-035): contracts (+ merger_agreement), insurance
+claims, correspondence, corporate records. Merger_agreement has no dedicated
+specialist agent — the contracts arm owns that pair.
+
+Runs a specialist agent (contracts, insurance, correspondence, or corporate
+records) over the docclass local JSONL dumps (``gt_fields`` from the HF
+ground_truth config), scores field-type-aware against the class's scalar GT,
+and appends ONE record to the repo experiment log.
 
 Designed for same-surface A/B: pin the exact row list with
 ``--filename-manifest`` (export from ``run_langfuse_docclass_eval.py
@@ -29,7 +33,12 @@ from statistics import mean
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from agents.specialist_agents import ContractsSpecialist, InsuranceClaimsSpecialist  # noqa: E402
+from agents.specialist_agents import (
+    ContractsSpecialist,
+    CorporateRecordsSpecialist,
+    CorrespondenceSpecialist,
+    InsuranceClaimsSpecialist,
+)  # noqa: E402
 from scripts.eval.run_extraction_eval import (  # noqa: E402
     load_expected_fields,
     print_extraction_summary,
@@ -59,12 +68,58 @@ DEFAULT_LOCAL_DUMP = "data/datasets/docclass_merged_v5.jsonl"
 CONTRACT_DOC_TYPES = frozenset({"contract", "merger_agreement"})
 INSURANCE_DOC_TYPE = "insurance_claim"
 
+CORRESPONDENCE_DOC_TYPE = "correspondence"
+CORPORATE_RECORD_DOC_TYPE = "corporate_record"
+
 INSURANCE_FIELD_KEYS = (
     "claim_number", "policy_number", "insurer", "insured_party",
     "claim_type", "date_of_loss", "date_filed", "claimed_amount",
     "adjuster", "damages_description", "coverage_determination",
     "denial_reasons", "supporting_documents",
+    "subject_matter", "keywords",
 )
+
+# HUB-035 follow-up: score the GT the corpus ACTUALLY carries for these
+# classes (HUB-022 coverage matrix) — intent/sentiment/topic for
+# correspondence; subject_matter/keywords for corporate_record. The
+# output-schema fields (sender, recipient, filing_number, ...) stay in the
+# agents' extraction schemas; corpus GT for them does not exist yet
+# (reconciliation: HUB-031/032).
+CORRESPONDENCE_FIELD_KEYS = (
+    "intent", "sentiment_label", "content_topic", "subject_matter", "keywords",
+)
+
+CORPORATE_RECORD_FIELD_KEYS = ("subject_matter", "keywords")
+
+# Explicit scoring types for corpus GT keys outside the taxonomy output
+# schemas (dojo would otherwise fall back to _heuristic_field_type).
+GT_FIELD_TYPES = {
+    "insurance_claims_specialist": {
+        "subject_matter": "free_text",
+        "keywords": "entity_list:free_text",
+    },
+    "correspondence_specialist": {
+        "intent": "name",
+        "sentiment_label": "name",
+        "content_topic": "free_text",
+        "subject_matter": "free_text",
+        "keywords": "entity_list:free_text",
+    },
+    "corporate_records_specialist": {
+        "subject_matter": "free_text",
+        "keywords": "entity_list:free_text",
+    },
+}
+
+# HUB-035: every canonical specialist family is runnable against the
+# mailroom-corpus dumps (merger_agreement has no specialist agent by design —
+# the contracts arm owns the contract + merger_agreement pair).
+SPECIALIST_DOC_TYPES = {
+    "contracts_specialist": frozenset({"contract", "merger_agreement"}),
+    "insurance_claims_specialist": frozenset({INSURANCE_DOC_TYPE}),
+    "correspondence_specialist": frozenset({CORRESPONDENCE_DOC_TYPE}),
+    "corporate_records_specialist": frozenset({CORPORATE_RECORD_DOC_TYPE}),
+}
 
 
 class EvalResultShim:
@@ -131,11 +186,35 @@ def enrich_insurance_rows(rows: list[dict]) -> list[dict]:
 
 def select_agent_rows(dataset: list[dict], agent: str) -> list[dict]:
     """Keep rows routed to the requested specialist."""
-    if agent == "contracts_specialist":
-        return [d for d in dataset if d["expected"] in CONTRACT_DOC_TYPES]
-    if agent == "insurance_claims_specialist":
-        return [d for d in dataset if d["expected"] == INSURANCE_DOC_TYPE]
-    raise ValueError(f"Unknown agent {agent!r}")
+    doc_types = SPECIALIST_DOC_TYPES.get(agent)
+    if doc_types is None:
+        raise ValueError(f"Unknown agent {agent!r}")
+    return [d for d in dataset if d["expected"] in doc_types]
+
+
+def _decode_listish(value):
+    """Decode JSON-encoded list strings (corpus keywords GT shape)."""
+    if isinstance(value, str) and value.strip().startswith("["):
+        try:
+            decoded = json.loads(value)
+            if isinstance(decoded, list):
+                return decoded
+        except json.JSONDecodeError:
+            pass
+    return value
+
+
+def enrich_generic_rows(rows: list[dict], field_keys: tuple[str, ...]) -> list[dict]:
+    """Attach ``expected_fields`` from flat scalar GT (mailroom-corpus dumps)."""
+    for row in rows:
+        gf = row.get("gt_fields") or {}
+        expected = dict(row.get("expected_fields") or {})
+        for key in field_keys:
+            val = gf.get(key)
+            if val not in (None, "", []):
+                expected[key] = _decode_listish(val)
+        row["expected_fields"] = expected
+    return rows
 
 
 def main() -> int:
@@ -145,7 +224,7 @@ def main() -> int:
 def main_with_args(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--agent", required=True,
-                        choices=["contracts_specialist", "insurance_claims_specialist"],
+                        choices=sorted(SPECIALIST_DOC_TYPES),
                         help="Which specialist to run")
     parser.add_argument("--local-dumps", default=DEFAULT_LOCAL_DUMP,
                         help=f"Local docclass-merged JSONL (default: {DEFAULT_LOCAL_DUMP})")
@@ -182,9 +261,6 @@ def main_with_args(argv: list[str]) -> int:
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args(argv)
 
-    (openrouter_key,) = require_env("OPENROUTER_API_KEY")
-    require_env("BRAINTRUST_API_KEY")
-
     available = list_prompts()
     if args.prompt_version not in available:
         parser.error(f"Unknown prompt version {args.prompt_version!r}. Available: {available}")
@@ -220,28 +296,44 @@ def main_with_args(argv: list[str]) -> int:
     if args.agent == "contracts_specialist":
         dataset = enrich_contract_rows(dataset)
         doc_class = "contract"
-        with_truth = [d for d in dataset if d.get("expected_fields")]
-    else:
+    elif args.agent == "insurance_claims_specialist":
         dataset = enrich_insurance_rows(dataset)
         doc_class = INSURANCE_DOC_TYPE
-        with_truth = [d for d in dataset if d.get("expected_fields")]
+    elif args.agent == "correspondence_specialist":
+        dataset = enrich_generic_rows(dataset, CORRESPONDENCE_FIELD_KEYS)
+        doc_class = CORRESPONDENCE_DOC_TYPE
+    else:
+        dataset = enrich_generic_rows(dataset, CORPORATE_RECORD_FIELD_KEYS)
+        doc_class = CORPORATE_RECORD_DOC_TYPE
+    with_truth = [d for d in dataset if d.get("expected_fields")]
 
-    if not with_truth:
-        parser.error(f"No rows carry ground truth for agent {args.agent!r}.")
-
-    field_types = get_field_types(doc_class)
+    # taxonomy schema types first; corpus-GT keys outside the output schema
+    # get the explicit GT scoring types above (deterministic, not heuristic)
+    field_types = {**get_field_types(doc_class), **GT_FIELD_TYPES.get(args.agent, {})}
     scored_fields = sorted({f for d in with_truth for f in d["expected_fields"]})
 
     log_path = args.experiment_log or default_jsonl_path()
     md_log_path = default_md_path()
 
     if args.dry_run:
+        if not with_truth:
+            gt_keys = sorted({k for d in dataset for k in (d.get("gt_fields") or {})})
+            print(f"Dry run: {len(dataset)} rows for {args.agent}, but NONE carry "
+                  f"schema GT ({doc_class} field_types) — live scoring would refuse. "
+                  f"Corpus GT keys present: {gt_keys[:12]}... "
+                  "(GT reconciliation: HUB-031/032; wiring itself is OK)")
+            print(f"  agent={args.agent} prompt={args.prompt_version} model={args.model}")
+            return 0
         print(f"Dry run: {len(with_truth)}/{len(dataset)} scored rows -> '{experiment_name}'")
         print(f"  agent={args.agent} prompt={args.prompt_version} model={args.model}")
         print(f"  fields scored: {scored_fields[:12]}{'...' if len(scored_fields) > 12 else ''}")
         if args.agent == "contracts_specialist" and not args.chunked:
             print("  WARNING: --chunked off — long-contract extraction may truncate")
         return 0
+
+    # keys are required only for LIVE runs — dry-run stays keyless (HUB-035)
+    (openrouter_key,) = require_env("OPENROUTER_API_KEY")
+    require_env("BRAINTRUST_API_KEY")
 
     tracer, tracing_backend, tracing_meta = resolve_tracer(
         session_id=experiment_name,
@@ -295,8 +387,18 @@ def main_with_args(argv: list[str]) -> int:
                         model=args.model, api_key=openrouter_key,
                         prompt_version=args.prompt_version,
                         callbacks=[specialist_handle.handler] if specialist_handle.handler else None)
-                else:
+                elif args.agent == "insurance_claims_specialist":
                     specialist = InsuranceClaimsSpecialist(
+                        model=args.model, api_key=openrouter_key,
+                        prompt_version=args.prompt_version,
+                        callbacks=[specialist_handle.handler] if specialist_handle.handler else None)
+                elif args.agent == "correspondence_specialist":
+                    specialist = CorrespondenceSpecialist(
+                        model=args.model, api_key=openrouter_key,
+                        prompt_version=args.prompt_version,
+                        callbacks=[specialist_handle.handler] if specialist_handle.handler else None)
+                else:
+                    specialist = CorporateRecordsSpecialist(
                         model=args.model, api_key=openrouter_key,
                         prompt_version=args.prompt_version,
                         callbacks=[specialist_handle.handler] if specialist_handle.handler else None)

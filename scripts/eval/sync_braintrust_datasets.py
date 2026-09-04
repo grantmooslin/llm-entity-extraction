@@ -212,7 +212,7 @@ def _sync_docclass_hf(cfg, api_key: str, *, out_path: Path, dry_run: bool) -> tu
 
     if dry_run:
         from datasets import load_dataset
-        gt = load_dataset("Lucius-Morningstar/docclass-merged", "ground_truth")
+        gt = load_dataset("Lucius-Morningstar/mailroom-corpus", "ground_truth")
         n = sum(len(gt[s]) for s in gt)
         print(f"  docclass: would export {n} HF rows -> {DOCCLASS_DATASET}")
         return n, 0
@@ -224,7 +224,7 @@ def _sync_docclass_hf(cfg, api_key: str, *, out_path: Path, dry_run: bool) -> tu
         cfg=cfg,
         api_key=api_key,
         dataset_name=DOCCLASS_DATASET,
-        description="Merged docclass corpus (Lucius-Morningstar/docclass-merged)",
+        description="Merged docclass corpus (Lucius-Morningstar/mailroom-corpus)",
         dry_run=False,
     )
     print(f"  docclass: {summary['inserted']} rows -> {DOCCLASS_DATASET} "

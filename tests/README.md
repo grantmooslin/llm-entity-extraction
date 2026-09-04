@@ -1,20 +1,37 @@
-# `tests/` — network-free suite
+<div align="center">
+
+# 🧪 Entity Extraction Tests
+
+**Test suites for the llm-entity-extraction package.**
+
+</div>
+
+---
+
+## Running Tests
 
 ```bash
-python -m pytest tests/ -q
-node tests/assets/site_render_audit.js   # headless render audit of the site (skipped without node)
+cd packages/llm-entity-extraction
+uv run pytest tests/
 ```
 
-All tests are mocked — no network, no LLM, no Braintrust. `conftest.py`
-fakes the env (Braintrust/Langfuse keys, `EXPERIMENT_LOG_PATH` to tmp) and
-provides `sample_dataset_rows` + `sample_maud_zip` fixtures.
+## Structure
 
-Coverage areas: prompts, scorers, taxonomy, evaluation helpers, config
-loading, field scoring, CUAD ground truth, subtype handoff, page voting,
-bootstrap CI math, cost models, the release workflow, the site builder
-(guardrail/trends/prompts), the headless site render audit, and the
-chained/extraction/classification/subtype/langfuse eval smoke loops.
+| Path | Contents |
+|:---|:---|
+| [`assets/`](assets/) | Test assets |
+| [`fixtures/`](fixtures/) | Test fixtures |
 
-Smoke-test pattern: each eval runner test defines `FakeEvalResult` +
-`FakeEvalRun`, monkeypatches `braintrust.Eval` + the agents, and asserts the
-wiring + the repo-log record written to the tmp JSONL.
+## Test Structure
+
+Tests cover:
+- Agent behavior
+- Pipeline processing
+- Scoring accuracy
+- Data integrity
+
+## Related Files
+
+- `agents/` — Agent implementations
+- `src/` — Source code
+- `data/` — Test data

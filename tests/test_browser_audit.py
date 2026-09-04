@@ -31,6 +31,10 @@ AUDIT = REPO_ROOT / "tests" / "assets" / "browser_audit.mjs"
     reason="no Chrome/Chromium available",
 )
 @pytest.mark.skipif(shutil.which("node") is None, reason="node not installed")
+@pytest.mark.skipif(
+    not (REPO_ROOT / "docs" / "data" / "meta.json").is_file(),
+    reason="docs/data/ site data absent (regenerate via scripts/site/build_site.py)",
+)
 def test_browser_audit_every_view():
     docs = REPO_ROOT / "docs"
 

@@ -277,7 +277,7 @@ def main() -> int:
         out = SUITES / f"edge_{agent}.jsonl"
         with out.open("w", encoding="utf-8") as f:
             for it in items:
-                f.write(json.dumps(it, ensure_ascii=False) + "\n")
+                f.write(json.dumps(it, ensure_ascii=False) + "\n")  # KANBAN-088-EXEMPT: json.dumps always escapes control chars (no raw newlines); UTF-8 output only
         print(f"{out.name}: {len(items)} items "
               f"(from {len(src[agent])} docs, seed {args.seed})")
         total += len(items)

@@ -221,7 +221,7 @@ def write_sample_manifest(dataset: list[dict], manifest_path: Path) -> None:
                 "filename": row["filename"],
                 "expected": row["expected"],
                 "expected_subclass": row.get("expected_subclass"),
-            }, ensure_ascii=False) + "\n")
+            }, ensure_ascii=False) + "\n")  # KANBAN-088-EXEMPT: json.dumps always escapes control chars (no raw newlines); UTF-8 output only
 
 
 def attach_pages_by_filename(dataset: list[dict], pdf_dir: Path) -> tuple[list[dict], int]:
@@ -355,9 +355,6 @@ def main_with_args(argv: list[str]) -> int:
                         help="Resolve config, load dataset, print the plan without running")
     args = parser.parse_args(argv)
 
-    (openrouter_key,) = require_env("OPENROUTER_API_KEY")
-    require_env("BRAINTRUST_API_KEY")  # still needed to load Braintrust datasets
-
     available = list_prompts()
     if args.prompt_version not in available:
         parser.error(f"Unknown prompt version {args.prompt_version!r}. Available: {available}")
@@ -444,6 +441,10 @@ def main_with_args(argv: list[str]) -> int:
               f"tracing=langfuse-primary (phoenix fallback) "
               f"session={experiment_name} trace_name={args.lf_trace_name}")
         return 0
+
+    # keys are required only for LIVE runs — dry-run stays keyless (HUB-035)
+    (openrouter_key,) = require_env("OPENROUTER_API_KEY")
+    require_env("BRAINTRUST_API_KEY")  # still needed to load Braintrust datasets
 
     # ------------------------------------------------------------------
     # Tracer — Langfuse PRIMARY, local Arize Phoenix server as fallback

@@ -19,6 +19,10 @@ HARNESS = REPO_ROOT / "tests" / "assets" / "site_render_audit.js"
 
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="node not installed")
+@pytest.mark.skipif(
+    not (REPO_ROOT / "docs" / "data" / "meta.json").is_file(),
+    reason="docs/data/ site data absent (regenerate via scripts/site/build_site.py)",
+)
 def test_every_view_renders_cleanly():
     proc = subprocess.run(
         ["node", str(HARNESS)],

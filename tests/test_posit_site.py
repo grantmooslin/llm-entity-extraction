@@ -35,6 +35,14 @@ LOG_JSONL = REPO_ROOT / "reports" / "experiment_log.jsonl"
 OPEN_DIV = re.compile(r"^:{3,}\s*\{")
 CLOSE_DIV = re.compile(r"^:{3,}\s*$")
 
+# docs/posit-src/ (site source) and reports/experiment_log.jsonl (live log)
+# are pruned/gitignored in the monorepo; tests that read them skip there.
+# The upstream repo stays the reference for the Posit site contract.
+_needs_site = pytest.mark.skipif(
+    not SITE_DIR.is_dir() or not LOG_JSONL.is_file(),
+    reason="docs/posit-src/ or reports/experiment_log.jsonl absent (pruned/live artifacts; see upstream repo)",
+)
+
 
 def _write_include(outdir: Path) -> dict[str, Path]:
     """Run the pre-render hook into a tmp dir; return the generated files."""
@@ -52,12 +60,14 @@ def _write_include(outdir: Path) -> dict[str, Path]:
     }
 
 
+@_needs_site
 def test_pre_render_generates_all_includes(tmp_path):
     files = _write_include(tmp_path)
     for name, path in files.items():
         assert path.exists(), f"missing generated include: {name}"
 
 
+@_needs_site
 def test_pre_render_experiment_log_include(tmp_path):
     files = _write_include(tmp_path)
     text = files["experiment-log"].read_text(encoding="utf-8")
@@ -79,6 +89,7 @@ def test_pre_render_experiment_log_include(tmp_path):
     assert "../index.html#/run/1" in text
 
 
+@_needs_site
 def test_pre_render_kanban_include(tmp_path):
     files = _write_include(tmp_path)
     text = files["kanban"].read_text(encoding="utf-8")
@@ -88,6 +99,7 @@ def test_pre_render_kanban_include(tmp_path):
     assert "## Discussion board" in text  # full board structure preserved
 
 
+@_needs_site
 def test_pre_render_discussion_include(tmp_path):
     files = _write_include(tmp_path)
     text = files["discussion"].read_text(encoding="utf-8")
@@ -107,6 +119,7 @@ def test_pre_render_discussion_include(tmp_path):
     assert depth == 0
 
 
+@_needs_site
 def test_pre_render_variables(tmp_path):
     files = _write_include(tmp_path)
     vars_ = yaml.safe_load(files["variables"].read_text(encoding="utf-8"))
@@ -120,6 +133,7 @@ def test_pre_render_variables(tmp_path):
                           "archived_cards", "discussion_entries", "generated"}
 
 
+@_needs_site
 def test_quarto_yml_contract(tmp_path):
     cfg = yaml.safe_load(QUARTO_YML.read_text(encoding="utf-8"))
     assert cfg["project"]["type"] == "website"
@@ -135,6 +149,7 @@ def test_quarto_yml_contract(tmp_path):
     assert "../index.html" in hrefs  # portal <-> SPA interop
 
 
+@_needs_site
 def test_rendered_pages_committed():
     """The rendered portal pages are committed under docs/posit/ — GitHub
     Pages serves them directly (no build step, no Actions)."""
@@ -174,6 +189,7 @@ def test_source_board_divs_stay_balanced():
 
 
 @pytest.mark.skipif(shutil.which("quarto") is None, reason="quarto not installed")
+@_needs_site
 def test_quarto_render_is_deterministic_and_clean():
     """Re-render with the local quarto must leave no diff under docs/ —
     proof the committed deployment is byte-identical to a fresh render."""

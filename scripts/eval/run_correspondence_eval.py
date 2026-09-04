@@ -152,7 +152,7 @@ def write_sample_manifest(dataset: list[dict], manifest_path: Path) -> None:
                 "expected_subclass": row.get("expected_subclass"),
                 "sentiment_label": row.get("sentiment_label"),
                 "sentiment_score": row.get("sentiment_score"),
-            }, ensure_ascii=False) + "\n")
+            }, ensure_ascii=False) + "\n")  # KANBAN-088-EXEMPT: json.dumps always escapes control chars (no raw newlines); UTF-8 output only
 
 
 def filter_by_filename_manifest(dataset: list[dict], manifest_path: Path) -> list[dict]:

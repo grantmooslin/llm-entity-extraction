@@ -48,7 +48,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PILOT_REPO = "Lucius-Morningstar/docclass-pilot"
-PARENT_REPO = "Lucius-Morningstar/docclass-merged"
+PARENT_REPO = "Lucius-Morningstar/mailroom-corpus"
 CLAIMS_REPO = "Lucius-Morningstar/cms-desynpuf-insurance-claims"
 
 GT_SCALAR_KEYS: tuple[str, ...] = (

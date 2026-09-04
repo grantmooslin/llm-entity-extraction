@@ -363,10 +363,10 @@ def main() -> int:
     problems = validate(proposal, base_text, set(PROMPT_VERSIONS))
     print("\n== proposal ==")
     print(json.dumps({k: proposal.get(k) for k in ("version_key", "rule_name", "rationale")},
-                     indent=2, ensure_ascii=False)[:1200])
+                     indent=2, ensure_ascii=False)[:1200])  # KANBAN-088-EXEMPT: pretty-print preview snippet, not a JSONL row write
     print("risk_scan:", json.dumps(proposal.get("risk_scan", {}), indent=2)[:800])
     Path("/tmp/opencode/pe_proposal.json").write_text(
-        json.dumps(proposal, indent=2, ensure_ascii=False))
+        json.dumps(proposal, indent=2, ensure_ascii=False))  # KANBAN-088-EXEMPT: pretty-print preview snippet, not a JSONL row write
     if problems:
         print("\nREJECTED — validation gates:")
         for p in problems:

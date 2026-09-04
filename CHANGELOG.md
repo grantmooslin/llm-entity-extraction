@@ -9,6 +9,22 @@ history of the repository's tags. Format follows
 ## [Unreleased]
 
 ### Added
+- **Insurance claim purpose/gist extraction surface (HUB-028 v8 LOB).** The
+  v8 insurance LOB expansion (`property` GNOTHEIA + `auto` BDR rows) carries
+  `subject_matter` / `keywords` GT on every insurance row (100% on all 950),
+  but the extraction surface dropped them: `config/taxonomy.yaml`
+  `insurance_claim.field_types` gained `subject_matter` (free_text) +
+  `keywords` (entity_list:name) and the v8 subclasses `property` / `auto`;
+  `agents/specialist_agents.py::INSURANCE_CLAIMS_SCHEMA` gained both fields;
+  new prompt version **`insurance_claims_specialist_v2`** adds the 9b/9c
+  subject-matter + keywords extraction rules (derived off v1, v0/v1
+  byte-stable), and
+  `scripts/eval/run_langfuse_docclass_specialist_eval.py` scores them
+  (`INSURANCE_FIELD_KEYS` + `GT_FIELD_TYPES.insurance_claims_specialist`).
+  The revision-pinned v8 dump now carries both fields in `expected_fields`
+  (350/350 property/auto rows) after rebuild against `eafe1ab4`. Tests:
+  `test_insurance_claim_v8_surface`, `test_insurance_specialist_v2_...`,
+  schema field assertions (756 passed).
 - **Docclass-merged v6 rev1 — correspondence rebalance + original files +
   blind-surface repair (KANBAN-105).** Human directive 2026-08-30; the merged
   corpus was contracts-concentrated (contract 509 + merger_agreement 152 =

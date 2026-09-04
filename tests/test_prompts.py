@@ -520,7 +520,8 @@ def test_sorter_docclass_prompt_option_list_matches_schema():
                     "sorter_docclass_correspondence_v0",
                     "sorter_docclass_correspondence_v1",
                     "sorter_docclass_correspondence_v2",
-                    "sorter_docclass_correspondence_v3"):
+                    "sorter_docclass_correspondence_v3",
+                    "sorter_mailroom_v0"):
         prompt = SorterAgent(prompt_version=version,
                              doc_classes=DOCCLASS_CLASSES,
                              schema=DOCCLASS_SCHEMA).system_prompt()
@@ -528,14 +529,21 @@ def test_sorter_docclass_prompt_option_list_matches_schema():
         # four dimensions; legacy v0..v6 were frozen before the
         # correspondence/insurance dimensions existed and are never mutated
         # after a run — they must carry the merger/corporate keys only.
-        if ("pilot" in version or version == "sorter_docclass_v7"
-                or "correspondence" in version):
+        # HUB-041: the mailroom-named v8 lineages also teach the v8 LOB
+        # tokens (property/auto); every docclass version frozen BEFORE the
+        # v8 corpus (pilot v0-v3, v7, correspondence) predates them and is
+        # never mutated — property/auto are excluded from their expectations.
+        if version == "sorter_mailroom_v0":
             expected_keys = DOC_SUBCLASS_KEYS
+        elif ("pilot" in version or version == "sorter_docclass_v7"
+                or "correspondence" in version):
+            expected_keys = [k for k in DOC_SUBCLASS_KEYS
+                             if k not in {"property", "auto"}]
         else:
             legacy_excluded = {"demand", "attorney_demand", "meeting_request",
                                "press_release", "memo", "email", "letter",
                                "notice", "carrier", "pde", "outpatient",
-                               "inpatient"}
+                               "inpatient", "property", "auto"}
             expected_keys = [k for k in DOC_SUBCLASS_KEYS if k not in legacy_excluded]
         for key in expected_keys:
             assert key in prompt, f"{version}: doc_subclass key {key!r} missing from the prompt"

@@ -796,6 +796,43 @@ SORTER_DOCCLASS_PILOT_PROMPT_V3 = SORTER_DOCCLASS_PILOT_PROMPT_V2.replace(
     '43. CONTRACT VS INSURANCE CLAIM DISAMBIGUATION: A document whose title or content explicitly identifies it as a distributor agreement, or any other contract subtype listed in the valid keys, is a contract, not an insurance_claim. The presence of the word "carrier" in a distributor agreement (e.g., "carrier" referring to a shipping company) does not trigger insurance_claim classification. Only documents that are claim documentation (FNOL, adjuster reports, EOBs, etc.) as defined in rule 38 are insurance_claim. A distributor agreement is a contract, and its contract_subtype is "distributor" (or the appropriate subtype from the list). This rule overrides any incidental keyword matches.\n\nReturn a JSON object with:',
 )
 
+# -----------------------------------------------------------------------------
+# HUB-041 — mailroom naming convention (human directive 2026-09-03): NEW
+# classification-chain versions register under ``*_mailroom_*`` keys, replacing
+# the retired ``*_docclass_*`` coinage in line with the docclass-merged ->
+# mailroom-corpus dataset rename (HUB-023). Existing docclass keys are FROZEN
+# experiment identity — never renamed, never mutated.
+#
+# sorter_mailroom_pilot_v0 — v8 insurance LOB subclass coverage (HUB-041).
+# Derived from sorter_docclass_pilot_v3 (the current pilot surface): rule 40
+# still teaches ONLY the four CMS file types (carrier/pde/outpatient/
+# inpatient) while the mailroom-corpus v8 ground truth carries SIX insurance
+# subclasses — property (200 GNOTHEIA FNOL bundles) and auto (150 BDR motor
+# decision letters) join the CMS types — so 350/950 insurance rows were
+# structurally ungradeable on the subclass dimension and the pilot schema
+# enum could not emit the tokens. This version extends rule 40 (and ONLY
+# rule 40) with the two LOB lines; everything else is byte-identical v3.
+# Defaults unchanged until this version wins a same-surface A/B on v8.
+# -----------------------------------------------------------------------------
+_MRMSN_P3_ANCHOR = (
+    "Crucially, a Medicare Summary Notice whose heading reads 'MEDICARE SUMMARY "
+    "NOTICE -- PHYSICIAN/SUPPLIER CLAIM (Part B)' is a physician/supplier notice "
+    "and therefore carrier, not outpatient, regardless of the mention of Part B."
+)
+assert SORTER_DOCCLASS_PILOT_PROMPT_V3.count(_MRMSN_P3_ANCHOR) == 1, \
+    "anchor drift: pilot sorter rule 40 MSN tail"
+SORTER_MAILROOM_PILOT_PROMPT_V0 = SORTER_DOCCLASS_PILOT_PROMPT_V3.replace(
+    _MRMSN_P3_ANCHOR,
+    _MRMSN_P3_ANCHOR
+    + " The v8 corpus adds two LINE-OF-BUSINESS subclasses beyond the CMS file"
+      " types: property (property-line claim documentation — FNOL bundles naming"
+      " a loss event, adjuster estimates, coverage positions on buildings or"
+      " personal property) and auto (motor-line claim documentation — accident"
+      " FNOL, adjuster reports, coverage decision letters for a vehicle loss). A"
+      " property or vehicle loss document subclasses as property or auto —"
+      " 'carrier' stays reserved for payer/insurer-issued adjudication documents.",
+)
+
 # Pilot-universe specialist variants (previously missing — KANBAN-101)
 CONTRACTS_SPECIALIST_DOCCLASS_PILOT_PROMPT_V0 = _with_pilot_context(
     CONTRACTS_SPECIALIST_DOCCLASS_PROMPT_V1,
@@ -889,4 +926,7 @@ DOCCLASS_PROMPT_VERSIONS: dict[str, str] = {
     "compliance_specialist_docclass_pilot_v0": COMPLIANCE_SPECIALIST_DOCCLASS_PILOT_PROMPT_V0,
     "court_opinions_specialist_docclass_pilot_v0": COURT_OPINIONS_SPECIALIST_DOCCLASS_PILOT_PROMPT_V0,
     "insurance_claims_specialist_docclass_pilot_v0": INSURANCE_CLAIMS_SPECIALIST_DOCCLASS_PILOT_PROMPT_V0,
+    # Mailroom naming convention (HUB-041): NEW keys carry `mailroom`, not
+    # `docclass` (dataset rename docclass-merged -> mailroom-corpus, HUB-023).
+    "sorter_mailroom_pilot_v0": SORTER_MAILROOM_PILOT_PROMPT_V0,
 }

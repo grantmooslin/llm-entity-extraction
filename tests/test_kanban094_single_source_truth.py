@@ -25,6 +25,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 REPORTS = REPO_ROOT / "reports"
 LOG_JSONL = REPORTS / "experiment_log.jsonl"
@@ -49,6 +51,8 @@ def test_no_side_experiment_logs_exist():
 def test_run_file_tree_is_exactly_one_to_n():
     """docs/data/runs/ holds exactly {001..N}.json, one per canonical row,
     with no gaps or orphans."""
+    if not LOG_JSONL.is_file():
+        pytest.skip("reports/experiment_log.jsonl absent (live artifact; regenerate via an eval run)")
     records = _records()
     n = len(records)
     on_disk = sorted(p.name for p in RUNS_DIR.glob("*.json"))
@@ -62,6 +66,8 @@ def test_run_file_tree_is_exactly_one_to_n():
 def test_build_site_check_detects_orphan_run_files(tmp_path):
     """--check must fail when a stale run file exists beyond N — the exact
     KANBAN-094 incident shape (index length alone missed it)."""
+    if not LOG_JSONL.is_file():
+        pytest.skip("reports/experiment_log.jsonl absent (live artifact; regenerate via an eval run)")
     import shutil
 
     out = tmp_path / "site-data"
@@ -85,7 +91,10 @@ def test_build_site_check_detects_orphan_run_files(tmp_path):
 def test_pre_render_hook_reexecs_without_scoring_package():
     """Quarto drives this hook with bare python3; the hook must survive an
     interpreter without llm_dojo_scoring by re-execing into the repo venv."""
-    t = (REPO_ROOT / "docs" / "posit-src" / "_pre-render.py").read_text()
+    hook = REPO_ROOT / "docs" / "posit-src" / "_pre-render.py"
+    if not hook.is_file():
+        pytest.skip("docs/posit-src/ absent (pruned heavy asset; see the upstream repo)")
+    t = hook.read_text()
     assert "_ensure_scoring_deps" in t
     assert "os.execv" in t, "hook must re-exec rather than crash"
     # and it must actually work from the system interpreter
@@ -103,6 +112,8 @@ def test_merged_side_rows_are_hazard_free_and_ordered():
     order (= timestamp order), and the log stays hazard-free. NOTE: the
     pre-existing log follows APPEND order, not global timestamp order
     (backfills legitimately invert), so only the merged tail is pinned."""
+    if not LOG_JSONL.is_file():
+        pytest.skip("reports/experiment_log.jsonl absent (live artifact; regenerate via an eval run)")
     from scripts.datasets._jsonl_safety import LINE_BOUNDARY_HAZARDS
 
     records = _records()
@@ -121,6 +132,6 @@ def test_merged_side_rows_are_hazard_free_and_ordered():
     # the 9-row appended tail must be chronologically ordered within itself
     tail = [r["timestamp"] for r in records[-9:]]
     assert tail == sorted(tail), "merged tail not in chronological order"
-    text = LOG_JSONL.read_text(encoding="utf-8")
+    text = LOG_JSONL.read_text(encoding="utf-8")  # guarded above
     for ch in LINE_BOUNDARY_HAZARDS:
         assert ch not in text

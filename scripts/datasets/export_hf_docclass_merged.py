@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export Lucius-Morningstar/docclass-merged (HF) to local JSONL for eval runners.
+"""Export Lucius-Morningstar/mailroom-corpus (HF) to local JSONL for eval runners.
 
 Joins the ``default`` config (doc_text) with ``ground_truth`` (labels + GT
 fields) into the combined row shape used by ``run_langfuse_docclass_eval.py``
@@ -24,7 +24,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from scripts.datasets._jsonl_safety import safe_jsonl_line
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DATASET_ID = "Lucius-Morningstar/docclass-merged"
+DATASET_ID = "Lucius-Morningstar/mailroom-corpus"
 
 INSURANCE_GT_KEYS = (
     "claim_number", "policy_number", "insurer", "insured_party",

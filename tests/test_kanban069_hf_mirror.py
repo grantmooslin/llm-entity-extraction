@@ -72,10 +72,15 @@ def test_gitignore_guards_staging_but_tracks_readme():
 # --- staging artifacts (skip when the gitignored dir is absent) ----------
 
 def test_staging_manifests_match_summary_dispositions():
-    if not STAGING.exists():
-        import pytest
+    import pytest
 
+    if not STAGING.exists():
         pytest.skip("data/hf_export/ staging absent (regenerate via export_bt_to_hf.py)")
+    if not (STAGING / "EXPORT_SUMMARY.json").is_file():
+        pytest.skip(
+            "data/hf_export/ staging incomplete — EXPORT_SUMMARY.json absent "
+            "(regenerate via export_bt_to_hf.py)"
+        )
     import json
 
     summary_path = STAGING / "EXPORT_SUMMARY.json"
